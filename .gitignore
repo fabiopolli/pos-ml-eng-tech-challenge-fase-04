@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+.uv-cache/
+*.egg-info/
+dist/
+build/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Local datasets and generated artifacts
+data/raw/*
+!data/raw/README.md
+data/processed/*
+!data/processed/README.md
+data/reference/*
+!data/reference/README.md
+data/production/*
+!data/production/README.md
+models/*
+!models/README.md
+reports/drift/*
+!reports/drift/README.md
+reports/figures/*
+!reports/figures/README.md
+artifacts/
+mlruns/
+mlflow.db
+*.joblib
+*.pkl
+*.onnx
+*.log
+
+# Notebooks and editors
+.ipynb_checkpoints/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Temporary review files
+tmp/
+

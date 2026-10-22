@@ -1,0 +1,55 @@
+project:
+  name: credit-scoring-fase-04
+  random_seed: 42
+
+dataset:
+  source: uci
+  id: 350
+  canonical_target: default_payment_next_month
+  id_column: ID
+  split:
+    train: 0.70
+    validation: 0.15
+    test: 0.15
+  financial_features:
+    - LIMIT_BAL
+    - PAY_0
+    - PAY_2
+    - PAY_3
+    - PAY_4
+    - PAY_5
+    - PAY_6
+    - BILL_AMT1
+    - BILL_AMT2
+    - BILL_AMT3
+    - BILL_AMT4
+    - BILL_AMT5
+    - BILL_AMT6
+    - PAY_AMT1
+    - PAY_AMT2
+    - PAY_AMT3
+    - PAY_AMT4
+    - PAY_AMT5
+    - PAY_AMT6
+  governance_features:
+    - SEX
+    - EDUCATION
+    - MARRIAGE
+    - AGE
+
+modeling:
+  primary_metric: roc_auc
+  secondary_metrics: [precision, recall, f1, accuracy]
+  candidates: [logistic_regression, random_forest]
+
+contract:
+  age_min: 18
+  age_max: 100
+  require_unique_id: true
+  require_positive_limit_bal: true
+  reject_null_features: true
+
+drift:
+  features_to_shift: [LIMIT_BAL, PAY_AMT1]
+  alpha: 0.05
+
