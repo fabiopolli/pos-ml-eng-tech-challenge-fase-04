@@ -33,6 +33,7 @@ reports/drift/*
 !reports/drift/README.md
 reports/figures/*
 !reports/figures/README.md
+!data/raw/*.dvc
 artifacts/
 mlruns/
 mlflow.db
