@@ -1,0 +1,57 @@
+stages:
+  eda:
+    cmd: python -m credit_monitoring.eda
+    deps:
+      - data/raw/default_of_credit_card_clients.csv
+      - src/credit_monitoring/eda.py
+      - src/credit_monitoring/config.py
+      - src/credit_monitoring/data/loading.py
+    params:
+      - configs/project.yaml:
+          - dataset
+    outs:
+      - reports/eda/eda_summary.json:
+          cache: false
+      - reports/figures/eda
+
+  prepare:
+    cmd: python -m credit_monitoring.data.prepare
+    deps:
+      - data/raw/default_of_credit_card_clients.csv
+      - reports/eda/eda_summary.json
+      - src/credit_monitoring/data/prepare.py
+      - src/credit_monitoring/config.py
+      - src/credit_monitoring/data/loading.py
+    params:
+      - configs/project.yaml:
+          - project.random_seed
+          - dataset
+          - contract
+    outs:
+      - data/processed/train.csv
+      - data/processed/validation.csv
+      - data/processed/test.csv
+      - data/processed/preparation_report.json
+      - data/reference/reference.csv
+
+  train:
+    cmd: python -m credit_monitoring.models.train
+    deps:
+      - data/processed/train.csv
+      - data/processed/validation.csv
+      - data/processed/test.csv
+      - src/credit_monitoring/models/train.py
+      - src/credit_monitoring/config.py
+    params:
+      - configs/project.yaml:
+          - project.random_seed
+          - dataset.financial_features
+          - dataset.canonical_target
+          - modeling
+    outs:
+      - models/credit_model.joblib
+      - models/credit_model_metadata.json
+      - reports/figures/model
+    metrics:
+      - reports/metrics.json:
+          cache: false

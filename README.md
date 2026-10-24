@@ -7,9 +7,9 @@
 Solução local e reproduzível de **Credit Scoring**, com contratos de qualidade de dados,
 simulação e detecção de drift, rastreamento de experimentos e documentação de governança.
 
-> **Status atual:** fundação do projeto criada. O pipeline de dados, os modelos e o
-> monitoramento ainda serão implementados incrementalmente; nenhum resultado de modelo ou
-> drift é alegado nesta versão inicial.
+> **Status atual:** pipeline de dados (EDA, preparação e split) e modelos baseline em revisão,
+> orquestrados por DVC. Contrato de dados, drift e monitoramento ainda serão implementados;
+> nenhum resultado de drift é alegado nesta versão.
 
 ## Equipe e frentes de trabalho
 
@@ -145,6 +145,18 @@ uv run ruff check .
 uv run ruff format --check .
 ```
 
+Pipeline de dados e modelo (EDA, preparação e treino, nessa ordem). O CSV bruto deve estar em
+`data/raw/default_of_credit_card_clients.csv` (ver [`data/raw/README.md`](data/raw/README.md)):
+
+```bash
+uv run dvc repro      # eda -> prepare -> train
+uv run dvc dag        # ordem dos estágios
+uv run dvc metrics show
+```
+
+O notebook [`notebooks/01_eda.ipynb`](notebooks/01_eda.ipynb) apresenta o EDA; a descrição do dataset
+está em [`docs/DATASET.md`](docs/DATASET.md).
+
 O dashboard inicial já pode ser aberto; os dados reais serão conectados na Etapa 3:
 
 ```bash
@@ -177,8 +189,8 @@ O acompanhamento operacional está em [`docs/CHECKLIST.md`](docs/CHECKLIST.md).
 | Entrega | Estado | Evidência atual |
 |---|---|---|
 | Fundação do repositório | Concluída | Estrutura, dependências, CI, testes e documentação inicial |
-| Aquisição e EDA | Pendente | Diretórios e configuração preparados |
-| Modelos e Data Contract | Pendente | Contratos arquiteturais definidos |
+| Aquisição e EDA | Em revisão | `notebooks/01_eda.ipynb`, estágio `eda` do `dvc.yaml` |
+| Modelos e Data Contract | Em andamento | Modelos (LR e RF) em revisão; contrato Pandera pendente |
 | Simulação e relatório de drift | Pendente | Cenário inicial documentado |
 | MLflow e Streamlit | Em preparação | Shell do dashboard criada |
 | Governança e vídeo | Em preparação | Documento-base e roteiro de entregas |

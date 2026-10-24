@@ -9,6 +9,23 @@
 - Configuração e seeds versionadas; dados e artefatos pesados ficam fora do Git.
 - Evidências distinguem Data Drift de Concept Drift e de degradação de performance.
 
+## Pipeline implementado (DVC)
+
+O `dvc.yaml` encadeia três estágios locais, executados com `uv run dvc repro`:
+
+```text
+data/raw (dvc add) -> eda -> prepare -> train
+```
+
+| Estágio | Entrada | Saída |
+|---|---|---|
+| `eda` | CSV bruto | `reports/eda/eda_summary.json`, `reports/figures/eda/` |
+| `prepare` | CSV bruto + `eda_summary.json` | `data/processed/{train,validation,test}.csv`, `data/reference/reference.csv` |
+| `train` | splits processados | `models/credit_model.joblib`, `reports/metrics.json`, `reports/figures/model/` |
+
+O `prepare` depende do resumo do EDA e confere o SHA-256 do CSV bruto, garantindo que a preparação
+só rode após o EDA do mesmo dado. Os parâmetros vêm de `configs/project.yaml`. Não há remote DVC.
+
 ## Fluxo planejado
 
 1. Aquisição do UCI 350 para `data/raw`.

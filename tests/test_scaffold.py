@@ -3,7 +3,9 @@ from credit_monitoring.paths import (
     CONFIG_DIR,
     DATA_DIR,
     MODELS_DIR,
+    PROCESSED_DATA_DIR,
     PRODUCTION_DATA_DIR,
+    RAW_DATA_DIR,
     REFERENCE_DATA_DIR,
     REPORTS_DIR,
 )
@@ -17,6 +19,8 @@ def test_expected_project_directories_exist() -> None:
     expected = [
         CONFIG_DIR,
         DATA_DIR,
+        RAW_DATA_DIR,
+        PROCESSED_DATA_DIR,
         REFERENCE_DATA_DIR,
         PRODUCTION_DATA_DIR,
         MODELS_DIR,

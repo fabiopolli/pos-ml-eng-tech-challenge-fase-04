@@ -1,0 +1,249 @@
+schema: '2.0'
+stages:
+  eda:
+    cmd: python -m credit_monitoring.eda
+    deps:
+    - path: data/raw/default_of_credit_card_clients.csv
+      hash: md5
+      md5: a6ee086d1eafba5566f666b3ff2ed2c9
+      size: 2897299
+    - path: src/credit_monitoring/config.py
+      hash: md5
+      md5: 3bb5d7eca547e6293b4eb57d88e833cb
+      size: 1019
+    - path: src/credit_monitoring/data/loading.py
+      hash: md5
+      md5: 9119f42bea57b8a98bf9554fc37d6a9d
+      size: 1240
+    - path: src/credit_monitoring/eda.py
+      hash: md5
+      md5: eb03006bd55e4f9fe8af23fd45a4c7bd
+      size: 11443
+    params:
+      configs/project.yaml:
+        dataset:
+          source: local_csv
+          origin: uci_350
+          raw_file: default_of_credit_card_clients.csv
+          csv:
+            sep: ;
+            header_row: 1
+          target_column_raw: default payment next month
+          canonical_target: default_payment_next_month
+          id_column: ID
+          split:
+            train: 0.7
+            validation: 0.15
+            test: 0.15
+          financial_features:
+          - LIMIT_BAL
+          - PAY_0
+          - PAY_2
+          - PAY_3
+          - PAY_4
+          - PAY_5
+          - PAY_6
+          - BILL_AMT1
+          - BILL_AMT2
+          - BILL_AMT3
+          - BILL_AMT4
+          - BILL_AMT5
+          - BILL_AMT6
+          - PAY_AMT1
+          - PAY_AMT2
+          - PAY_AMT3
+          - PAY_AMT4
+          - PAY_AMT5
+          - PAY_AMT6
+          governance_features:
+          - SEX
+          - EDUCATION
+          - MARRIAGE
+          - AGE
+    outs:
+    - path: reports/eda/eda_summary.json
+      hash: md5
+      md5: 3a82a2a8542c74cc0ccc269b6ace8157
+      size: 1390
+    - path: reports/figures/eda
+      hash: md5
+      md5: 522299a113861f364e633f84a7500c9c.dir
+      size: 492254
+      nfiles: 9
+  prepare:
+    cmd: python -m credit_monitoring.data.prepare
+    deps:
+    - path: data/raw/default_of_credit_card_clients.csv
+      hash: md5
+      md5: a6ee086d1eafba5566f666b3ff2ed2c9
+      size: 2897299
+    - path: reports/eda/eda_summary.json
+      hash: md5
+      md5: 3a82a2a8542c74cc0ccc269b6ace8157
+      size: 1390
+    - path: src/credit_monitoring/config.py
+      hash: md5
+      md5: 3bb5d7eca547e6293b4eb57d88e833cb
+      size: 1019
+    - path: src/credit_monitoring/data/loading.py
+      hash: md5
+      md5: 9119f42bea57b8a98bf9554fc37d6a9d
+      size: 1240
+    - path: src/credit_monitoring/data/prepare.py
+      hash: md5
+      md5: 5004e6f256a60c77e61d369f7c47cb31
+      size: 6969
+    params:
+      configs/project.yaml:
+        contract:
+          age_min: 18
+          age_max: 100
+          require_unique_id: true
+          require_positive_limit_bal: true
+          reject_null_features: true
+        dataset:
+          source: local_csv
+          origin: uci_350
+          raw_file: default_of_credit_card_clients.csv
+          csv:
+            sep: ;
+            header_row: 1
+          target_column_raw: default payment next month
+          canonical_target: default_payment_next_month
+          id_column: ID
+          split:
+            train: 0.7
+            validation: 0.15
+            test: 0.15
+          financial_features:
+          - LIMIT_BAL
+          - PAY_0
+          - PAY_2
+          - PAY_3
+          - PAY_4
+          - PAY_5
+          - PAY_6
+          - BILL_AMT1
+          - BILL_AMT2
+          - BILL_AMT3
+          - BILL_AMT4
+          - BILL_AMT5
+          - BILL_AMT6
+          - PAY_AMT1
+          - PAY_AMT2
+          - PAY_AMT3
+          - PAY_AMT4
+          - PAY_AMT5
+          - PAY_AMT6
+          governance_features:
+          - SEX
+          - EDUCATION
+          - MARRIAGE
+          - AGE
+        project.random_seed: 42
+    outs:
+    - path: data/processed/preparation_report.json
+      hash: md5
+      md5: e53bae3ae55534ffbf60a820edaf7ca0
+      size: 623
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 5aa8989b8427c1f6f96f33bb6ee100d5
+      size: 434168
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 7132d155b920db848f0ffe906cfb2ef3
+      size: 2028587
+    - path: data/processed/validation.csv
+      hash: md5
+      md5: 5baca61e08811e00c3d6dae9f666f001
+      size: 434890
+    - path: data/reference/reference.csv
+      hash: md5
+      md5: 7132d155b920db848f0ffe906cfb2ef3
+      size: 2028587
+  train:
+    cmd: python -m credit_monitoring.models.train
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 5aa8989b8427c1f6f96f33bb6ee100d5
+      size: 434168
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 7132d155b920db848f0ffe906cfb2ef3
+      size: 2028587
+    - path: data/processed/validation.csv
+      hash: md5
+      md5: 5baca61e08811e00c3d6dae9f666f001
+      size: 434890
+    - path: src/credit_monitoring/config.py
+      hash: md5
+      md5: 3bb5d7eca547e6293b4eb57d88e833cb
+      size: 1019
+    - path: src/credit_monitoring/models/train.py
+      hash: md5
+      md5: de7b4adb4a24594b8e45df898e5157d0
+      size: 8109
+    params:
+      configs/project.yaml:
+        dataset.canonical_target: default_payment_next_month
+        dataset.financial_features:
+        - LIMIT_BAL
+        - PAY_0
+        - PAY_2
+        - PAY_3
+        - PAY_4
+        - PAY_5
+        - PAY_6
+        - BILL_AMT1
+        - BILL_AMT2
+        - BILL_AMT3
+        - BILL_AMT4
+        - BILL_AMT5
+        - BILL_AMT6
+        - PAY_AMT1
+        - PAY_AMT2
+        - PAY_AMT3
+        - PAY_AMT4
+        - PAY_AMT5
+        - PAY_AMT6
+        modeling:
+          primary_metric: roc_auc
+          secondary_metrics:
+          - precision
+          - recall
+          - f1
+          - accuracy
+          candidates:
+          - logistic_regression
+          - random_forest
+          logistic_regression:
+            C: 1.0
+            max_iter: 1000
+            class_weight: balanced
+          random_forest:
+            n_estimators: 300
+            max_depth: 8
+            min_samples_leaf: 20
+            class_weight: balanced_subsample
+            n_jobs: -1
+        project.random_seed: 42
+    outs:
+    - path: models/credit_model.joblib
+      hash: md5
+      md5: d2300fcc7cb6fa563b21b23036fa811c
+      size: 5490002
+    - path: models/credit_model_metadata.json
+      hash: md5
+      md5: a5dd8b04e07a2c1a421b678ac755e9cb
+      size: 1083
+    - path: reports/figures/model
+      hash: md5
+      md5: 88a5ee31c6d8017f377d6d316edfe821.dir
+      size: 77625
+      nfiles: 2
+    - path: reports/metrics.json
+      hash: md5
+      md5: 6a8965f5decefeacaf87b56d4ebf1c63
+      size: 952

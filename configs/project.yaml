@@ -3,8 +3,13 @@ project:
   random_seed: 42
 
 dataset:
-  source: uci
-  id: 350
+  source: local_csv
+  origin: uci_350
+  raw_file: default_of_credit_card_clients.csv
+  csv:
+    sep: ";"
+    header_row: 1
+  target_column_raw: default payment next month
   canonical_target: default_payment_next_month
   id_column: ID
   split:
@@ -41,6 +46,16 @@ modeling:
   primary_metric: roc_auc
   secondary_metrics: [precision, recall, f1, accuracy]
   candidates: [logistic_regression, random_forest]
+  logistic_regression:
+    C: 1.0
+    max_iter: 1000
+    class_weight: balanced
+  random_forest:
+    n_estimators: 300
+    max_depth: 8
+    min_samples_leaf: 20
+    class_weight: balanced_subsample
+    n_jobs: -1
 
 contract:
   age_min: 18
