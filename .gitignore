@@ -53,3 +53,6 @@ Thumbs.db
 # Temporary review files
 tmp/
 
+
+# Editor pessoal
+.obsidian/

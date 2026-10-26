@@ -79,8 +79,9 @@ do DVC, com ponteiro `data/default of credit card clients.xls.dvc` no repositór
 remover o arquivo da árvore e rodar `uv run dvc checkout` o restaura do cache com o md5
 esperado, e o pipeline segue íntegro. **Consequência a registrar:** um clone novo só reproduz o
 pipeline depois de `uv run dvc pull -r dagshub`, porque a fonte do bruto não está mais no Git —
-isso acopla a reprodução ao remote da entrega 1.1b, ainda não configurado. O histórico Git
-anterior continua contendo o XLS; a remoção é do estado atual do repositório.
+isso acopla a reprodução ao remote da entrega 1.1b, configurado e com a recuperação provada
+(seção 1.6.1). O histórico Git anterior continua contendo o XLS; a remoção é do estado atual do
+repositório.
 
 **Recorte 1.1b (remoto) — executado e verificado.** O operador preencheu o `.env` (ignorado
 pelo Git) e a configuração foi concluída em 2026-10-26.
