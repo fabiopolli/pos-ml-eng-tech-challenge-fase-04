@@ -34,7 +34,7 @@ registrado.
 | §1.2 | Aquisição e auditoria do dataset | §1.2.1 (exposição declarada) + **§1.2.2 (revalidação por execução)** | Execução revalidada |
 | §1.3 | Preparação dos dados | **§1.3.1 (revalidação por execução)** | Execução revalidada |
 | §1.4 | Treinamento da Regressão Logística | **§1.4.1 (revalidação por execução)** | Execução revalidada |
-| §1.5 | Treinamento do Random Forest | **§1.5.1 (revalidação por execução)** | Execução revalidada |
+| §1.5 | Treinamento do Random Forest | **§1.5.1 (revalidação por execução)** + **§1.5.2 (persistência dos candidatos)** | Execução revalidada |
 | §1.6 | Avaliação, seleção e versionamento | **§1.6.2 (revalidação do caminho local)** + **§1.6.1 (recuperação remota executada em checkout separado)** | Execução revalidada |
 | §1.7 | Data Contract (Pandera) | **§1.7.1 (revalidação por execução)** | Execução revalidada |
 
@@ -63,16 +63,18 @@ repositório.
 | `uv run dvc push -r dagshub` | 0 | 25 objetos enviados |
 | `git diff --check` | 0 | sem saída |
 
-### Verificações mais recentes (2026-10-26, após a revalidação de 1.4/1.5/1.6)
+### Verificações mais recentes (2026-10-26, após a revalidação de 1.4/1.5/1.6 e a persistência dos candidatos)
 
 | Comando | Código de saída | Resultado |
 |---|---|---|
-| `uv run pytest -q` | 0 | **80 passed** (74 + 4 do contrato + 2 do escopo do `fit` e da recalculabilidade) |
+| `uv run pytest -q` | 0 | **83 passed** (74 + 4 do contrato + 2 do escopo do `fit` e da recalculabilidade + 3 da persistência dos candidatos) |
 | `uv run ruff check .` | 0 | All checks passed |
 | `uv run ruff format --check .` | 0 | 53 files already formatted |
+| `uv run dvc repro` | 0 | estágios `train` e `evaluate` reexecutados; `reports/metrics.json` e `reports/test_metrics.json` **inalterados** |
+| `uv run dvc push -r dagshub` | 0 | **3 arquivos enviados** ao DagsHub (baseline, metadados, diretório `models/candidates`) |
 | `uv run dvc status` | 0 | `Data and pipelines are up to date.` |
 | `uv run dvc status -c -r dagshub` | 0 | `Cache and remote 'dagshub' are in sync.` |
-| `uv run dvc repro -f` (clone isolado) | 0 | 6 estágios em 28 s; 13 artefatos byte a byte idênticos, exceto `git_sha` nos metadados |
+| `uv run dvc repro -f` (clone isolado) | 0 | 6 estágios; artefatos de candidato reproduzidos byte a byte, metadados diferindo apenas em `git_sha` |
 | `git diff --check` | 0 | sem saída |
 
 ## Hashes dos artefatos
@@ -86,6 +88,8 @@ repositório.
 | `data/processed/test.csv` | `70642cbcc74972400e63df96e78e1e07497f15b6b15fe278f232aaf18b725729` |
 | `data/reference/reference.csv` | `9ebd48b6d31c67f46cc28aff0bde36b48f62936aff0011007b7cb78d26108c26` (igual ao treino) |
 | `models/credit_model.joblib` | `a5a4a740902fab9efa5138f98917a8a7f447c5af7f7d97b707290c205c1e0464` |
+| `models/candidates/credit_model_logistic_regression.joblib` | `06fb185123d37f8381fa156125ec8dc86ea9991384ecc7b22acfb47fd9364f89` (baseline, §1.5.2) |
+| `models/candidates/credit_model_random_forest.joblib` | `a5a4a740902fab9efa5138f98917a8a7f447c5af7f7d97b707290c205c1e0464` (igual ao congelado) |
 | `reports/eda/eda_summary.json` | `cd33ed3a49e52c27339d88b67dbbb1a4afcfe06a09b649205272e426a5f1dd65` |
 | `reports/explore/train_exploration.json` | `0f6b8b8af79a4ad51ecedb545707f3c77597a34ad9cf7c2bccf391d6df840628` |
 | `reports/metrics.json` (seleção) | `37a3fc84c371af2cf44f035f94791f4da9751f93c1b2ca0357cce477539a0050` |
@@ -417,6 +421,56 @@ que as métricas reportadas fossem reconstruíveis a partir dela. Acrescentado
 precision, recall e F1 recalculadas da matriz devem coincidir com as reportadas (tolerância 1e-6,
 a precisão do arredondamento da apresentação). Mutação aplicada: avaliar as métricas no treino em
 vez da validação → o teste falha (`AssertionError`).
+
+### 1.5.2 — Persistência dos candidatos (ampliação de escopo, 2026-10-26, 14:00–14:30)
+
+Por decisão do operador, a limitação registrada na sessão anterior — **apenas o modelo selecionado
+era serializado** — foi eliminada. Antes, `train.py` gravava só `best_model` e a Regressão
+Logística existia apenas como métricas em `reports/metrics.json`, sendo retreinada a cada execução
+do estágio: a comparação entre os dois modelos, exigida pelo plano ("os dois modelos serão avaliados
+sob as mesmas condições"), não era auditável a partir de artefatos.
+
+**O que mudou.** Cada candidato é serializado em `models/candidates/`, e
+`models/credit_model_metadata.json` passa a registrar o bloco `candidates` (caminho, SHA-256,
+hiperparâmetros, convergência e marca de selecionado). O artefato congelado
+`models/credit_model.joblib` continua sendo a **única entrada** do estágio de avaliação — o
+protocolo de hash congelado não mudou — e `models/candidates/` entrou como nova saída do estágio
+`train` no `dvc.yaml`.
+
+| Artefato | SHA-256 | Situação |
+|---|---|---|
+| `models/candidates/credit_model_logistic_regression.joblib` | `06fb185123d37f8381fa156125ec8dc86ea9991384ecc7b22acfb47fd9364f89` (2.369 B) | **novo** — o baseline deixa de ser efêmero |
+| `models/candidates/credit_model_random_forest.joblib` | `a5a4a740902fab9efa5138f98917a8a7f447c5af7f7d97b707290c205c1e0464` (5.490.050 B) | byte a byte igual ao artefato congelado; o DVC **deduplica** o objeto no cache e no remote |
+| `models/credit_model.joblib` | `a5a4a740902fab9e…` | **inalterado** — o congelado continua o mesmo estimador |
+| `reports/metrics.json` | `37a3fc84c371af2c…` | **inalterado** — a comparação dos dois modelos não mudou |
+| `reports/test_metrics.json` | `f9aa6f218a76df55…` | **inalterado** — a avaliação final não mudou |
+
+**O baseline continua restrito à validação.** O estágio `evaluate` não passou a pontuar o baseline
+no teste: isso seria exposição adicional do conjunto de teste, vedada pelo plano ("avaliar o
+escolhido no teste"). A restrição ganhou prova automatizada:
+`test_evaluation_never_scores_the_baseline_candidate` verifica, por spy, que **exatamente um
+estimador** pontua o teste e que os artefatos dos candidatos não são alterados pela avaliação.
+
+**Testes novos (três, todos verificados por mutação).**
+
+| Teste | O que prova | Mutação que o faz falhar |
+|---|---|---|
+| `test_every_candidate_is_serialized_and_auditable` | cada candidato existe, o hash confere com o metadado e o artefato do selecionado é o mesmo estimador congelado | parar de serializar os candidatos |
+| `test_the_baseline_artifact_reproduces_its_recorded_validation_metrics` | o artefato do baseline rederiva o ROC-AUC registrado, provando que é o estimador que produziu os números publicados | serializar um estimador diferente do ajustado |
+| `test_evaluation_never_scores_the_baseline_candidate` | exatamente um estimador pontua o teste e os artefatos dos candidatos ficam intactos | avaliar também o baseline no teste |
+
+**Reprodutibilidade.** Em clone isolado do branch, `uv run dvc repro -f` reproduziu **os dois**
+artefatos de candidato byte a byte (`06fb1851…` e `a5a4a740…`), o modelo congelado,
+`reports/metrics.json` e `reports/test_metrics.json`. A única diferença em todo o conjunto é o
+`git_sha` dos metadados, como em §1.4.1 e §1.6.1.
+
+**Versionamento.** `uv run dvc push -r dagshub` → **3 arquivos enviados ao DagsHub** (o candidato
+do baseline, os metadados e a entrada do diretório `models/candidates`); o candidato selecionado
+não gerou upload, por deduplicação de conteúdo. Após o envio,
+`uv run dvc status -c -r dagshub` → *Cache and remote 'dagshub' are in sync.*
+
+**Commits.** `c05e652` (código e testes) e `297ce87` (artefatos e `dvc.lock`).
+
 
 ## 1.7 — Data Contract (Pandera)
 

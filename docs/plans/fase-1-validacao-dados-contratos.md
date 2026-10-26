@@ -119,7 +119,7 @@ dados preparados antes de qualquer ajuste de modelo.
 | Referência | `data/reference/reference.csv` igual ao treino intacto, inclusive IDs e serialização |
 | Contrato | Esquema rotulado e esquema de inferência; retorno de sucesso ou diagnóstico de falha sem dados pessoais |
 | Seleção | Métricas de validação dos dois modelos, regra de decisão, limiar e fingerprint da configuração |
-| Modelo | `models/credit_model.joblib`, metadados de seleção/versões/hashes, predição reproduzível após carga |
+| Modelo | `models/credit_model.joblib` (o **selecionado**, congelado, única entrada da avaliação) e `models/candidates/credit_model_<candidato>.joblib` (cada candidato, para a comparação ser auditável por artefato), metadados de seleção/versões/hashes, predição reproduzível após carga |
 | Avaliação final | Métricas do escolhido no teste e vínculo com a seleção congelada; exposição anterior declarada |
 | Versionamento | Ponteiros/`dvc.lock` coerente com o código no Git; objetos aprovados no DagsHub e prova de leitura com cache separado |
 
