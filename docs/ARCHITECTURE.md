@@ -6,7 +6,8 @@
 - Código reutilizável em `src`; notebooks apenas para exploração e comunicação.
 - Dados de referência e produção fisicamente separados.
 - Validação acontece antes de treino ou inferência.
-- Configuração e seeds versionadas; dados e artefatos pesados ficam fora do Git.
+- Configuração, seeds e ponteiros DVC versionados no Git; conteúdos de dados/modelos ficam fora
+  do Git e no remote DagsHub Storage quando aprovados e configurados.
 - Evidências distinguem Data Drift de Concept Drift e de degradação de performance.
 
 ## Pipeline implementado (DVC)
@@ -24,7 +25,10 @@ data/raw (dvc add) -> eda -> prepare -> train
 | `train` | splits processados | `models/credit_model.joblib`, `reports/metrics.json`, `reports/figures/model/` |
 
 O `prepare` depende do resumo do EDA e confere o SHA-256 do CSV bruto, garantindo que a preparação
-só rode após o EDA do mesmo dado. Os parâmetros vêm de `configs/project.yaml`. Não há remote DVC.
+só rode após o EDA do mesmo dado. Os parâmetros vêm de `configs/project.yaml`. O DVC declara o CSV
+bruto e as saídas de preparação/treino (incluindo o modelo) para versionamento. DagsHub Storage é
+o remote planejado; ainda não está configurado em `.dvc/config` neste checkout. Consulte
+[`DAGSHUB.md`](DAGSHUB.md) para conexão e configuração local de credenciais.
 
 ## Fluxo planejado
 
@@ -47,7 +51,8 @@ só rode após o EDA do mesmo dado. Os parâmetros vêm de `configs/project.yaml
 | `models` | pipelines de treino, avaliação, seleção e inferência |
 | `monitoring` | drift, métricas operacionais, logs e alertas |
 | `dashboard` | leitura e apresentação dos artefatos de observabilidade |
+| DVC + DagsHub Storage | versionamento/reprodução de datasets e modelos; GitHub guarda os ponteiros, DagsHub os objetos |
 
-O projeto não inclui API em tempo real, cloud, Kubernetes, Airflow, filas, banco dedicado ou
-retreinamento automático.
-
+O projeto não inclui API em tempo real, infraestrutura própria de cloud/compute, Kubernetes,
+Airflow, filas, banco dedicado ou retreinamento automático. DagsHub Storage é a exceção de
+armazenamento remoto; o processamento e treinamento continuam locais.

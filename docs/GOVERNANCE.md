@@ -7,6 +7,9 @@
 - Dataset: UCI Default of Credit Card Clients (ID 350).
 - Finalidade acadêmica: estudar risco de inadimplência e monitoramento de degradação.
 - Não há decisão real de crédito nem titulares brasileiros reais atendidos pelo sistema.
+- Datasets e modelos aprovados para compartilhamento serão armazenados no DagsHub Storage via DVC;
+  confirmar termos de uso da fonte e autorização antes do primeiro envio remoto.
+- Tokens do DagsHub e credenciais do remote devem permanecer em configuração local não versionada.
 
 ## Inventário e minimização
 
@@ -24,4 +27,3 @@ usar esses atributos de forma controlada e agregada.
 - riscos, limitações e supervisão humana;
 - resposta a drift e critérios para suspensão/revisão do modelo;
 - análise causal das mudanças observadas.
-

@@ -31,8 +31,8 @@ crédito. O projeto usa o dataset público **UCI Default of Credit Card Clients 
 separa explicitamente dados de referência dos lotes simulados de produção.
 
 O plano detalhado, com 28 entregas distribuídas em quatro semanas, está em
-[`plano-de-trabalho-TC4.md`](plano-de-trabalho-TC4.md). O enunciado oficial está em
-[`MLET - Tech Challenge - Fase 4.pdf`](MLET%20-%20Tech%20Challenge%20-%20Fase%204.pdf).
+[`docs/plans/plano-de-trabalho-TC4.md`](docs/plans/plano-de-trabalho-TC4.md). O enunciado oficial
+está em [`docs/plans/MLET - Tech Challenge - Fase 4.pdf`](docs/plans/MLET%20-%20Tech%20Challenge%20-%20Fase%204.pdf).
 
 ## Critérios oficiais
 
@@ -72,13 +72,21 @@ ser ajustada apenas no treino para evitar vazamento de dados.
 | Drift | Evidently AI e testes estatísticos |
 | Experimentos | MLflow |
 | Dashboard | Streamlit |
+| Versionamento de datasets e modelos | DVC + DagsHub Storage |
 | Qualidade | Pytest, Ruff e GitHub Actions |
+
+O DVC rastreia dados e artefatos do pipeline; seus ponteiros e metadados ficam no GitHub,
+enquanto os objetos ficam no DagsHub Storage. O remote ainda precisa ser configurado para o
+repositório DagsHub do projeto. Veja [`docs/DAGSHUB.md`](docs/DAGSHUB.md); não coloque tokens ou
+credenciais em arquivos versionados.
 
 ## Arquitetura planejada
 
 ```text
 UCI 350
   -> aquisição e preparação
+  -> datasets e modelo versionados por DVC
+  -> DagsHub Storage (remote de dados/modelos)
   -> contrato Pandera
   -> treino e seleção do modelo
   -> dataset de referência
@@ -157,7 +165,8 @@ uv run dvc metrics show
 O notebook [`notebooks/01_eda.ipynb`](notebooks/01_eda.ipynb) apresenta o EDA; a descrição do dataset
 está em [`docs/DATASET.md`](docs/DATASET.md).
 
-O dashboard inicial já pode ser aberto; os dados reais serão conectados na Etapa 3:
+O dashboard inicial já pode ser aberto; a integração de observabilidade e os dados de produção
+simulados serão concluídos nas etapas seguintes:
 
 ```bash
 uv run streamlit run dashboard/app.py
@@ -208,22 +217,27 @@ tarefa.
 
 ## Dados e privacidade
 
-Dados brutos, processados, lotes de produção, modelos e execuções locais não devem ser
-versionados. Somente documentação, código, configurações e pequenas evidências não sensíveis
-podem entrar no Git. O plano de governança será consolidado em
+Dados brutos, processados, lotes de produção e modelos não devem ser adicionados diretamente ao
+Git. Os dados e modelos autorizados para compartilhamento serão versionados pelo DVC e armazenados
+no DagsHub Storage; o GitHub conterá apenas código, configurações, documentação e ponteiros DVC.
+Tokens e credenciais permanecem em configuração local não versionada. Antes de enviar dados ao
+serviço, confirmar a origem, os termos de uso e a autorização para armazenamento remoto. O plano de
+governança será consolidado em
 [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md) e resumido aqui antes da entrega.
 
 ## Escopo deliberadamente excluído
 
 Para concentrar o trabalho nos critérios de avaliação, esta fase não prevê API em tempo real,
-cloud, Kubernetes, Airflow, banco dedicado, filas, AutoML, redes neurais, alertas externos ou
-retreinamento automático.
+infraestrutura própria de cloud ou compute remoto, Kubernetes, Airflow, banco dedicado, filas,
+AutoML, redes neurais, alertas externos ou retreinamento automático. DagsHub Storage é a exceção
+planejada para armazenamento remoto versionado de dados e modelos; o treinamento permanece local.
 
 ## Documentação
 
-- [`plano-de-trabalho-TC4.md`](plano-de-trabalho-TC4.md): plano técnico das quatro semanas.
+- [`docs/plans/plano-de-trabalho-TC4.md`](docs/plans/plano-de-trabalho-TC4.md): plano técnico das
+  quatro semanas.
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): fluxo, componentes e decisões de escopo.
 - [`docs/CHECKLIST.md`](docs/CHECKLIST.md): 28 entregas e suas evidências.
 - [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md): base para LGPD, viés, retenção e causalidade.
+- [`docs/DAGSHUB.md`](docs/DAGSHUB.md): configuração e uso seguro do remote DVC no DagsHub.
 - [`CONTRIBUTING.md`](CONTRIBUTING.md): convenções de colaboração e qualidade.
-

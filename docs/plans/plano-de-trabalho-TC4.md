@@ -14,7 +14,9 @@ Desenvolver uma solução simplificada de Machine Learning para classificação 
 
 O projeto simulará um cenário no qual uma fintech possui um modelo de Credit Scoring em operação e precisa monitorar a qualidade dos dados e identificar alterações que possam comprometer a confiabilidade de suas previsões.
 
-O desenvolvimento será realizado localmente, utilizando ferramentas open-source, sem necessidade de infraestrutura cloud ou sistemas complexos de implantação.
+O desenvolvimento e a execução do pipeline serão locais, utilizando ferramentas open-source, sem
+infraestrutura própria de cloud ou sistemas complexos de implantação. O DagsHub Storage será usado
+como armazenamento remoto gerenciado para os objetos versionados pelo DVC.
 
 ## 2. Stack tecnológica
 
@@ -29,8 +31,14 @@ O desenvolvimento será realizado localmente, utilizando ferramentas open-source
 | Detecção de drift | Evidently AI |
 | Rastreamento | MLflow |
 | Dashboard | Streamlit |
-| Versionamento | Git e GitHub |
+| Código e documentação | Git e GitHub |
+| Versionamento de datasets e modelos | DVC e DagsHub Storage |
 | Documentação | Markdown |
+
+O DVC mantém os arquivos ponteiro e metadados (`.dvc`, `dvc.yaml` e `dvc.lock`) no Git; os
+conteúdos dos datasets e modelos rastreados pelo DVC ficam no remote DagsHub Storage. As credenciais
+de acesso ao remote são locais e nunca entram no Git. A configuração depende de um repositório
+DagsHub conectado ao GitHub; detalhes em [`docs/DAGSHUB.md`](../DAGSHUB.md).
 
 ### Dataset selecionado
 
@@ -74,12 +82,12 @@ A seleção será realizada com base no desempenho de validação e na simplicid
 
 | ID | Entrega | Atividades |
 |---|---|---|
-| **1.1** | Configuração do repositório | Criar repositório GitHub, definir estrutura de diretórios, dependências Python e instruções iniciais de execução. |
+| **1.1** | Configuração do repositório | Criar repositório GitHub, definir estrutura de diretórios e dependências Python, conectar o projeto ao DagsHub, configurar o remote DVC com credenciais locais e documentar a recuperação dos dados. |
 | **1.2** | Aquisição e exploração do dataset | Obter o dataset UCI, identificar variáveis, tipos, distribuição do alvo, valores ausentes, duplicatas e possíveis inconsistências. |
 | **1.3** | Preparação dos dados | Selecionar as 19 features financeiras, preparar os dados e realizar divisão estratificada em treino (70%), validação (15%) e teste (15%). |
 | **1.4** | Treinamento da Regressão Logística | Implementar pipeline de pré-processamento e treinar o classificador baseline com Scikit-learn. |
 | **1.5** | Treinamento do Random Forest | Treinar o segundo classificador, utilizando parâmetros iniciais simples para controlar o overfitting. |
-| **1.6** | Avaliação e seleção do modelo | Comparar ROC-AUC, precision, recall, F1-score e matriz de confusão. Selecionar e serializar o modelo final, registrando a justificativa. |
+| **1.6** | Avaliação, seleção e versionamento do modelo | Comparar ROC-AUC, precision, recall, F1-score e matriz de confusão. Selecionar e serializar o modelo final, registrar a justificativa e verificar que datasets e modelo são reproduzíveis por DVC e armazenados no DagsHub Storage. |
 | **1.7** | Implementação do Data Contract | Criar pelo menos três regras rígidas com Pandera e demonstrar que um lote contendo dados inválidos é rejeitado antes da inferência. |
 
 ### Regras iniciais do Data Contract
@@ -99,6 +107,7 @@ A etapa estará concluída quando:
 - Um modelo tiver sido formalmente selecionado.
 - O modelo selecionado realizar predições sobre dados válidos.
 - O contrato Pandera bloquear comprovadamente um lote inválido.
+- O dataset de entrada e as saídas de dados/modelo rastreadas por DVC podem ser recuperadas do DagsHub Storage, sem credenciais no Git.
 
 **Entregável oficial:** modelo baseline treinado e script funcional de validação de dados.
 
@@ -255,7 +264,8 @@ Para concentrar o trabalho nos critérios de avaliação da FIAP, não serão de
 - Retreinamento automático.
 - Plataformas adicionais de monitoramento.
 
-O projeto utilizará apenas os dois algoritmos definidos e as ferramentas essenciais de validação, drift, rastreamento e visualização.
+O projeto utilizará apenas os dois algoritmos definidos e as ferramentas essenciais de validação,
+drift, rastreamento, versionamento (DVC/DagsHub Storage) e visualização.
 
 ## 9. Critérios de avaliação
 
@@ -278,5 +288,6 @@ Ao final das quatro semanas, o grupo deverá possuir:
 5. Um ambiente MLflow registrando métricas, parâmetros e artefatos.
 6. Um dashboard Streamlit apresentando a saúde do pipeline e seus alertas.
 7. Um repositório GitHub documentado, acompanhado do vídeo STAR.
+8. Ponteiros e metadados DVC no GitHub, com datasets e modelos aprovados recuperáveis do DagsHub Storage.
 
 **Princípio orientador:** implementar somente o necessário para demonstrar, de forma clara e reproduzível, os requisitos de validação, detecção de drift, observabilidade e governança definidos no Tech Challenge.

@@ -4,12 +4,12 @@ Status possíveis: `Pendente`, `Em andamento`, `Em revisão`, `Concluído`.
 
 ## Semana 1 - Validação de dados e contratos
 
-- [x] **1.1** Configuração inicial do repositório - evidência: estrutura, `pyproject.toml` e CI.
+- [ ] **1.1** Configuração inicial do repositório e remote DagsHub - evidência: estrutura, `pyproject.toml`, CI e recuperação/push DVC com credenciais locais.
 - [ ] **1.2** Aquisição e exploração do dataset - Em revisão - evidência: `notebooks/01_eda.ipynb`, `src/credit_monitoring/eda.py`, `docs/DATASET.md`.
 - [ ] **1.3** Preparação e split estratificado 70/15/15 - Em revisão - evidência: `src/credit_monitoring/data/prepare.py`, `dvc.yaml`.
 - [ ] **1.4** Treinamento da Regressão Logística - Em revisão - evidência: `src/credit_monitoring/models/train.py`, `reports/metrics.json`.
 - [ ] **1.5** Treinamento do Random Forest - Em revisão - evidência: `src/credit_monitoring/models/train.py`, `reports/metrics.json`.
-- [ ] **1.6** Avaliação, seleção e serialização do modelo - Em revisão - evidência: `reports/metrics.json`, `models/credit_model_metadata.json`.
+- [ ] **1.6** Avaliação, seleção, serialização e versionamento remoto do modelo - Em revisão - evidência: `reports/metrics.json`, `models/credit_model_metadata.json` e objeto recuperável via DVC/DagsHub.
 - [ ] **1.7** Data Contract Pandera e lote inválido rejeitado.
 
 ## Semana 2 - Simulação e detecção de drift
@@ -41,4 +41,3 @@ Status possíveis: `Pendente`, `Em andamento`, `Em revisão`, `Concluído`.
 - [ ] **4.5** README consolidado com evidências reais.
 - [ ] **4.6** Vídeo STAR de até cinco minutos.
 - [ ] **4.7** Revisão final de código, evidências e histórico.
-
