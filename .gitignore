@@ -33,6 +33,7 @@ reports/drift/*
 !reports/drift/README.md
 reports/figures/*
 !reports/figures/README.md
+reports/run_resources.json
 !data/raw/*.dvc
 artifacts/
 mlruns/

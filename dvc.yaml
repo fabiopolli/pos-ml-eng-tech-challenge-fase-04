@@ -69,14 +69,15 @@ stages:
     deps:
       - data/processed/train.csv
       - data/processed/validation.csv
-      - data/processed/test.csv
       - src/credit_monitoring/models/train.py
       - src/credit_monitoring/config.py
+      - src/credit_monitoring/contracts
     params:
       - configs/project.yaml:
           - project.random_seed
           - dataset.financial_features
           - dataset.canonical_target
+          - contract
           - modeling
     outs:
       - models/credit_model.joblib
@@ -84,4 +85,23 @@ stages:
       - reports/figures/model
     metrics:
       - reports/metrics.json:
+          cache: false
+
+  evaluate:
+    cmd: python -m credit_monitoring.models.evaluate
+    deps:
+      - data/processed/test.csv
+      - models/credit_model.joblib
+      - models/credit_model_metadata.json
+      - src/credit_monitoring/models/evaluate.py
+      - src/credit_monitoring/config.py
+      - src/credit_monitoring/contracts
+    params:
+      - configs/project.yaml:
+          - dataset.financial_features
+          - dataset.canonical_target
+          - contract
+          - modeling.primary_metric
+    outs:
+      - reports/test_metrics.json:
           cache: false

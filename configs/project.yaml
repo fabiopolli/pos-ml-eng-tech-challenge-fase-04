@@ -62,6 +62,8 @@ modeling:
   primary_metric: roc_auc
   secondary_metrics: [precision, recall, f1, accuracy]
   candidates: [logistic_regression, random_forest]
+  baseline: logistic_regression
+  tie_break: baseline
   logistic_regression:
     C: 1.0
     max_iter: 1000

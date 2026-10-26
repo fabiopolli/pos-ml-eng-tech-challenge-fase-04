@@ -30,6 +30,8 @@ credit-monitoring-acquire = "credit_monitoring.data.acquire:main"
 credit-monitoring-eda = "credit_monitoring.eda:main"
 credit-monitoring-prepare = "credit_monitoring.data.prepare:main"
 credit-monitoring-train = "credit_monitoring.models.train:main"
+credit-monitoring-evaluate = "credit_monitoring.models.evaluate:main"
+credit-monitoring-validate = "credit_monitoring.contracts.validate:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

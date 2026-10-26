@@ -15,8 +15,8 @@ def _out_paths(stage: dict) -> list[str]:
     return [next(iter(out)) if isinstance(out, dict) else out for out in stage.get("outs", [])]
 
 
-def test_pipeline_stage_order_is_acquire_eda_prepare_explore_train():
-    assert list(_stages()) == ["acquire", "eda", "prepare", "explore", "train"]
+def test_pipeline_stage_order_is_acquire_eda_prepare_explore_train_evaluate():
+    assert list(_stages()) == ["acquire", "eda", "prepare", "explore", "train", "evaluate"]
 
 
 def test_acquire_rebuilds_the_raw_csv_from_the_source_workbook():
@@ -47,3 +47,30 @@ def test_train_depends_on_prepare_outputs():
         "data/processed/train.csv",
         "data/processed/validation.csv",
     }
+
+
+def test_train_stage_never_depends_on_the_test_split():
+    """The selection stage must not read the test partition."""
+    stages = _stages()
+    assert "data/processed/test.csv" not in stages["train"]["deps"]
+    assert "data/processed/test.csv" not in stages["train"].get("outs", [])
+
+
+def test_evaluate_is_a_separate_stage_that_owns_the_test_split():
+    stages = _stages()
+    assert "data/processed/test.csv" in stages["evaluate"]["deps"]
+    assert "models/credit_model.joblib" in stages["evaluate"]["deps"]
+    assert "data/processed/test.csv" not in stages["train"]["deps"]
+    # The frozen artifact is produced by the selection stage and consumed by the
+    # evaluation stage: it is an output of one stage and a dependency of the other.
+    assert "models/credit_model.joblib" in _out_paths(stages["train"])
+    assert "models/credit_model.joblib" not in _out_paths(stages["evaluate"])
+
+
+def test_no_file_is_tracked_as_the_output_of_two_stages():
+    stages = _stages()
+    owners: dict[str, str] = {}
+    for name, stage in stages.items():
+        for path in _out_paths(stage):
+            assert path not in owners, f"{path} is an output of {owners[path]} and {name}"
+            owners[path] = name
