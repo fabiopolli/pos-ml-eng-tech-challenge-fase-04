@@ -242,7 +242,7 @@ O acompanhamento operacional está em [`docs/CHECKLIST.md`](docs/CHECKLIST.md).
 
 | Entrega | Estado | Evidência atual |
 |---|---|---|
-| Fundação do repositório e remote | Em andamento | `dvc[s3]` e `xlrd` travados; pipeline e `dvc.lock` coerentes; workbook original migrado do Git para o DVC; **remote DagsHub e recuperação pendentes das credenciais** (`.env` + `scripts/configure_dagshub.sh` prontos) |
+| Fundação do repositório e remote | Em revisão | `dvc[s3]` e `xlrd` travados; pipeline e `dvc.lock` coerentes; workbook original migrado do Git para o DVC; remote DagsHub configurado, objetos enviados e **recuperação provada em checkout separado** |
 | Aquisição, auditoria e preparação | Em revisão | Estágios `acquire`/`eda`/`prepare`/`explore`; proveniência com DOI e licença em [`docs/DATASET.md`](docs/DATASET.md); exposição do teste declarada em [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md) |
 | Modelos e Data Contract | Em revisão | Contrato Pandera integrado antes do `fit`; seleção na validação e avaliação final em estágios separados; [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md) |
 | Simulação e relatório de drift | Pendente | Cenário inicial documentado |

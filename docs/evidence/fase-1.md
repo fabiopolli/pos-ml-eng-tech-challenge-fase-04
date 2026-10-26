@@ -3,10 +3,10 @@
 **Janela de execução:** 2026-10-26 (branch `fase-1-bill`).
 **Plano:** [`docs/plans/plano-de-trabalho-TC4.md`](../plans/plano-de-trabalho-TC4.md) (seção 11) e
 [`docs/plans/fase-1-validacao-dados-contratos.md`](../plans/fase-1-validacao-dados-contratos.md).
-**Estado do marco M1:** **prontidão local parcial** — M1 **não** está fechado. Faltam a
-autorização de rede/credenciais do DagsHub (1.1b) e a prova de recuperação remota (1.6).
-Os itens aceitos abaixo são **observações verificadas nesta execução**, não aceitações da
-comissão: responsável e revisor por ID continuam pendentes.
+**Estado do marco M1:** **todos os itens de aceite verificados tecnicamente**, incluindo a prova
+de recuperação remota no DagsHub (seção 1.6.1). M1 **não** é declarado como concluído: o aceite
+técnico verificado segue para revisão da equipe, e responsável e revisor por ID continuam
+pendentes.
 
 ## Ambiente da execução
 
@@ -17,7 +17,7 @@ comissão: responsável e revisor por ID continuam pendentes.
 | Python | 3.12.14 (gerenciado pelo uv, `.python-version` = `3.12`) |
 | scikit-learn / pandas / numpy | 1.9.1 / 2.3.3 / 2.5.4 |
 | Pandera / joblib | 0.34.1 / 1.6.0 |
-| Branch | `fase-1-bill` (base `main` @ `c560b46`) |
+| Branch | `fase-1-bill` (base `main` @ `c560b46`), publicada em `origin/fase-1-bill` |
 | Commit do código que gerou os artefatos | `fb5ee7b` (registrado em `models/credit_model_metadata.json` como `git_sha`) |
 
 > `git_sha` registra o commit do **código** que produziu o artefato; o commit que versiona o
@@ -35,7 +35,9 @@ comissão: responsável e revisor por ID continuam pendentes.
 | `uv run dvc repro` | 0 | 6 estágios reproduzidos |
 | `uv run dvc repro -f` (2× consecutivas) | 0 | `dvc.lock` e artefatos **byte-a-byte idênticos** |
 | `uv run dvc status` | 0 | `Data and pipelines are up to date.` |
-| `uv run dvc remote list` | 0 | **vazio** — nenhum remote configurado (bloqueio 1.1b) |
+| `uv run dvc remote list` | 0 | `dagshub s3://dvc` (default) — remote configurado |
+| `uv run dvc status -c -r dagshub` | 0 | `Cache and remote 'dagshub' are in sync.` |
+| `uv run dvc push -r dagshub` | 0 | 25 objetos enviados |
 | `git diff --check` | 0 | sem saída |
 
 ## Hashes dos artefatos
@@ -82,16 +84,24 @@ pipeline depois de `uv run dvc pull -r dagshub`, porque a fonte do bruto não es
 isso acopla a reprodução ao remote da entrega 1.1b, ainda não configurado. O histórico Git
 anterior continua contendo o XLS; a remoção é do estado atual do repositório.
 
-**Recorte 1.1b (remoto) — bloqueado.** `.dvc/config` continua sem remote
-(`uv run dvc remote list` vazio) e não há credenciais. Depende de decisões de equipe:
+**Recorte 1.1b (remoto) — executado e verificado.** O operador preencheu o `.env` (ignorado
+pelo Git) e a configuração foi concluída em 2026-10-26.
 
-1. autorização de rede e credenciais do DagsHub (owner, endpoint, chave/segredo);
-2. quais saídas DVC podem ser compartilhadas.
+Diagnóstico do acesso (o `.env` inicial não autenticava):
 
-Para destravar: preencha `.env` (ignorado pelo Git) com `DAGSHUB_OWNER`, `DAGSHUB_REPO` e as duas
-chaves, e rode `scripts/configure_dagshub.sh`, que grava as credenciais apenas em
-`.dvc/config.local` e falha com mensagem explícita se alguma variável estiver vazia. O procedimento
-completo está em [`docs/DAGSHUB.md`](../DAGSHUB.md).
+| Sintoma | Causa verificada | Correção |
+|---|---|---|
+| `dvc status -c -r dagshub` → `401 Unauthorized` (HeadObject e ListObjects) | O gateway do DagsHub autentica pelo `access_key_id` e espera **o mesmo token nos dois campos** (guia oficial do DVC Storage). O token de 40 caracteres estava no campo `secret_access_key`, e o valor de 13 caracteres em `access_key_id` não é o token | Token único em `DAGSHUB_TOKEN`, usado nos dois campos |
+| Endpoint `https://dagshub.com/<owner>/<repo>.s3` respondia `302` para `/user/login` | Repositório privado; o redirect é esperado sem autenticação, e não era a causa do 401 | — |
+| `DAGSHUB_REPO` continha a URL completa do repositório (`.../src/feat/<branch>`) | O endpoint exige o **slug** do repositório | Script normaliza e extrai o slug, avisando o operador |
+
+| Verificação | Resultado |
+|---|---|
+| `scripts/configure_dagshub.sh` | Remote `dagshub` = `s3://dvc`, endpoint `https://dagshub.com/deniscelclaro/pos-ml-eng-tech-challenge-fase-04.s3`; credenciais só em `.dvc/config.local` (ignorado pelo Git) |
+| `uv run dvc push -r dagshub` | **25 objetos enviados** (workbook da UCI, CSV bruto, splits, referência, modelo, figuras) |
+| `uv run dvc status -c -r dagshub` | `Cache and remote 'dagshub' are in sync.` |
+| Segredos no repositório | Nenhum: `.env` e `.dvc/config.local` verificados como ignorados pelo Git; `.dvc/config` versionado contém apenas URL e endpoint |
+| Quais saídas podem ser compartilhadas | Enviado o conjunto de objetos do DVC: o dataset é público (UCI 350, CC BY 4.0) e o repositório é privado. A chave de distribuição do repositório na DagsHub não foi alterada por esta execução |
 
 ## 1.2 — Aquisição e auditoria do dataset
 
@@ -219,7 +229,7 @@ Exemplo de diagnóstico (lote com 21.000 linhas e cinco violações):
 | Avaliação final (teste, RF) | ROC-AUC **0,777198** · precision 0,497115 · recall 0,605422 · F1 0,545948 · accuracy 0,777111 · matriz TN 2.894 / FP 610 / FN 393 / TP 603 |
 | Reprodutibilidade | `uv run dvc repro -f` duas vezes consecutivas produz `dvc.lock` e artefatos **byte-a-byte idênticos** (`dvc status` limpo ao final) |
 | Sem arquivo com dois donos | Teste `test_no_file_is_tracked_as_the_output_of_two_stages` garante que nenhum arquivo é saída de dois estágios |
-| Recuperação remota | **Bloqueada** — sem remote e sem credenciais (1.1b). Não há prova de recuperação a partir do DagsHub |
+| Recuperação remota | **Proveda** — ver a seção 1.6.1 abaixo |
 
 ### Observação sobre reprodutibilidade e metadados
 
@@ -232,6 +242,47 @@ Duas decisões de projeto merecem registro:
    execução. Elas ficam em `reports/run_resources.json` (ignorado pelo Git, não é saída DVC) e
    serão registradas no MLflow na fase 3. A fase 3 deve tratar esse arquivo como entrada
    opcional, não como fonte versionada.
+
+### 1.6.1 — Prova de recuperação remota (DagsHub)
+
+Executada em 2026-10-26, em **checkout e cache DVC separados** do projeto de origem, conforme o
+plano exige ("não limpar o cache de trabalho para testar").
+
+| Passo | Comando | Resultado |
+|---|---|---|
+| 1 | `git clone --branch fase-1-bill https://github.com/fabiopolli/pos-ml-eng-tech-challenge-fase-04.git` | Clone novo, **sem cache DVC** (`.dvc/cache` inexistente) |
+| 2 | `scripts/configure_dagshub.sh <caminho_do_.env>` | Remote configurado no clone; credenciais só em `.dvc/config.local` |
+| 3 | `uv run dvc pull -r dagshub` | `25 files fetched and 23 files added` |
+| 4 | `uv run dvc status` | `Data and pipelines are up to date.` |
+| 5 | `diff dvc.lock` (clone × projeto de origem) | **Idêntico** |
+| 6 | `uv run dvc repro -f` no clone | Todos os artefatos **byte-a-byte idênticos** aos do projeto de origem |
+| 7 | Inferência com o modelo recuperado | Probabilidades equivalentes em `3,33e-16` (tolerância declarada 1e-12); ROC-AUC **0,777198**, igual ao publicado |
+
+Hashes conferidos no clone recuperado (todos iguais aos do projeto de origem):
+
+| Artefato | SHA-256 |
+|---|---|
+| `data/default of credit card clients.xls` | `63c47faa4cf5e224c3494cd5f776721bcdc4a374ecf16665632f3afab8f38a44` |
+| `data/raw/default_of_credit_card_clients.csv` | `1fc7fe04822413cf48d0f5ca974cbe47061b21ea10fa1d114bb56b8feac79358` |
+| `data/processed/train.csv` | `9ebd48b6d31c67f46cc28aff0bde36b48f62936aff0011007b7cb78d26108c26` |
+| `data/processed/validation.csv` | `e910967511f31406edbc3c9fe0528571d079c45da10116dba4e53e379d285106` |
+| `data/processed/test.csv` | `70642cbcc74972400e63df96e78e1e07497f15b6b15fe278f232aaf18b725729` |
+| `data/reference/reference.csv` | `9ebd48b6d31c67f46cc28aff0bde36b48f62936aff0011007b7cb78d26108c26` |
+| `models/credit_model.joblib` | `a5a4a740902fab9efa5138f98917a8a7f447c5af7f7d97b707290c205c1e0464` |
+
+**Defeito encontrado e corrigido por esta prova.** Na primeira tentativa, o clone recuperado
+divergiu do `dvc.lock`: o diretório `src/credit_monitoring/contracts` é uma dependência do estágio
+`train`, e o hash do diretório incluía `__pycache__`, presente na árvore de trabalho do projeto de
+origem e ausente no clone. O `dvc.lock` passava a descrever o mesmo código de forma diferente em
+máquinas diferentes. Correção: `.dvcignore` passou a excluir `__pycache__/` e `*.py[cod]`, e o
+lock foi regenerado e republicado (commit `80c9694`).
+
+**Observação sobre o `git_sha` nos metadados.** Ao reexecutar `dvc repro -f` no clone, o único
+arquivo cujo hash muda no `dvc.lock` é `models/credit_model_metadata.json`: o campo `git_sha`
+registra o commit do checkout que produziu o artefato (no clone, o HEAD é diferente). Todas as
+demais saídas — dados, modelo e relatórios — permanecem byte-a-byte idênticas. É o comportamento
+esperado de metadados que registram a versão do código, e está documentado no registro de
+transferência.
 
 ---
 
@@ -248,18 +299,22 @@ Duas decisões de projeto merecem registro:
 - [x] Modelo recarregado com probabilidades equivalentes dentro de tolerância declarada.
 - [x] Metadados completos: limiar, features, seed, hashes de dados/modelo, SHA Git, versões,
       versão do contrato, exposição do teste declarada.
-- [ ] Objetos DVC no DagsHub e recuperação em checkout/cache separado, com hashes conferidos e
-      inferência do modelo recuperado. **Pendente de autorização (1.1b).**
+- [x] Objetos DVC no DagsHub e recuperação em checkout/cache separado, com hashes conferidos e
+      inferência do modelo recuperado (seção 1.6.1).
 - [x] `docs/evidence/fase-1.md` com seções 1.1–1.7, comandos, códigos de saída e hashes.
 
-**M1: não fechado.** O caminho local está verificado; falta a prova remota exigida pelo enunciado
-e pelo gate.
+**M1: todos os itens de aceite verificados tecnicamente.** O caminho local e a prova de recuperação
+remota estão executados e documentados. O marco **não** é declarado como concluído: conforme o
+protocolo da seção 11 do plano geral, aceite técnico verificado segue para **revisão da equipe**,
+e responsável/revisor por ID ainda não foram confirmados. Também permanece a decisão de quando
+rodar a `dvc push` seguinte a cada novo commit de código (o remote e o lock precisam andar
+juntos).
 
 ## Transferência para a fase 2
 
 | Item | Valor |
 |---|---|
-| SHA do código | `fb5ee7b` (`git_sha` nos metadados) |
+| SHA do código | `80c9694` (`git_sha` nos metadados; commit de código anterior ao commit de artefatos) |
 | `dvc.lock` | versionado no branch `fase-1-bill`, coerente com o código |
 | Hash do treino / validação / teste / referência | `9ebd48b6…` / `e9109675…` / `70642cbc…` / `9ebd48b6…` |
 | Hash do modelo | `a5a4a740…` (5.490.002 B) |
@@ -272,18 +327,18 @@ e pelo gate.
 
 ## Pendências que exigem a equipe
 
-1. **Autorização de rede e credenciais do DagsHub** (owner, endpoint, chave/segredo) — bloqueia
-   1.1b, o aceite de recuperação de 1.6 e o fechamento de M1. O `.env` e o script de configuração
-   já estão prontos; falta apenas o preenchimento pelo operador.
+1. **Credenciais do DagsHub** — resolvido em 2026-10-26: remote configurado, 25 objetos enviados
+   e recuperação provada em checkout separado (seção 1.6.1).
 2. **Decisão sobre o XLS de 5,5 MB no Git** — **resolvida em 2026-10-26**: o workbook original foi
-   migrado para o DVC (ponteiro versionado no Git, objeto no cache/remote). Pendente apenas o
-   `dvc push` para que a fonte exista fora desta máquina.
+   migrado para o DVC (ponteiro versionado no Git, objeto no cache e no remote). O `dvc push`
+   seguinte a cada commit de código mantém o remote em dia com o `dvc.lock`.
 3. **Responsável e revisor por ID** — os aceites técnicos acima estão verificados, mas a
    confirmação de aceite cabe à equipe.
 4. **Cobertura de Concept Drift** (citada na p. 2 do enunciado, não detalhada na rubrica) —
    pendência que a fase 2 deve tratar antes do aceite final.
-5. **Publicação da branch** — as alterações estão em commits locais da branch `fase-1-bill`; o
-   `git push` foi autorizado pelo operador e executado no fechamento desta janela.
+5. **Publicação da branch** — concluída: a branch `fase-1-bill` foi publicada em
+   `origin/fase-1-bill` com autorização do operador. O PR para `main` continua sendo decisão da
+   equipe.
 
 ## Limitações conhecidas desta execução
 
