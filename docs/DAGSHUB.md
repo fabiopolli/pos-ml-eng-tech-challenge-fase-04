@@ -32,11 +32,17 @@ dessa alteração versionada, cada integrante instala o mesmo ambiente com `uv s
 
    ```bash
    cp .env.example .env
-   $EDITOR .env   # preencher DAGSHUB_OWNER, DAGSHUB_REPO e as duas chaves
+   $EDITOR .env   # preencher DAGSHUB_OWNER, DAGSHUB_REPO e DAGSHUB_TOKEN
    ```
 
-4. Aplicar a configuração com o script, que grava as chaves em `.dvc/config.local` (ignorado pelo
-   Git) e nunca imprime os valores:
+   O DagsHub entrega **um único token** para o DVC Storage (aba *Data → DVC* do repositório), e
+   o mesmo token vai nos dois campos de credencial, como no guia oficial. Se a página mostrar um
+   par de chaves, use o valor de **secret/token** nos dois campos: o gateway do DagsHub autentica
+   pelo `access_key_id` e rejeita com `401 Unauthorized` um valor diferente do token. Se colar a
+   URL completa do repositório em `DAGSHUB_REPO`, o script extrai o slug.
+
+4. Aplicar a configuração com o script, que grava as credenciais em `.dvc/config.local` (ignorado
+   pelo Git) e nunca imprime os valores:
 
    ```bash
    scripts/configure_dagshub.sh
@@ -66,12 +72,10 @@ Armazenar `access_key_id` e `secret_access_key` localmente, com os valores/token
 DagsHub. O `--local` grava em `.dvc/config.local`, que não deve ser commitado:
 
 ```bash
-read -rsp 'DagsHub access key: ' DAGSHUB_ACCESS_KEY_ID; printf '\n'
-uv run dvc remote modify dagshub --local access_key_id "$DAGSHUB_ACCESS_KEY_ID"
-unset DAGSHUB_ACCESS_KEY_ID
-read -rsp 'DagsHub secret key: ' DAGSHUB_SECRET_ACCESS_KEY; printf '\n'
-uv run dvc remote modify dagshub --local secret_access_key "$DAGSHUB_SECRET_ACCESS_KEY"
-unset DAGSHUB_SECRET_ACCESS_KEY
+read -rsp 'DagsHub token: ' DAGSHUB_TOKEN; printf '\n'
+uv run dvc remote modify dagshub --local access_key_id "$DAGSHUB_TOKEN"
+uv run dvc remote modify dagshub --local secret_access_key "$DAGSHUB_TOKEN"
+unset DAGSHUB_TOKEN
 ```
 
 Nunca passe tokens em commits, `.env.example`, documentação, logs ou configuração DVC
