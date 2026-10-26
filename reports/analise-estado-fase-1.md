@@ -448,11 +448,11 @@ e `md5 = a6ee086d1eafba5566f666b3ff2ed2c9` — **idênticos** ao hash registrado
 ```python
 # requer xlrd (não está nas dependências; `uv add --dev xlrd`)
 import pandas as pd
+
 xl = pd.ExcelFile("data/default of credit card clients.xls")
-df = xl.parse("Data", header=1)                      # 30.000 × 25
+df = xl.parse("Data", header=1)  # 30.000 × 25
 placeholder = ";".join(["", *[f"X{i}" for i in range(1, 24)], "Y"])
-content = ("\ufeff" + placeholder + "\r\n"
-           + df.to_csv(sep=";", index=False, lineterminator="\r\n"))
+content = "\ufeff" + placeholder + "\r\n" + df.to_csv(sep=";", index=False, lineterminator="\r\n")
 Path("data/raw/default_of_credit_card_clients.csv").write_bytes(content.encode("utf-8"))
 ```
 
