@@ -29,16 +29,19 @@ dependencies = [
 #   uv sync --dev --locked --extra drift          # fase 2 (evidently)
 #   uv sync --dev --locked --extra observability  # fase 3 (mlflow, streamlit)
 #   uv sync --dev --locked --extra provenance     # reverificar a fonte na UCI
+#   uv sync --dev --locked --extra model_lab      # laboratorio de modelos (plano 1.6)
 [project.optional-dependencies]
 drift = ["evidently>=0.7,<1"]
 observability = ["mlflow>=3,<4", "streamlit>=1.40,<2"]
 provenance = ["ucimlrepo>=0.0.7,<1"]
+model_lab = ["streamlit>=1.40,<2"]
 
 [project.scripts]
 credit-monitoring-acquire = "credit_monitoring.data.acquire:main"
 credit-monitoring-eda = "credit_monitoring.eda:main"
 credit-monitoring-prepare = "credit_monitoring.data.prepare:main"
 credit-monitoring-train = "credit_monitoring.models.train:main"
+credit-monitoring-tune = "credit_monitoring.models.tune:main"
 credit-monitoring-evaluate = "credit_monitoring.models.evaluate:main"
 credit-monitoring-validate = "credit_monitoring.contracts.validate:main"
 

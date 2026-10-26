@@ -3319,6 +3319,9 @@ dependencies = [
 drift = [
     { name = "evidently" },
 ]
+model-lab = [
+    { name = "streamlit" },
+]
 observability = [
     { name = "mlflow" },
     { name = "streamlit" },
@@ -3350,11 +3353,12 @@ requires-dist = [
     { name = "scikit-learn", specifier = ">=1.5,<2" },
     { name = "scipy", specifier = ">=1.13,<2" },
     { name = "seaborn", specifier = ">=0.13,<1" },
+    { name = "streamlit", marker = "extra == 'model-lab'", specifier = ">=1.40,<2" },
     { name = "streamlit", marker = "extra == 'observability'", specifier = ">=1.40,<2" },
     { name = "ucimlrepo", marker = "extra == 'provenance'", specifier = ">=0.0.7,<1" },
     { name = "xlrd", specifier = ">=2,<3" },
 ]
-provides-extras = ["drift", "observability", "provenance"]
+provides-extras = ["drift", "observability", "provenance", "model-lab"]
 
 [package.metadata.requires-dev]
 dev = [

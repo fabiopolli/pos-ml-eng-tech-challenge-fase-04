@@ -39,6 +39,9 @@ jobs:
       - name: Test
         run: uv run pytest
 
+      - name: Test the model laboratory with the model_lab extra
+        run: uv run --extra model_lab pytest tests/test_app_dev.py
+
       - name: Build package
         run: uv build
 
