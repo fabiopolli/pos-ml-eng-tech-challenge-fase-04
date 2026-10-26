@@ -108,8 +108,8 @@ stages:
       size: 1202
     - path: src/credit_monitoring/data/prepare.py
       hash: md5
-      md5: b34d33d9df8b5d1c90eecdd6cf3471a8
-      size: 6796
+      md5: c61c6432a58b1513c4059655ceb82142
+      size: 9436
     params:
       configs/project.yaml:
         contract:
@@ -178,8 +178,8 @@ stages:
     outs:
     - path: data/processed/preparation_report.json
       hash: md5
-      md5: 639201ba794820cd077009911bebd838
-      size: 595
+      md5: fd8299009aeb2b5790b754f24d3a8998
+      size: 1575
     - path: data/processed/test.csv
       hash: md5
       md5: 43d9bfda014be80f16359e72da97ccbb
@@ -199,10 +199,6 @@ stages:
   train:
     cmd: python -m credit_monitoring.models.train
     deps:
-    - path: data/processed/test.csv
-      hash: md5
-      md5: 43d9bfda014be80f16359e72da97ccbb
-      size: 429667
     - path: data/processed/train.csv
       hash: md5
       md5: dd57d28df2ec5b23960b1bbda5e36d00
@@ -215,12 +211,23 @@ stages:
       hash: md5
       md5: dcc6b47dd5862af2c46c60615575c10d
       size: 987
+    - path: src/credit_monitoring/contracts
+      hash: md5
+      md5: f213d725a28a8099871007e3be35b367.dir
+      size: 33842
+      nfiles: 12
     - path: src/credit_monitoring/models/train.py
       hash: md5
-      md5: 3a163aee1c4330e6b184da5ae55d16d4
-      size: 7905
+      md5: 0ffd17e1c45b799c2f828fc45eb575e6
+      size: 16276
     params:
       configs/project.yaml:
+        contract:
+          age_min: 18
+          age_max: 100
+          require_unique_id: true
+          require_positive_limit_bal: true
+          reject_null_features: true
         dataset.canonical_target: default_payment_next_month
         dataset.financial_features:
         - LIMIT_BAL
@@ -252,6 +259,8 @@ stages:
           candidates:
           - logistic_regression
           - random_forest
+          baseline: logistic_regression
+          tie_break: baseline
           logistic_regression:
             C: 1.0
             max_iter: 1000
@@ -266,21 +275,21 @@ stages:
     outs:
     - path: models/credit_model.joblib
       hash: md5
-      md5: 05f6e9d0518025aac24df3fd94ac19ce
-      size: 5490034
+      md5: 95e041c68a280caedc64f6eb93c895e6
+      size: 5490050
     - path: models/credit_model_metadata.json
       hash: md5
-      md5: 2784caa83bb17a6108f45e1c2622e5cd
-      size: 1043
+      md5: 8c2df407fb1d7d7888031c27c9646e68
+      size: 2828
     - path: reports/figures/model
       hash: md5
-      md5: 70dcbdbfb70d0289d8f2bb1c4c5690e5.dir
-      size: 86378
+      md5: 74b028f2f285543f7ac91271b3d62d8c.dir
+      size: 87161
       nfiles: 2
     - path: reports/metrics.json
       hash: md5
-      md5: ba41465709096bf4fc8014f53b1ac439
-      size: 906
+      md5: 04ac0cbff18ff46f66440cb2c902cd8c
+      size: 1347
   acquire:
     cmd: python -m credit_monitoring.data.acquire
     deps:
@@ -373,3 +382,66 @@ stages:
       md5: 35b943f2746167cf981f817e0cf089c4.dir
       size: 325671
       nfiles: 6
+  evaluate:
+    cmd: python -m credit_monitoring.models.evaluate
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 43d9bfda014be80f16359e72da97ccbb
+      size: 429667
+    - path: models/credit_model.joblib
+      hash: md5
+      md5: 95e041c68a280caedc64f6eb93c895e6
+      size: 5490050
+    - path: models/credit_model_metadata.json
+      hash: md5
+      md5: 8c2df407fb1d7d7888031c27c9646e68
+      size: 2828
+    - path: src/credit_monitoring/config.py
+      hash: md5
+      md5: dcc6b47dd5862af2c46c60615575c10d
+      size: 987
+    - path: src/credit_monitoring/contracts
+      hash: md5
+      md5: f213d725a28a8099871007e3be35b367.dir
+      size: 33842
+      nfiles: 12
+    - path: src/credit_monitoring/models/evaluate.py
+      hash: md5
+      md5: 6b50e6823bd6d9a3654a8744f3ba7089
+      size: 4564
+    params:
+      configs/project.yaml:
+        contract:
+          age_min: 18
+          age_max: 100
+          require_unique_id: true
+          require_positive_limit_bal: true
+          reject_null_features: true
+        dataset.canonical_target: default_payment_next_month
+        dataset.financial_features:
+        - LIMIT_BAL
+        - PAY_0
+        - PAY_2
+        - PAY_3
+        - PAY_4
+        - PAY_5
+        - PAY_6
+        - BILL_AMT1
+        - BILL_AMT2
+        - BILL_AMT3
+        - BILL_AMT4
+        - BILL_AMT5
+        - BILL_AMT6
+        - PAY_AMT1
+        - PAY_AMT2
+        - PAY_AMT3
+        - PAY_AMT4
+        - PAY_AMT5
+        - PAY_AMT6
+        modeling.primary_metric: roc_auc
+    outs:
+    - path: reports/test_metrics.json
+      hash: md5
+      md5: b644f603ab3f5e4aecf9a28e368efd59
+      size: 1214

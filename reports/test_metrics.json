@@ -1,0 +1,31 @@
+{
+  "contract_version": "1.0.0",
+  "model_sha256": "a5a4a740902fab9efa5138f98917a8a7f447c5af7f7d97b707290c205c1e0464",
+  "protocol": {
+    "frozen": true,
+    "note": "Avaliacao final sob protocolo congelado. Reexecutar este estagio reproduz os mesmos numeros: nao cria uma avaliacao independente nova.",
+    "primary_metric": "roc_auc",
+    "selection_source": "models/credit_model_metadata.json"
+  },
+  "selected_model": "random_forest",
+  "test": {
+    "accuracy": 0.777111,
+    "confusion_matrix": {
+      "fn": 393,
+      "fp": 610,
+      "tn": 2894,
+      "tp": 603
+    },
+    "f1": 0.545948,
+    "precision": 0.497115,
+    "recall": 0.605422,
+    "roc_auc": 0.777198
+  },
+  "test_exposure": {
+    "declared": true,
+    "reference": "docs/evidence/fase-1.md#12-aquisicao-e-auditoria-do-dataset",
+    "statement": "O EDA historico calculou correlacoes feature-alvo e taxa de default por grupo sobre as 30.000 linhas do bruto, incluindo as linhas do conjunto de teste. A avaliacao final e uma reavaliacao sob protocolo congelado, nao uma avaliacao intocada. Ver docs/evidence/fase-1.md, secao 1.2."
+  },
+  "test_sha256": "70642cbcc74972400e63df96e78e1e07497f15b6b15fe278f232aaf18b725729",
+  "threshold": 0.5
+}
