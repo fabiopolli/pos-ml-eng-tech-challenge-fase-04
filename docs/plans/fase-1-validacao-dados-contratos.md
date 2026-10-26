@@ -236,6 +236,13 @@ razões inválidas ou IDs compartilhados falham. Regras removem apenas o previst
 controladas; referência e treino têm igualdade de conteúdo (verificada por hash e por teste). 1.7
 valida os resultados antes do treino.
 
+> **Executada e verificada em 2026-10-26** (revalidação independente: reexecução do zero com
+> saídas byte-a-byte idênticas, união das remoções conferida em fixture controlada, caminhos de
+> erro exercitados). Duas lacunas foram fechadas nesta passagem: a falha por IDs compartilhados
+> passou a ter cobertura de teste, e o relatório passou a registrar a impressão digital da
+> configuração, as razões de split e o arredondamento das taxas. Detalhes em
+> [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) ("1.3.1").
+
 ### 1.7 — Implementação do Data Contract
 
 **Dependências:** esquema e dados de 1.3; deve terminar antes de 1.4/1.5.

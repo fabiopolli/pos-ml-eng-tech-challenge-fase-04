@@ -1,3 +1,4 @@
+import copy
 import json
 
 import pandas as pd
@@ -8,6 +9,8 @@ from credit_monitoring.config import canonical_columns
 from credit_monitoring.data.loading import file_sha256, load_raw
 from credit_monitoring.data.prepare import (
     assert_eda_matches_raw,
+    audit_split_ids,
+    config_fingerprint,
     prepare_dataset,
     run_preparation,
     split_dataset,
@@ -183,3 +186,78 @@ def test_preparation_report_records_split_and_reference_evidence(tmp_path, confi
     }
     assert summary["reference"]["identical_to_train"] is True
     assert summary["reference"]["sha256"] == summary["reference"]["train_sha256"]
+
+
+def test_split_fails_when_ids_are_shared_between_splits(config, monkeypatch):
+    """The leakage guard must fire when a split hands back shared IDs."""
+    prepared, _ = _canonical(config)
+
+    def fake_split(frame, test_size, stratify=None, random_state=None):
+        half = len(frame) // 2
+        return frame.iloc[:half].copy(), frame.iloc[:half].copy()
+
+    monkeypatch.setattr("credit_monitoring.data.prepare.train_test_split", fake_split)
+
+    with pytest.raises(AssertionError, match="ID leakage between splits"):
+        split_dataset(prepared, config)
+
+
+def test_id_audit_reports_shared_ids_between_splits(config):
+    prepared, _ = _canonical(config)
+    splits = {
+        "train": prepared.iloc[:100].copy(),
+        "validation": prepared.iloc[:50].copy(),
+        "test": prepared.iloc[100:150].copy(),
+    }
+
+    audit = audit_split_ids(splits, config["dataset"]["id_column"])
+
+    assert audit["id_intersections"] == {"train&validation": 50}
+    assert audit["ids_unique_within_split"]["train"] is True
+    assert audit["sum_of_split_rows"] == 200
+    assert audit["unique_ids_across_splits"] == 150
+    assert audit["coverage_complete"] is False
+
+
+def test_config_fingerprint_is_stable_and_sensitive_to_used_params(config):
+    baseline = config_fingerprint(config)
+    assert baseline == config_fingerprint(config)
+
+    other_seed = copy.deepcopy(config)
+    other_seed["project"]["random_seed"] = 7
+    assert config_fingerprint(other_seed) != baseline
+
+    other_ratios = copy.deepcopy(config)
+    other_ratios["dataset"]["split"] = {"train": 0.6, "validation": 0.2, "test": 0.2}
+    assert config_fingerprint(other_ratios) != baseline
+
+    other_contract = copy.deepcopy(config)
+    other_contract["contract"]["age_max"] = 90
+    assert config_fingerprint(other_contract) != baseline
+
+    unrelated = copy.deepcopy(config)
+    unrelated["modeling"]["baseline"] = "random_forest"
+    assert config_fingerprint(unrelated) == baseline
+
+
+def test_preparation_report_binds_config_ratios_and_rounding(tmp_path, config):
+    raw_csv = write_raw_csv(tmp_path / "raw.csv", make_raw(config))
+    eda_summary = tmp_path / "eda_summary.json"
+    eda_summary.write_text(json.dumps({"raw_sha256": file_sha256(raw_csv)}), encoding="utf-8")
+
+    summary = run_preparation(
+        raw_csv,
+        config,
+        eda_summary_path=eda_summary,
+        processed_dir=tmp_path / "processed",
+        reference_dir=tmp_path / "reference",
+    )
+
+    assert summary["config"]["params"] == [
+        "project.random_seed",
+        "dataset",
+        "contract",
+    ]
+    assert summary["config"]["sha256"] == config_fingerprint(config)
+    assert summary["split_ratios"] == {"train": 0.7, "validation": 0.15, "test": 0.15}
+    assert summary["target_rate_rounding_decimals"] == 4

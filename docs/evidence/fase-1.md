@@ -166,7 +166,7 @@ Hashes conferidos na sessão: XLS `sha256 63c47faa…f38a44` / `md5 c0a9cb82…1
 | XLS adulterado (byte alterado no offset 1024) | `AcquisitionError: Source workbook md5 diverged: got 82b78cf83e6cfcfd2450e87b0db01e9a, expected c0a9cb828ded9c446574ede877bf1f6e` — exit 1, nenhum CSV produzido |
 | Planilha inexistente no workbook | `AcquisitionError: Sheet 'Sheet_inexistente' not found in default of credit card clients.xls; available sheets: ['Data']` |
 | CSV com layout incompatível | `ValueError: Raw dataset is missing columns: ['ID', 'LIMIT_BAL', …]` (`data/loading.py:37`) |
-| EDA gerado de outro bruto | `ValueError: EDA summary was generated from a different raw file. Re-run the EDA.` (`data/prepare.py:114`) — a preparação continua dependente da auditoria do **mesmo** hash, sem ciclo EDA supervisionado → split → EDA |
+| EDA gerado de outro bruto | `ValueError: EDA summary was generated from a different raw file. Re-run the EDA.` (`data/prepare.py:121`) — a preparação continua dependente da auditoria do **mesmo** hash, sem ciclo EDA supervisionado → split → EDA |
 
 **Auditoria estrutural e separação da exploração supervisionada.** `reports/eda/eda_summary.json`
 confere: `scope: "structural_audit_only"`, `supervised_analysis: false`, 30.000 linhas, 25
@@ -203,6 +203,79 @@ XLS para o DVC (`0e20346`), depois da última atualização da tabela de comando
 | Linhas úteis | 30.000 após limpeza ≥ 5.000 exigido pelo enunciado |
 | Referência | `data/reference/reference.csv` com SHA-256 **idêntico** ao de `train.csv` (igualdade verificada por hash e por teste) |
 | Transformações aprendidas | Nenhuma: o split é anterior a qualquer `scaler` ou ajuste de modelo |
+
+### 1.3.1 — Revalidação independente da preparação (2026-10-26, 12:05–12:25)
+
+A 1.3 já estava implementada; esta sessão reexecutou a etapa do zero e conferiu cada ação do
+plano de primeira mão. Duas lacunas reais foram encontradas e fechadas nesta passagem.
+
+**Reexecução do zero, com byte-a-byte.** Os cinco artefatos da etapa (`train.csv`,
+`validation.csv`, `test.csv`, `preparation_report.json` e `data/reference/reference.csv`) foram
+removidos do disco e reconstruídos:
+
+| Passo | Comando | Código de saída | Resultado |
+|---|---|---|---|
+| 1 | `rm` dos cinco artefatos de `data/processed/` e `data/reference/` | 0 | diretórios com apenas os `README.md` |
+| 2 | `uv run dvc repro prepare` | 0 | estágio restaurado do cache; `cmp` com as cópias anteriores: **idêntico** nos cinco arquivos |
+| 3 | `uv run dvc repro --force prepare` | 0 | reexecução real do `acquire → eda → prepare`; `Preparacao concluida: {'train': 21000, 'validation': 4500, 'test': 4500}` |
+| 4 | `sha256sum` dos artefatos antes e depois | 0 | **inalterado** — `train.csv` = `9ebd48b6…8c26`, `preparation_report.json` = `60fc337b…3a6` |
+| 5 | `uv run dvc status` | 0 | `Data and pipelines are up to date.` · `git status --short` sem saída |
+
+**União das remoções e sobreposição de motivos, em fixture controlada.** Fixture de 600 linhas
+com motivos sobrepostos (uma linha com `ID` duplicado **e** alvo inválido) e motivos isolados:
+
+| Métrica | Valor observado |
+|---|---|
+| `input_rows` / `output_rows` / `removed_rows` | 600 / 595 / 5 |
+| `entrada = saída + removidos únicos` | **True** |
+| Soma dos motivos por regra | 6 — **não** é a contagem de linhas removidas |
+| `rows_matching_multiple_reasons` | 1 (a linha com dois motivos é removida uma vez) |
+| Motivos preservados | nulo 1, `ID` duplicado 1, alvo inválido 1, `LIMIT_BAL ≤ 0` 1, `AGE` fora de 18–100 2; a linha com nulo não é recontada nas demais regras (`~null_mask & …`) |
+
+**Determinismo e sensibilidade à seed.** Mesma entrada e mesma configuração → partições
+idênticas; `random_state=7` → partição diferente. Na reexecução forcada do estágio DVC, os
+hashes de `train.csv`, `validation.csv` e `test.csv` não se alteraram: a mesma entrada e a mesma
+configuração produzem as mesmas partições.
+
+**Caminhos de erro, verificados por execução.**
+
+| Cenário induzido | Resultado observado |
+|---|---|
+| Razões de split inválidas (0,70/0,20/0,20) | `ValueError: Split ratios must sum to 1: {'train': 0.7, 'validation': 0.2, 'test': 0.2}` |
+| IDs compartilhados entre partições | `AssertionError: ID leakage between splits` (`data/prepare.py:111`) — **agora coberto por teste**, ver lacunas abaixo |
+| Hash do bruto divergente do EDA | `ValueError: EDA summary was generated from a different raw file. Re-run the EDA.` (`data/prepare.py:121`) |
+| EDA ausente | `FileNotFoundError: EDA summary not found: … Run the EDA first.` |
+
+**Fronteira do modelo.** O `train.csv` tem 25 colunas: `ID` + 19 features financeiras + 4 de
+demografia (`SEX`, `EDUCATION`, `MARRIAGE`, `AGE`) + alvo. A demografia e o `ID` ficam de fora da
+fronteira do modelo (`feature_columns` = 19 features financeiras, em `config.py:20`), e a seleção
+acontece em `models/train.py:190` — nunca na preparação. Nenhum `scaler` é ajustado antes do
+split: `StandardScaler` aparece apenas dentro do `Pipeline` ajustado no treino.
+
+**Lacunas encontradas e fechadas nesta passagem.**
+
+1. **Falha por IDs compartilhados sem cobertura de teste.** O guarda `AssertionError: ID leakage
+   between splits` existia, mas nenhum teste o exercitava — a aceitação do plano ("IDs
+   compartilhados falham") estava garantida apenas por leitura de código. Acrescentados
+   `test_split_fails_when_ids_are_shared_between_splits` (dublando `train_test_split` para
+   devolver partições com IDs repetidos) e `test_id_audit_reports_shared_ids_between_splits`
+   (interseção `train&validation` = 50 reportada e `coverage_complete` = False).
+2. **Relatório não vinculado à configuração.** O relatório registrava o hash do bruto e a seed,
+   mas não a configuração consumida nem o arredondamento das taxas — exigência das ações 3 e 5 do
+   plano. Acrescentados ao relatório: `config.sha256` (impressão digital SHA-256 de
+   `project.random_seed` + `dataset` + `contract`, o mesmo escopo dos parâmetros DVC do estágio),
+   `config.params`, `split_ratios` e `target_rate_rounding_decimals` (4). O fingerprint é estável
+   para entradas equivalentes e muda com seed, razões de split ou `contract` — coberto por
+   `test_config_fingerprint_is_stable_and_sensitive_to_used_params` e
+   `test_preparation_report_binds_config_ratios_and_rounding`.
+
+**Estado do repositório após a mudança.** `dvc.lock` atualizado (hash da dependência
+`prepare.py` e do novo `preparation_report.json`; os hashes de `train.csv`, `validation.csv` e
+`test.csv` **não** mudaram). `uv run dvc push` enviou 1 objeto novo
+(`data/processed/preparation_report.json`) e `uv run dvc status -c -r dagshub` voltou a
+responder *Cache and remote 'dagshub' are in sync*. Suíte: `uv run pytest -q` → 0, **74 passed**
+(70 anteriores + 4 novos); `uv run ruff check .` → 0, *All checks passed*;
+`uv run ruff format --check .` → 0, *53 files already formatted*.
 
 ## 1.4 — Treinamento da Regressão Logística
 

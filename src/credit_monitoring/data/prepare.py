@@ -1,6 +1,7 @@
 """Cleaning and stratified splitting of the credit default dataset."""
 
 import argparse
+import hashlib
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -122,6 +123,23 @@ def assert_eda_matches_raw(summary_path: Path, raw_sha256: str) -> None:
 
 MINIMUM_USEFUL_ROWS = 5000
 REFERENCE_FILE = "reference.csv"
+TARGET_RATE_DECIMALS = 4
+PREPARATION_CONFIG_PARAMS = ("project.random_seed", "dataset", "contract")
+
+
+def config_fingerprint(config: dict[str, Any]) -> str:
+    """SHA-256 over the configuration actually consumed by the preparation.
+
+    The scope matches the DVC parameters of the ``prepare`` stage, so the
+    report cannot drift from the configuration that produced the splits.
+    """
+    payload = {
+        "project.random_seed": config["project"]["random_seed"],
+        "dataset": config["dataset"],
+        "contract": config["contract"],
+    }
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def audit_split_ids(splits: dict[str, pd.DataFrame], id_column: str) -> dict[str, Any]:
@@ -178,6 +196,12 @@ def run_preparation(
     summary = {
         "raw_sha256": raw_sha256,
         "random_seed": config["project"]["random_seed"],
+        "config": {
+            "params": list(PREPARATION_CONFIG_PARAMS),
+            "sha256": config_fingerprint(config),
+        },
+        "split_ratios": {name: float(config["dataset"]["split"][name]) for name in SPLIT_NAMES},
+        "target_rate_rounding_decimals": TARGET_RATE_DECIMALS,
         "cleaning": asdict(report),
         "cleaning_note": (
             "Nenhuma linha foi removida no dado real: as cinco regras de limpeza nao "
@@ -198,7 +222,7 @@ def run_preparation(
         "splits": {
             name: {
                 "rows": len(frame),
-                "target_rate": round(float(frame[target].mean()), 4),
+                "target_rate": round(float(frame[target].mean()), TARGET_RATE_DECIMALS),
             }
             for name, frame in splits.items()
         },
