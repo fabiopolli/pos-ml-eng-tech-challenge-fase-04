@@ -295,7 +295,10 @@ def run_training(
     max_difference = float(abs(before - after).max())
     reload_check = {
         "tolerance": RELOAD_TOLERANCE,
-        "max_abs_probability_difference": max_difference,
+        # Rounded to the tolerance precision: the parallel prediction of the forest
+        # accumulates in a non-deterministic order, so the raw float difference varies
+        # between runs while staying far below the tolerance.
+        "max_abs_probability_difference": round(max_difference, 12),
         "passed": bool(max_difference <= RELOAD_TOLERANCE),
     }
     if not reload_check["passed"]:
