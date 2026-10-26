@@ -68,7 +68,10 @@ Verificado por execução local (uv 0.12.18, Python 3.12.14) e leitura de códig
 6. **DagsHub inacessível.** Sem `dvc[s3]`, sem remote e sem credenciais, o aceite de recuperação
    de 1.1/1.6 e o marco M1 permanecem abertos.
 
-### 2.3 Decisões que dependem da equipe (não do agente)
+### 2.3 Decisões do executor do plano (não do agente)
+
+Todas as três foram decididas pelo executor do plano em 2026-10-26; a tabela é registro do
+diagnóstico, não pendência em aberto.
 
 | Decisão | Impacto se não decidida |
 |---|---|

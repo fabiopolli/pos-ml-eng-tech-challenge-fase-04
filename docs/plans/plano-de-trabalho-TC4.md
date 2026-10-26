@@ -459,9 +459,12 @@ o trabalho de outros integrantes.
 
 O agente pode inspecionar, implementar e testar localmente dentro da tarefa autorizada. Commit,
 push, PR, publicação de objetos DVC/vídeo, criação de recursos externos e exclusão de versões
-dependem da autorização aplicável; o plano não concede essas permissões. Se uma dependência
-externa bloquear um aceite, continuar apenas trabalho local independente e relatar o bloqueio.
-Não declarar o marco completo sem a evidência faltante.
+dependem da autorização aplicável; o plano não concede essas permissões. **Quem dá essa
+autorização é o executor do plano — o operador do projeto** (neste trabalho, Bill Kopp). Não
+existe etapa de aprovação por outros integrantes, revisão por par nem registro de atribuição por
+ID: nenhuma execução fica bloqueada por isso, e o aceite técnico verificado encerra o ID. Se uma
+dependência externa bloquear um aceite, continuar apenas trabalho local independente e relatar o
+bloqueio. Não declarar o marco completo sem a evidência faltante.
 
 ### Ciclo de execução
 
