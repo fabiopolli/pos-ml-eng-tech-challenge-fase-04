@@ -12,6 +12,19 @@ páginas 2–7. As quatro etapas e os pesos são oficiais; quatro semanas, 28 en
 MLflow + Streamlit e DVC/DagsHub são escolhas da equipe. O status operacional fica no
 [`docs/CHECKLIST.md`](../CHECKLIST.md), sem confundir existência de código com aceite.
 
+### Planos de execução por etapa
+
+Os documentos abaixo expandem os mesmos 28 IDs para execução agêntica incremental. Este plano
+geral define escopo e aceites; os planos de fase detalham como implementá-los e verificá-los.
+Nenhum deles declara as entregas realizadas. Todos usam o [protocolo comum](#11-protocolo-de-execução-agêntica).
+
+| Etapa | Plano detalhado | IDs | Marco de saída |
+|---|---|---|---|
+| 1 — Validação de Dados e Contratos | [Execução da fase 1](fase-1-validacao-dados-contratos.md) | 1.1–1.7 | M1: contrato, modelo congelado e recuperação DVC |
+| 2 — Simulação e Detecção de Drift | [Execução da fase 2](fase-2-simulacao-deteccao-drift.md) | 2.1–2.7 | M2: controle e drift reproduzíveis com relatório |
+| 3 — Observabilidade de Pipelines e Modelos | [Execução da fase 3](fase-3-observabilidade-pipelines-modelos.md) | 3.1–3.7 | M3: quatro cenários rastreáveis no MLflow/Streamlit |
+| 4 — Governança e Apresentação | [Execução da fase 4](fase-4-governanca-apresentacao.md) | 4.1–4.7 | M4: evidências consolidadas, reprodução e vídeo |
+
 ---
 
 ## 1. Objetivo do projeto
@@ -432,3 +445,79 @@ Ao final das quatro semanas, o grupo deverá possuir:
 8. Ponteiros e metadados DVC no GitHub, com datasets e modelos aprovados recuperáveis do DagsHub Storage.
 
 **Princípio orientador:** implementar somente o necessário para demonstrar, de forma clara e reproduzível, os requisitos de validação, detecção de drift, observabilidade e governança definidos no Tech Challenge.
+
+## 11. Protocolo de execução agêntica
+
+### Unidade de trabalho e autonomia
+
+Executar um ID por vez, ou um recorte verificável dele, com um agente executor e revisão humana
+atribuída pela equipe. A solicitação atual de detalhamento é de Bill Kopp; os responsáveis e
+revisores da implementação continuam a confirmar. Os planos não pressupõem subagentes,
+execução paralela automática ou nova plataforma de orquestração.
+
+Antes de editar, ler `AGENTS.md`, este plano, o plano da fase, o checklist e a arquitetura;
+inspecionar branch, diff, configuração, testes e artefatos atuais. Reaproveitar implementação
+existente após verificá-la. Trabalhar em branch `<tipo>/<integrante>/<descricao-curta>`, respeitar
+o trabalho de outros integrantes e confirmar o responsável do ID no início da execução.
+
+O agente pode inspecionar, implementar e testar localmente dentro da tarefa autorizada. Commit,
+push, PR, publicação de objetos DVC/vídeo, criação de recursos externos e exclusão de versões
+dependem da autorização aplicável; o plano não concede essas permissões. Se uma dependência
+externa bloquear um aceite, continuar apenas trabalho local independente e relatar o bloqueio.
+Não declarar o marco completo sem a evidência faltante.
+
+### Ciclo de execução
+
+1. **Reconstruir:** verificar entradas, hashes, versão do ambiente, dependências e estado real.
+2. **Delimitar:** registrar ID, objetivo, arquivos, responsável/revisor e teste de aceite antes
+   de implementar; decompor mudanças grandes em recortes que preservem um caminho funcional.
+3. **Executar:** fazer a menor mudança que satisfaça o recorte, com configuração explícita e
+   efeitos locais previsíveis. Não sobrescrever lotes, resultados ou decisões de outra execução.
+4. **Verificar:** executar teste proporcional e controle negativo quando o requisito envolve
+   bloqueio/detecção; registrar comando, versão, código de saída e evidência, inclusive falhas.
+5. **Revisar:** inspecionar diff, privacidade e consistência entre código, configuração e docs;
+   encaminhar para revisão com limitações e dependências ainda abertas.
+6. **Transferir:** informar o que mudou, o que passou, o que não foi executado e o próximo ID.
+   Atualizar o checklist apenas quando status, aceite, responsável ou evidência realmente mudar.
+
+Usar `Pendente`, `Em andamento`, `Em revisão` e `Concluído` como no checklist. Registrar bloqueio
+como motivo junto ao status existente, sem inventar conclusão. Aceite técnico verificado segue
+para revisão; somente registrar conclusão após a revisão definida pela equipe.
+
+### Contrato de entrada e saída da tarefa
+
+Usar este modelo no pedido ao agente e no handoff; campos não verificados ficam explicitamente
+pendentes. Datas e estimativas dependem da disponibilidade confirmada, sem compromissos fictícios.
+
+```text
+ID / recorte:
+Objetivo e limite da mudança:
+Responsável / revisor / prazo confirmado ou pendente:
+Dependências aceitas e entradas (caminho + hash/versão):
+Branch / SHA de base / alterações preexistentes relevantes:
+Arquivos permitidos e interfaces a preservar:
+Passos e teste de aceite (resultado esperado antes de executar):
+Decisões/propostas ainda não aprovadas:
+Resultado observado / comandos / códigos de saída / ambiente:
+Evidências (arquivo, SHA Git, hash DVC, run_id quando aplicável):
+Bloqueios, testes não executados e limitações:
+Próximo recorte e condição para retomada:
+```
+
+Como convenção proposta, registrar evidências textuais agregadas em `docs/evidence/fase-N.md`,
+com seção por ID, e indexá-las na entrega 4.7. Esses arquivos ainda serão criados durante a
+implementação. Não copiar linhas de clientes, segredos ou resultados fictícios para o registro.
+Dados/modelos e relatórios autorizados ficam no DVC; logs, banco e artefatos MLflow ficam locais.
+Referenciar seus hashes/IDs no registro textual em vez de adicioná-los diretamente ao Git.
+
+### Retomada e critérios de interrupção
+
+Ao retomar, conferir o estado atual: não repetir treino, teste final ou sincronização só porque
+uma conversa anterior os propôs. Reusar artefatos compatíveis por hash e verificar o que falta.
+Se código/configuração/dados mudaram, invalidar as evidências dependentes e explicar quais
+precisam de nova execução. Não reutilizar resultados de versões diferentes como um único aceite.
+
+Interromper o caminho dependente quando houver vazamento de dados, contrato burlado, origem
+incompatível, permissão externa ausente ou resultado divergente do protocolo. Registrar causa,
+evidência e decisão necessária. Um experimento sem detecção esperada é inconclusivo/falho para
+o aceite: preservar o resultado e versionar um novo desenho, sem ajustar até passar em silêncio.

@@ -35,6 +35,9 @@ O plano detalhado, com 28 entregas distribuídas em quatro semanas, está em
 [`docs/plans/plano-de-trabalho-TC4.md`](docs/plans/plano-de-trabalho-TC4.md). O enunciado oficial
 está em [`docs/plans/MLET - Tech Challenge - Fase 4.pdf`](docs/plans/MLET%20-%20Tech%20Challenge%20-%20Fase%204.pdf).
 
+O plano geral também indexa os [quatro planos de execução agêntica](docs/plans/plano-de-trabalho-TC4.md#planos-de-execução-por-etapa),
+com pacotes por ID, dependências, interfaces, verificações e transferência entre fases.
+
 ## Critérios oficiais
 
 | Critério | Peso | Evidência mínima esperada |
