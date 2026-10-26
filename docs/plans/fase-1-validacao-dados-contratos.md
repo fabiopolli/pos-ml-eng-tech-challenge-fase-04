@@ -268,6 +268,14 @@ nulo, coluna ausente, tipo incompatível e alvo inválido falham. Testar limites
 17/101 rejeitados; inferência sem alvo passa. Spy/mock de `fit`/predição comprova zero chamadas
 em falha. Se várias regras falharem, o lote é contado uma só vez como rejeitado.
 
+> **Executada e verificada em 2026-10-26** (revalidação independente: 30/30 checagens vivas
+> sobre o `train.csv` real; o código de produção do contrato não mudou). Duas lacunas de **prova**
+> foram fechadas: o lado da predição do spy (zero chamadas quando o contrato falha) e a prova de
+> que o **lote integral** é validado antes de selecionar as 19 entradas do modelo. Cada teste
+> novo foi validado por mutação do código de produção. Observações registradas sem mudança de
+> comportamento: lote vazio é aceito, valores do alvo estão no código e não no bloco
+> `contract:`. Detalhes em [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) ("1.7.1").
+
 ### 1.4 — Treinamento da Regressão Logística
 
 **Dependências:** 1.3 e 1.7 aceitos; exploração supervisionada restrita ao treino.

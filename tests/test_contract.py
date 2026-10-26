@@ -30,6 +30,26 @@ def test_valid_batch_is_accepted(valid_batch, config):
     assert len(validated) == len(valid_batch)
 
 
+def test_validated_batch_keeps_every_canonical_column(valid_batch, config):
+    """The contract validates the integral batch, not a projected subset."""
+    validated = validate_batch(valid_batch, config)
+    assert list(validated.columns) == expected_columns(config, labeled=True)
+    assert len(validated) == len(valid_batch)
+
+
+def test_labeled_and_inference_schemas_share_the_same_feature_definition(config):
+    from credit_monitoring.config import feature_columns
+    from credit_monitoring.contracts.schema import build_inference_schema, build_labeled_schema
+
+    labeled = build_labeled_schema(config)
+    inference = build_inference_schema(config)
+    target = config["dataset"]["canonical_target"]
+    assert set(inference.columns) <= set(labeled.columns)
+    assert set(labeled.columns) - set(inference.columns) == {target}
+    assert set(feature_columns(config)) <= set(inference.columns)
+    assert target not in inference.columns
+
+
 def test_inference_batch_without_target_is_accepted(valid_batch, config):
     inference = valid_batch.drop(columns=["default_payment_next_month"])
     validated = validate_batch(inference, config, labeled=False)

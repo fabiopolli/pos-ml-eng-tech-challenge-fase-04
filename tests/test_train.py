@@ -169,6 +169,38 @@ def test_contract_violation_stops_the_fit(tmp_path, config, processed_dir, monke
     assert calls == []
 
 
+def test_whole_batch_is_validated_before_the_model_inputs_are_selected(
+    tmp_path, config, processed_dir, monkeypatch
+):
+    """The contract gates the whole batch, not only the columns fed to the model.
+
+    ``SEX`` is a governance attribute: it is not one of the 19 model inputs.
+    A batch where it is missing must still abort the training, which proves the
+    validation happens on the integral batch before the feature selection.
+    """
+    assert "SEX" not in feature_columns(config)
+
+    invalid = pd.read_csv(processed_dir / "train.csv").drop(columns=["SEX"])
+    invalid.to_csv(processed_dir / "train.csv", index=False)
+
+    calls = []
+    from sklearn.pipeline import Pipeline
+
+    original_fit = Pipeline.fit
+
+    def counting_fit(self, *args, **kwargs):
+        calls.append(self)
+        return original_fit(self, *args, **kwargs)
+
+    monkeypatch.setattr(Pipeline, "fit", counting_fit)
+
+    with pytest.raises(ContractViolation) as error:
+        _train(tmp_path, config, processed_dir, "whole-batch")
+
+    assert calls == []
+    assert "SEX" in str(error.value)
+
+
 def test_metadata_is_complete(tmp_path, config, processed_dir):
     _train(tmp_path, config, processed_dir, "meta")
     metadata = json.loads(

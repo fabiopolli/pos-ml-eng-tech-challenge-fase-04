@@ -109,6 +109,42 @@ def test_evaluation_blocks_an_invalid_test_batch(tmp_path, config, processed_dir
         )
 
 
+def test_contract_violation_stops_the_prediction(
+    tmp_path, config, processed_dir, frozen, monkeypatch
+):
+    """A violated contract must abort before any prediction is made.
+
+    The plan requires a spy/mock of ``fit``/prediction to show zero calls when
+    the contract fails: the training path is already covered by
+    ``test_contract_violation_stops_the_fit``; this is the prediction side.
+    """
+    models_dir, reports_dir = frozen
+    invalid = pd.read_csv(processed_dir / "test.csv")
+    invalid.loc[invalid.index[0], "LIMIT_BAL"] = 0
+    invalid.to_csv(processed_dir / "test.csv", index=False)
+
+    calls = []
+    from sklearn.pipeline import Pipeline
+
+    original_predict_proba = Pipeline.predict_proba
+
+    def counting_predict_proba(self, *args, **kwargs):
+        calls.append(self)
+        return original_predict_proba(self, *args, **kwargs)
+
+    monkeypatch.setattr(Pipeline, "predict_proba", counting_predict_proba)
+
+    with pytest.raises(ContractViolation):
+        run_evaluation(
+            config,
+            processed_dir=processed_dir,
+            models_dir=models_dir,
+            reports_dir=reports_dir,
+        )
+
+    assert calls == []
+
+
 def test_evaluation_is_reproducible(tmp_path, config, processed_dir, frozen):
     models_dir, reports_dir = frozen
     first = run_evaluation(

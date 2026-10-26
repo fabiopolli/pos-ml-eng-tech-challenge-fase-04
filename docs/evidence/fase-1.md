@@ -336,6 +336,85 @@ Exemplo de diagnóstico (lote com 21.000 linhas e cinco violações):
 }
 ```
 
+### 1.7.1 — Revalidação independente do contrato (2026-10-26, 12:35–13:00)
+
+A 1.7 já estava implementada e coerente com as cinco ações do plano. Esta sessão reexecutou
+cada ação e cada item de aceite contra o código real, sobre o `train.csv` verdadeiro
+(21.000 linhas, 25 colunas), e encontrou **duas lacunas de prova** — não de comportamento.
+
+**Verificação viva: 30/30 checagens passaram.**
+
+| Verificação | Resultado observado |
+|---|---|
+| CLI com lote válido | `exit=0`, `status=accepted`, `rows=21000`, `contract_version=1.0.0` |
+| CLI com lote de inferência (sem alvo) | `exit=0` |
+| CLI com arquivo ilegível | `exit=1`, mensagem `Erro ao ler o lote` no `stderr` |
+| Duplicidade de ID | rejeitado — `require_unique_id[ID]=2` |
+| `LIMIT_BAL ≤ 0` | rejeitado — `require_positive_limit_bal[LIMIT_BAL]=1` |
+| `AGE` 17 e `AGE` 101 | rejeitados — `age_out_of_range[AGE]=1` |
+| Nulo em feature (`PAY_AMT1`) | rejeitado — `reject_null_features[PAY_AMT1]=1` |
+| Coluna ausente (`BILL_AMT3`) | rejeitado — `missing_column[BILL_AMT3]=1` |
+| Tipo incompatível (`PAY_AMT2`) | rejeitado — `coerce_dtype[PAY_AMT2]=1` + `dtype[PAY_AMT2]=1` |
+| Alvo inválido (7) | rejeitado — `invalid_target[default_payment_next_month]=1` |
+| Limites `AGE` 18 e 100 | **aceitos** (inclusivos) |
+| Fatura negativa, `EDUCATION=0`, `MARRIAGE=0`, `PAY_0=-2` | **aceitos** — proibidos por conveniência, não por defeito |
+| Inferência sem alvo | **aceita** |
+| Lote integral | a validação devolve as 21.000 linhas e as 25 colunas canônicas |
+| Várias regras quebrando | `rejected_rows=21000` (o lote inteiro, contado **uma vez**) com 3 regras quebradas |
+| Diagnóstico | só regra, coluna e contagem; nenhum valor de cliente |
+
+**Lacunas fechadas nesta passagem.** Ambas eram critérios de aceite do plano garantidos apenas
+por leitura de código, sem prova automatizada.
+
+1. **Zero chamadas de predição em falha — sem teste.** O plano exige *"Spy/mock de `fit`/predição
+   comprova zero chamadas em falha"*. O lado do `fit` tinha prova
+   (`test_contract_violation_stops_the_fit`), o lado da **predição** não tinha nenhuma: a
+   avaliação apenas afirmava que a exceção era levantada. Acrescentado
+   `tests/test_evaluate.py::test_contract_violation_stops_the_prediction`, com spy de
+   `Pipeline.predict_proba` e asserção de **zero chamadas**.
+2. **Lote integral validado antes de selecionar as entradas do modelo — sem teste.** A ação 3 do
+   plano exige validar o lote integral antes de escolher as 19 entradas do modelo; nada
+   provava isso no caminho do treino. Acrescentado
+   `tests/test_train.py::test_whole_batch_is_validated_before_the_model_inputs_are_selected`,
+   que remove `SEX` — atributo de **governança**, fora das 19 features do modelo — e prova que o
+   treino aborta com `ContractViolation` **antes de qualquer `fit`** (`calls == []`).
+
+**Prova de que os testes novos têm dentes (mutação).** Cada teste novo foi confrontado com uma
+mutação proposital do código de produção, e o teste falhou como deveria:
+
+| Mutação aplicada | Teste que falhou |
+|---|---|
+| `evaluate.py` passa a prever sem validar o contrato | `test_contract_violation_stops_the_prediction` — `DID NOT RAISE ContractViolation` |
+| `schema.py` deixa de exigir as colunas de governança | `test_whole_batch_is_validated_before_the_model_inputs_are_selected` — `DID NOT RAISE ContractViolation` |
+| `validation.py` devolve um subconjunto das colunas | `test_validated_batch_keeps_every_canonical_column` — `missing_column[...]` |
+
+As mutações foram revertidas imediatamente; `git status` do código de produção ficou limpo.
+
+**Testes estruturais acrescentados.** A ação 1 do plano exige "mesma definição das features"
+entre os esquemas rotulado e de inferência, sem prova estrutural: acrescentados
+`test_labeled_and_inference_schemas_share_the_same_feature_definition` (o esquema rotulado é o
+de inferência mais o alvo) e `test_validated_batch_keeps_every_canonical_column` (a validação
+devolve o lote integral, não uma projeção).
+
+**Estado do repositório.** O código de produção do contrato **não mudou** — nenhuma linha de
+`src/credit_monitoring/contracts/`, `models/train.py` ou `models/evaluate.py` foi tocada. Como
+`src/credit_monitoring/contracts` é dependência declarada dos estágios `train` e `evaluate` no
+`dvc.yaml`, `uv run dvc status` permanece *Data and pipelines are up to date.* e nada precisa ir
+ao remote. Suíte: `uv run pytest -q` → 0, **78 passed** (74 anteriores + 4 novos);
+`uv run ruff check .` → 0, *All checks passed*; `uv run ruff format --check .` → 0,
+*53 files already formatted*.
+
+**Observações registradas, sem mudança de comportamento** (decidido não alterar o contrato no
+meio da fase; o que muda a decisão está explicitado):
+
+| Observação | Decisão e o que a mudaria |
+|---|---|
+| Um lote **vazio** (0 linhas) é **aceito** — o contrato valida esquema e semântica, e um lote sem linhas é esquema-válido | Mantido como está. Uma chave nova no bloco `contract:` mudaria a impressão digital da configuração e cascatearia para o relatório da 1.3, o `dvc.lock`, os metadados do modelo congelado e as métricas de teste. Se a fase 2 precisar rejeitar lotes vazios, a regra deve entrar como `require_non_empty_batch` no bloco `contract:`, com reexecução completa do pipeline e nova evidência de aceite |
+| Os valores do alvo `{0, 1}` estão no código (`TARGET_VALUES`, `contracts/schema.py`), não no bloco `contract:` | Consistente com o plano: a ação 2 mapeia 1:1 o bloco `contract:` para as cinco regras rígidas enumeradas, e a ação 1 define o alvo binário no nível do esquema. Não é configurável; torná-lo configurável exigiria mudança de configuração e reexecução do pipeline |
+| Atributos de governança sem regra de domínio (`SEX=99`) são **aceitos**; `AGE` tem a faixa 18–100 explícita | Por projeto, conforme a ação 2 ("não proibir … por conveniência") e a regra explícita sobre `AGE` |
+| Colunas extras no lote são aceitas (`strict=False`) | Um lote operacional pode trazer colunas adicionais; o contrato exige presença e tipo do que conhece |
+| Com `coerce=True`, um alvo textual `"1"` é convertido em 1,0 e aceito; "alvo inválido" só é rejeitado quando o valor fica fora de `{0, 1}` após a conversão | Registrado para a fase 2: um lote com alvo textual passa a ser pontuado como válido no esquema de inferência, onde o alvo sequer é validado |
+
 ## 1.6 — Avaliação, seleção e versionamento
 
 **Recorte local — implementado e verificado. Recorte remoto — bloqueado.**
