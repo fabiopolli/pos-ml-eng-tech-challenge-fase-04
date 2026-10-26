@@ -168,8 +168,16 @@ aponta ao repositório correto sem segredos no diff; `uv run dvc status` sem est
 após a regularização. Registrar recuperação do bruto quando autorizada e completar a prova dos
 artefatos finais em 1.6. Sem uv/acesso, registrar o bloqueio.
 
-### 1.2 — Aquisição e auditoria do dataset
+> **Executada e revalidada por execução em 2026-10-26** (registro de aceite em
+> [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) §1.1 e **§1.1.1**): instalação travada,
+> configuração do remote, ausência de segredos no diff e no histórico, recuperação remota do zero
+> em clone novo do GitHub sem cache e inferência sobre o modelo recuperado. A revalidação
+> **achou um item não executado**: a ação 2 da 1.1a (reavaliar `ucimlrepo`, `evidently`, `mlflow` e
+> `streamlit` como dependências de fases futuras) — as quatro seguem declaradas como dependências
+> de runtime, sem uso no código da fase 1. Registrado em "Pendências que exigem a equipe" na
+> evidência, aguardando decisão do executor do plano.
 
+### 1.2 — Aquisição e auditoria do dataset
 **Dependências:** ambiente local de 1.1a; origem do arquivo identificável.
 
 **Ações do agente:**

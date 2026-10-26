@@ -30,7 +30,7 @@ registrado.
 
 | Seção | Entrega | Prova registrada | Grau |
 |---|---|---|---|
-| §1.1 | Configuração do repositório | Execução original + recuperação remota provada (§1.6.1) | Execução original |
+| §1.1 | Configuração do repositório | **§1.1.1 (revalidação por execução)** + recuperação remota provada (§1.6.1) | Execução revalidada |
 | §1.2 | Aquisição e auditoria do dataset | §1.2.1 (exposição declarada) + **§1.2.2 (revalidação por execução)** | Execução revalidada |
 | §1.3 | Preparação dos dados | **§1.3.1 (revalidação por execução)** | Execução revalidada |
 | §1.4 | Treinamento da Regressão Logística | **§1.4.1 (revalidação por execução)** | Execução revalidada |
@@ -63,7 +63,7 @@ repositório.
 | `uv run dvc push -r dagshub` | 0 | 25 objetos enviados |
 | `git diff --check` | 0 | sem saída |
 
-### Verificações mais recentes (2026-10-26, após a revalidação de 1.4/1.5/1.6 e a persistência dos candidatos)
+### Verificações mais recentes (2026-10-26, após a revalidação de 1.1, 1.4, 1.5, 1.6 e a persistência dos candidatos)
 
 | Comando | Código de saída | Resultado |
 |---|---|---|
@@ -75,6 +75,8 @@ repositório.
 | `uv run dvc status` | 0 | `Data and pipelines are up to date.` |
 | `uv run dvc status -c -r dagshub` | 0 | `Cache and remote 'dagshub' are in sync.` |
 | `uv run dvc repro -f` (clone isolado) | 0 | 6 estágios; artefatos de candidato reproduzidos byte a byte, metadados diferindo apenas em `git_sha` |
+| `uv sync --dev --locked` (clone novo do GitHub) | 0 | instalação travada; `dvc_s3` e `xlrd` importáveis |
+| `uv run dvc pull -r dagshub` (clone sem cache) | 0 | 27 arquivos buscados, 25 adicionados; hashes conferidos; inferência sobre o modelo recuperado igual à publicada |
 | `git diff --check` | 0 | sem saída |
 
 ## Hashes dos artefatos
@@ -142,6 +144,32 @@ Diagnóstico do acesso (o `.env` inicial não autenticava):
 | `uv run dvc status -c -r dagshub` | `Cache and remote 'dagshub' are in sync.` |
 | Segredos no repositório | Nenhum: `.env` e `.dvc/config.local` verificados como ignorados pelo Git; `.dvc/config` versionado contém apenas URL e endpoint |
 | Quais saídas podem ser compartilhadas | Enviado o conjunto de objetos do DVC: o dataset é público (UCI 350, CC BY 4.0) e o repositório é privado. A chave de distribuição do repositório na DagsHub não foi alterada por esta execução |
+
+### 1.1.1 — Revalidação independente da configuração do repositório (2026-10-26, 14:40–15:00)
+
+A 1.1 era a única entrega da fase que ainda se apoiava na execução original. Esta passagem
+reexecutou a configuração em um **clone novo do GitHub, sem cache DVC**, e provou o acesso remoto
+do zero.
+
+| Verificação | Resultado observado |
+|---|---|
+| Ambiente | `git clone --branch fase-1-bill https://github.com/…` → clone novo, `.dvc/cache` **inexistente**; `uv sync --dev --locked` → exit 0; `dvc_s3`, `xlrd` e o stack de runtime importam |
+| Configuração do remote | `scripts/configure_dagshub.sh <.env>` → remote `dagshub` = `s3://dvc`, endpoint `https://dagshub.com/deniscelclaro/pos-ml-eng-tech-challenge-fase-04.s3`; credenciais só em `.dvc/config.local` |
+| Segredos | `.env` e `.dvc/config.local` são ignorados pelo Git e não estão versionados; o `.dvc/config` versionado **e todo o seu histórico** não contêm `access_key_id`, `secret_access_key` nem token |
+| Recuperação remota do zero | `uv run dvc pull -r dagshub` → **27 arquivos buscados, 25 adicionados**; `uv run dvc status` → *Data and pipelines are up to date.*; `uv run dvc status -c -r dagshub` → *Cache and remote 'dagshub' are in sync.* |
+| Integridade dos artefatos recuperados | todos os hashes conferem com os publicados: XLS `63c47faa…` (md5 `c0a9cb82…`), bruto `1fc7fe04…`, treino `9ebd48b6…`, validação `e9109675…`, teste `70642cbc…`, referência `9ebd48b6…`, modelo `a5a4a740…`, baseline `06fb1851…` e candidato selecionado `a5a4a740…` |
+| `dvc.lock` | idêntico ao do projeto de origem |
+| Inferência sobre o modelo recuperado | ROC-AUC **0,777198** e accuracy **0,777111** — iguais aos publicados |
+| Regressão do `.dvcignore` | com `__pycache__` criado dentro de `src/credit_monitoring/contracts`, `dvc status` continua limpo e o `dvc.lock` não muda — o defeito encontrado em §1.6.1 permanece corrigido |
+| CI | `uv sync --dev --locked` → `ruff format --check` → `ruff check` → `pytest`; a CI **não** valida o `dvc.lock` (limitação já registrada) |
+
+**Achado: a ação 2 da 1.1a (reavaliar as dependências de fases futuras) não foi executada.**
+`ucimlrepo`, `evidently`, `mlflow` e `streamlit` seguem declaradas como dependências de **runtime**
+em `pyproject.toml`, apesar de nenhuma ser importada pelo código da fase 1 (`streamlit` aparece
+apenas em `dashboard/app.py`, a casca do dashboard que é entrega da fase 3). O plano registra o
+motivo da reavaliação: *"mantê-las declaradas sem uso amplia a superfície do ambiente e confunde
+'instalado' com 'implementado'"*. O item está registrado em "Pendências que exigem a equipe", com a
+recomendação de movê-las para grupos opcionais por fase.
 
 ## 1.2 — Aquisição e auditoria do dataset
 
@@ -736,6 +764,12 @@ precisam andar juntos).
 5. **Revalidação independente de 1.4, 1.5 e 1.6 (caminho local)** — **concluída em 2026-10-26**:
    §1.4.1, §1.5.1 e §1.6.2, executadas em clone isolado. As sete entregas da fase 1 têm agora
    registro de aceite com prova de execução, e não apenas leitura de código.
+6. **Dependências de fases futuras ainda declaradas como runtime** — **pendente de decisão**:
+   `ucimlrepo`, `evidently`, `mlflow` e `streamlit` seguem em `[project.dependencies]`, sem uso no
+   código da fase 1 (achado da revalidação da 1.1, §1.1.1). O plano pede a reavaliação: movê-las
+   para grupos opcionais por fase reduz a superfície do ambiente e separa "instalado" de
+   "implementado". Impacto: `uv.lock` muda e as fases 3 e 4 passam a instalar os extras
+   correspondentes; nenhum artefato DVC é afetado. Requer decisão do executor do plano.
 
 ## Limitações conhecidas desta execução
 
