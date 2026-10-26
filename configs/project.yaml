@@ -12,6 +12,22 @@ dataset:
   target_column_raw: default payment next month
   canonical_target: default_payment_next_month
   id_column: ID
+  acquisition:
+    xls_file: default of credit card clients.xls
+    sheet: Data
+    header_row: 1
+    sep: ";"
+    lineterminator: "\r\n"
+    placeholder_columns: 23
+    expected_xls_md5: c0a9cb828ded9c446574ede877bf1f6e
+    expected_csv_md5: a6ee086d1eafba5566f666b3ff2ed2c9
+    expected_csv_sha256: 1fc7fe04822413cf48d0f5ca974cbe47061b21ea10fa1d114bb56b8feac79358
+    source_url: https://archive.ics.uci.edu/dataset/350/default+of+credit+card+clients
+    doi: 10.24432/C55S3H
+    license: CC BY 4.0
+    citation: >-
+      Yeh, I. (2009). Default of Credit Card Clients [Dataset]. UCI Machine Learning
+      Repository. https://doi.org/10.24432/C55S3H
   split:
     train: 0.70
     validation: 0.15

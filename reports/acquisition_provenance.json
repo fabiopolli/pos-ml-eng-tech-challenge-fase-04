@@ -1,0 +1,32 @@
+{
+  "conversion": {
+    "encoding": "utf-8 with BOM",
+    "header_row": 1,
+    "index": false,
+    "lineterminator": "\r\n",
+    "placeholder_row": ";X1;X2;X3;X4;X5;X6;X7;X8;X9;X10;X11;X12;X13;X14;X15;X16;X17;X18;X19;X20;X21;X22;X23;Y",
+    "script": "credit_monitoring.data.acquire",
+    "sep": ";",
+    "sheet": "Data"
+  },
+  "output": {
+    "columns": 25,
+    "file": "default_of_credit_card_clients.csv",
+    "md5": "a6ee086d1eafba5566f666b3ff2ed2c9",
+    "rows": 30000,
+    "sha256": "1fc7fe04822413cf48d0f5ca974cbe47061b21ea10fa1d114bb56b8feac79358",
+    "size_bytes": 2897299
+  },
+  "source": {
+    "citation": "Yeh, I. (2009). Default of Credit Card Clients [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C55S3H",
+    "dataset_id": 350,
+    "doi": "10.24432/C55S3H",
+    "file": "default of credit card clients.xls",
+    "license": "CC BY 4.0",
+    "md5": "c0a9cb828ded9c446574ede877bf1f6e",
+    "repository": "UCI Machine Learning Repository",
+    "sha256": "63c47faa4cf5e224c3494cd5f776721bcdc4a374ecf16665632f3afab8f38a44",
+    "size_bytes": 5539328,
+    "source_url": "https://archive.ics.uci.edu/dataset/350/default+of+credit+card+clients"
+  }
+}

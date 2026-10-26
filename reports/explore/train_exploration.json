@@ -1,0 +1,108 @@
+{
+  "default_rate_by_age_band": {
+    "(17, 25]": {
+      "default_rate": 0.269642,
+      "rows": 2711
+    },
+    "(25, 30]": {
+      "default_rate": 0.202312,
+      "rows": 5017
+    },
+    "(30, 35]": {
+      "default_rate": 0.199512,
+      "rows": 4100
+    },
+    "(35, 40]": {
+      "default_rate": 0.212865,
+      "rows": 3420
+    },
+    "(40, 50]": {
+      "default_rate": 0.229042,
+      "rows": 4187
+    },
+    "(50, 60]": {
+      "default_rate": 0.250901,
+      "rows": 1387
+    },
+    "(60, 100]": {
+      "default_rate": 0.258427,
+      "rows": 178
+    }
+  },
+  "default_rate_by_group": {
+    "EDUCATION": {
+      "0": {
+        "default_rate": 0.0,
+        "rows": 12
+      },
+      "1": {
+        "default_rate": 0.194742,
+        "rows": 7379
+      },
+      "2": {
+        "default_rate": 0.23594,
+        "rows": 9833
+      },
+      "3": {
+        "default_rate": 0.250872,
+        "rows": 3440
+      },
+      "4": {
+        "default_rate": 0.056818,
+        "rows": 88
+      },
+      "5": {
+        "default_rate": 0.066351,
+        "rows": 211
+      },
+      "6": {
+        "default_rate": 0.162162,
+        "rows": 37
+      }
+    },
+    "MARRIAGE": {
+      "0": {
+        "default_rate": 0.1,
+        "rows": 40
+      },
+      "1": {
+        "default_rate": 0.232836,
+        "rows": 9526
+      },
+      "2": {
+        "default_rate": 0.210385,
+        "rows": 11208
+      },
+      "3": {
+        "default_rate": 0.287611,
+        "rows": 226
+      }
+    },
+    "SEX": {
+      "1": {
+        "default_rate": 0.243003,
+        "rows": 8325
+      },
+      "2": {
+        "default_rate": 0.206864,
+        "rows": 12675
+      }
+    }
+  },
+  "rows": 21000,
+  "scope": "training_split_only",
+  "split": "train",
+  "target_rate": 0.2211904761904762,
+  "top_target_correlations": {
+    "LIMIT_BAL": -0.1592,
+    "PAY_0": 0.3274,
+    "PAY_2": 0.2678,
+    "PAY_3": 0.2406,
+    "PAY_4": 0.223,
+    "PAY_5": 0.2084,
+    "PAY_6": 0.1935,
+    "PAY_AMT1": -0.0701,
+    "PAY_AMT2": -0.0666,
+    "PAY_AMT4": -0.0559
+  }
+}

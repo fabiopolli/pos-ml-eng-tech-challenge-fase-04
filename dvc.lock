@@ -9,16 +9,16 @@ stages:
       size: 2897299
     - path: src/credit_monitoring/config.py
       hash: md5
-      md5: 3bb5d7eca547e6293b4eb57d88e833cb
-      size: 1019
+      md5: dcc6b47dd5862af2c46c60615575c10d
+      size: 987
     - path: src/credit_monitoring/data/loading.py
       hash: md5
-      md5: 9119f42bea57b8a98bf9554fc37d6a9d
-      size: 1240
+      md5: ce9a861d2f64ba6a27993955cf967cf2
+      size: 1202
     - path: src/credit_monitoring/eda.py
       hash: md5
-      md5: eb03006bd55e4f9fe8af23fd45a4c7bd
-      size: 11443
+      md5: 7e6e733d1e4a071f0b0e362ad0a8d567
+      size: 9248
     params:
       configs/project.yaml:
         dataset:
@@ -31,6 +31,23 @@ stages:
           target_column_raw: default payment next month
           canonical_target: default_payment_next_month
           id_column: ID
+          acquisition:
+            xls_file: default of credit card clients.xls
+            sheet: Data
+            header_row: 1
+            sep: ;
+            lineterminator: "\r\n"
+            placeholder_columns: 23
+            expected_xls_md5: c0a9cb828ded9c446574ede877bf1f6e
+            expected_csv_md5: a6ee086d1eafba5566f666b3ff2ed2c9
+            expected_csv_sha256: 
+              1fc7fe04822413cf48d0f5ca974cbe47061b21ea10fa1d114bb56b8feac79358
+            source_url: 
+              https://archive.ics.uci.edu/dataset/350/default+of+credit+card+clients
+            doi: 10.24432/C55S3H
+            license: CC BY 4.0
+            citation: Yeh, I. (2009). Default of Credit Card Clients [Dataset]. 
+              UCI Machine Learning Repository. https://doi.org/10.24432/C55S3H
           split:
             train: 0.7
             validation: 0.15
@@ -63,13 +80,13 @@ stages:
     outs:
     - path: reports/eda/eda_summary.json
       hash: md5
-      md5: 3a82a2a8542c74cc0ccc269b6ace8157
-      size: 1390
+      md5: 4f082c7d106a4bd472c7cb98f6d41ad3
+      size: 1132
     - path: reports/figures/eda
       hash: md5
-      md5: 522299a113861f364e633f84a7500c9c.dir
-      size: 492254
-      nfiles: 9
+      md5: e8b05725da017e9ac9f8e8f578e144e8.dir
+      size: 236515
+      nfiles: 6
   prepare:
     cmd: python -m credit_monitoring.data.prepare
     deps:
@@ -79,20 +96,20 @@ stages:
       size: 2897299
     - path: reports/eda/eda_summary.json
       hash: md5
-      md5: 3a82a2a8542c74cc0ccc269b6ace8157
-      size: 1390
+      md5: 4f082c7d106a4bd472c7cb98f6d41ad3
+      size: 1132
     - path: src/credit_monitoring/config.py
       hash: md5
-      md5: 3bb5d7eca547e6293b4eb57d88e833cb
-      size: 1019
+      md5: dcc6b47dd5862af2c46c60615575c10d
+      size: 987
     - path: src/credit_monitoring/data/loading.py
       hash: md5
-      md5: 9119f42bea57b8a98bf9554fc37d6a9d
-      size: 1240
+      md5: ce9a861d2f64ba6a27993955cf967cf2
+      size: 1202
     - path: src/credit_monitoring/data/prepare.py
       hash: md5
-      md5: 5004e6f256a60c77e61d369f7c47cb31
-      size: 6969
+      md5: b34d33d9df8b5d1c90eecdd6cf3471a8
+      size: 6796
     params:
       configs/project.yaml:
         contract:
@@ -111,6 +128,23 @@ stages:
           target_column_raw: default payment next month
           canonical_target: default_payment_next_month
           id_column: ID
+          acquisition:
+            xls_file: default of credit card clients.xls
+            sheet: Data
+            header_row: 1
+            sep: ;
+            lineterminator: "\r\n"
+            placeholder_columns: 23
+            expected_xls_md5: c0a9cb828ded9c446574ede877bf1f6e
+            expected_csv_md5: a6ee086d1eafba5566f666b3ff2ed2c9
+            expected_csv_sha256: 
+              1fc7fe04822413cf48d0f5ca974cbe47061b21ea10fa1d114bb56b8feac79358
+            source_url: 
+              https://archive.ics.uci.edu/dataset/350/default+of+credit+card+clients
+            doi: 10.24432/C55S3H
+            license: CC BY 4.0
+            citation: Yeh, I. (2009). Default of Credit Card Clients [Dataset]. 
+              UCI Machine Learning Repository. https://doi.org/10.24432/C55S3H
           split:
             train: 0.7
             validation: 0.15
@@ -144,47 +178,47 @@ stages:
     outs:
     - path: data/processed/preparation_report.json
       hash: md5
-      md5: e53bae3ae55534ffbf60a820edaf7ca0
-      size: 623
+      md5: 639201ba794820cd077009911bebd838
+      size: 595
     - path: data/processed/test.csv
       hash: md5
-      md5: 5aa8989b8427c1f6f96f33bb6ee100d5
-      size: 434168
+      md5: 43d9bfda014be80f16359e72da97ccbb
+      size: 429667
     - path: data/processed/train.csv
       hash: md5
-      md5: 7132d155b920db848f0ffe906cfb2ef3
-      size: 2028587
+      md5: dd57d28df2ec5b23960b1bbda5e36d00
+      size: 2007586
     - path: data/processed/validation.csv
       hash: md5
-      md5: 5baca61e08811e00c3d6dae9f666f001
-      size: 434890
+      md5: b3b783043ad58b194cf3d2dd1d2aa5be
+      size: 430389
     - path: data/reference/reference.csv
       hash: md5
-      md5: 7132d155b920db848f0ffe906cfb2ef3
-      size: 2028587
+      md5: dd57d28df2ec5b23960b1bbda5e36d00
+      size: 2007586
   train:
     cmd: python -m credit_monitoring.models.train
     deps:
     - path: data/processed/test.csv
       hash: md5
-      md5: 5aa8989b8427c1f6f96f33bb6ee100d5
-      size: 434168
+      md5: 43d9bfda014be80f16359e72da97ccbb
+      size: 429667
     - path: data/processed/train.csv
       hash: md5
-      md5: 7132d155b920db848f0ffe906cfb2ef3
-      size: 2028587
+      md5: dd57d28df2ec5b23960b1bbda5e36d00
+      size: 2007586
     - path: data/processed/validation.csv
       hash: md5
-      md5: 5baca61e08811e00c3d6dae9f666f001
-      size: 434890
+      md5: b3b783043ad58b194cf3d2dd1d2aa5be
+      size: 430389
     - path: src/credit_monitoring/config.py
       hash: md5
-      md5: 3bb5d7eca547e6293b4eb57d88e833cb
-      size: 1019
+      md5: dcc6b47dd5862af2c46c60615575c10d
+      size: 987
     - path: src/credit_monitoring/models/train.py
       hash: md5
-      md5: de7b4adb4a24594b8e45df898e5157d0
-      size: 8109
+      md5: 3a163aee1c4330e6b184da5ae55d16d4
+      size: 7905
     params:
       configs/project.yaml:
         dataset.canonical_target: default_payment_next_month
@@ -232,18 +266,110 @@ stages:
     outs:
     - path: models/credit_model.joblib
       hash: md5
-      md5: d2300fcc7cb6fa563b21b23036fa811c
-      size: 5490002
+      md5: 05f6e9d0518025aac24df3fd94ac19ce
+      size: 5490034
     - path: models/credit_model_metadata.json
       hash: md5
-      md5: a5dd8b04e07a2c1a421b678ac755e9cb
-      size: 1083
+      md5: 2784caa83bb17a6108f45e1c2622e5cd
+      size: 1043
     - path: reports/figures/model
       hash: md5
-      md5: 88a5ee31c6d8017f377d6d316edfe821.dir
-      size: 77625
+      md5: 70dcbdbfb70d0289d8f2bb1c4c5690e5.dir
+      size: 86378
       nfiles: 2
     - path: reports/metrics.json
       hash: md5
-      md5: 6a8965f5decefeacaf87b56d4ebf1c63
-      size: 952
+      md5: ba41465709096bf4fc8014f53b1ac439
+      size: 906
+  acquire:
+    cmd: python -m credit_monitoring.data.acquire
+    deps:
+    - path: data/default of credit card clients.xls
+      hash: md5
+      md5: c0a9cb828ded9c446574ede877bf1f6e
+      size: 5539328
+    - path: src/credit_monitoring/config.py
+      hash: md5
+      md5: dcc6b47dd5862af2c46c60615575c10d
+      size: 987
+    - path: src/credit_monitoring/data/acquire.py
+      hash: md5
+      md5: 3949e9c11cdace4287b657a3269472b0
+      size: 6729
+    params:
+      configs/project.yaml:
+        dataset.acquisition:
+          xls_file: default of credit card clients.xls
+          sheet: Data
+          header_row: 1
+          sep: ;
+          lineterminator: "\r\n"
+          placeholder_columns: 23
+          expected_xls_md5: c0a9cb828ded9c446574ede877bf1f6e
+          expected_csv_md5: a6ee086d1eafba5566f666b3ff2ed2c9
+          expected_csv_sha256: 
+            1fc7fe04822413cf48d0f5ca974cbe47061b21ea10fa1d114bb56b8feac79358
+          source_url: 
+            https://archive.ics.uci.edu/dataset/350/default+of+credit+card+clients
+          doi: 10.24432/C55S3H
+          license: CC BY 4.0
+          citation: Yeh, I. (2009). Default of Credit Card Clients [Dataset]. 
+            UCI Machine Learning Repository. https://doi.org/10.24432/C55S3H
+        dataset.raw_file: default_of_credit_card_clients.csv
+    outs:
+    - path: data/raw/default_of_credit_card_clients.csv
+      hash: md5
+      md5: a6ee086d1eafba5566f666b3ff2ed2c9
+      size: 2897299
+    - path: reports/acquisition_provenance.json
+      hash: md5
+      md5: bc9fcc7ecdeca9e7bd14596b5e715a7c
+      size: 1181
+  explore:
+    cmd: python -m credit_monitoring.explore
+    deps:
+    - path: data/processed/train.csv
+      hash: md5
+      md5: dd57d28df2ec5b23960b1bbda5e36d00
+      size: 2007586
+    - path: src/credit_monitoring/config.py
+      hash: md5
+      md5: dcc6b47dd5862af2c46c60615575c10d
+      size: 987
+    - path: src/credit_monitoring/explore.py
+      hash: md5
+      md5: 6ddc66719796e53f5e110a12bea7c580
+      size: 8553
+    params:
+      configs/project.yaml:
+        dataset.canonical_target: default_payment_next_month
+        dataset.financial_features:
+        - LIMIT_BAL
+        - PAY_0
+        - PAY_2
+        - PAY_3
+        - PAY_4
+        - PAY_5
+        - PAY_6
+        - BILL_AMT1
+        - BILL_AMT2
+        - BILL_AMT3
+        - BILL_AMT4
+        - BILL_AMT5
+        - BILL_AMT6
+        - PAY_AMT1
+        - PAY_AMT2
+        - PAY_AMT3
+        - PAY_AMT4
+        - PAY_AMT5
+        - PAY_AMT6
+    outs:
+    - path: reports/explore/train_exploration.json
+      hash: md5
+      md5: fdefcea352b7677cdd71767f1bfcda47
+      size: 2023
+    - path: reports/figures/explore
+      hash: md5
+      md5: 35b943f2746167cf981f817e0cf089c4.dir
+      size: 325671
+      nfiles: 6

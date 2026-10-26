@@ -1,4 +1,19 @@
 stages:
+  acquire:
+    cmd: python -m credit_monitoring.data.acquire
+    deps:
+      - data/default of credit card clients.xls
+      - src/credit_monitoring/data/acquire.py
+      - src/credit_monitoring/config.py
+    params:
+      - configs/project.yaml:
+          - dataset.raw_file
+          - dataset.acquisition
+    outs:
+      - data/raw/default_of_credit_card_clients.csv
+      - reports/acquisition_provenance.json:
+          cache: false
+
   eda:
     cmd: python -m credit_monitoring.eda
     deps:
@@ -33,6 +48,21 @@ stages:
       - data/processed/test.csv
       - data/processed/preparation_report.json
       - data/reference/reference.csv
+
+  explore:
+    cmd: python -m credit_monitoring.explore
+    deps:
+      - data/processed/train.csv
+      - src/credit_monitoring/explore.py
+      - src/credit_monitoring/config.py
+    params:
+      - configs/project.yaml:
+          - dataset.financial_features
+          - dataset.canonical_target
+    outs:
+      - reports/explore/train_exploration.json:
+          cache: false
+      - reports/figures/explore
 
   train:
     cmd: python -m credit_monitoring.models.train

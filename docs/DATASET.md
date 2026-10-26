@@ -1,7 +1,56 @@
 # Dataset: Default of Credit Card Clients
 
 Fonte: UCI Machine Learning Repository (ID 350). Arquivo local: `data/raw/default_of_credit_card_clients.csv`
-(30.000 linhas, 25 colunas, separador `;`, versionado com DVC).
+(30.000 linhas, 25 colunas, separador `;`), reconstruído pelo estágio DVC `acquire` e
+versionado com DVC.
+
+## Proveniência e atribuição
+
+| Item | Valor |
+|---|---|
+| Repositório | UCI Machine Learning Repository, dataset ID 350 |
+| Arquivo original | `default of credit card clients.xls` (5.539.328 B) |
+| md5 do XLS | `c0a9cb828ded9c446574ede877bf1f6e` |
+| DOI | [10.24432/C55S3H](https://doi.org/10.24432/C55S3H) |
+| Licença | CC BY 4.0 (Creative Commons Attribution 4.0 International) |
+| Atribuição exigida | Yeh, I. (2009). *Default of Credit Card Clients* [Dataset]. UCI Machine Learning Repository. https://doi.org/10.24432/C55S3H |
+| Período dos dados | Pagamentos de abril a setembro de 2005 (Taiwan); valores monetários em NT$ |
+
+A licença CC BY 4.0 permite compartilhamento e adaptação, com crédito apropriado. A
+atribuição acima deve acompanhar qualquer redistribuição do CSV, dos artefatos derivados
+ou dos relatórios que os reaproveitem.
+
+### Conversão XLS→CSV
+
+A UCI distribui o original em XLS; o projeto consome um CSV. A conversão é um **estágio
+versionado** (`python -m credit_monitoring.data.acquire`), não um passo manual: sem o
+script não existe CSV com proveniência.
+
+| Parâmetro | Valor |
+|---|---|
+| Script | `src/credit_monitoring/data/acquire.py` (estágio DVC `acquire`) |
+| Planilha lida | `Data` |
+| Linha de cabeçalho | `header_row=1` (a linha 0 é `X1..X23;Y`, descartada) |
+| Separador | `;` |
+| `index` | `False` |
+| Terminador de linha | `\r\n` |
+| Codificação | UTF-8 com BOM (`utf-8-sig`) |
+| Linha de placeholder | `;X1;X2;…;X23;Y` |
+
+O script confere os hashes esperados e **falha com erro explícito** se houver divergência:
+
+| Artefato | md5 | sha256 |
+|---|---|---|
+| `data/default of credit card clients.xls` | `c0a9cb828ded9c446574ede877bf1f6e` | `63c47faa4cf5e224c3494cd5f776721bcdc4a374ecf16665632f3afab8f38a44` |
+| `data/raw/default_of_credit_card_clients.csv` | `a6ee086d1eafba5566f666b3ff2ed2c9` | `1fc7fe04822413cf48d0f5ca974cbe47061b21ea10fa1d114bb56b8feac79358` |
+
+O registro gerado pela aquisição fica em `reports/acquisition_provenance.json` (versionado no
+Git), com os hashes das duas fontes e todos os parâmetros de leitura. Os hashes esperados
+estão em `configs/project.yaml` (`dataset.acquisition`), como fonte única de verdade.
+
+> Os valores esperados no `configs/project.yaml` foram conferidos contra a página oficial do
+> dataset em 2026-10-26 (DOI, licença, arquivo e tamanho). Qualquer alteração do XLS ou da
+> receita de conversão invalida a via e exige revisar a decisão de proveniência.
 
 ## Descrição
 

@@ -26,6 +26,7 @@ dependencies = [
 ]
 
 [project.scripts]
+credit-monitoring-acquire = "credit_monitoring.data.acquire:main"
 credit-monitoring-eda = "credit_monitoring.eda:main"
 credit-monitoring-prepare = "credit_monitoring.data.prepare:main"
 credit-monitoring-train = "credit_monitoring.models.train:main"
