@@ -8,6 +8,12 @@ com foco em `models/`, `notebooks/` e `scripts/`.
 **Natureza:** diagnóstico de estado (observação + reprodução). Nenhuma entrega da Fase 1 foi
 declarada aceita por este documento; nenhuma mudança foi aplicada no repositório.
 
+**Atualização posterior (2026-10-26):** por decisão do operador, o gate de atribuição de
+responsável/revisor por ID foi removido dos planos (`docs/plans/`), do checklist e da
+documentação de fase; o aceite técnico verificado encerra o ID. As referências a esse gate nas
+seções 7 e 10 deste relatório descrevem o diagnóstico na data da análise e não refletem o plano
+vigente.
+
 ---
 
 ## 1. Resumo executivo

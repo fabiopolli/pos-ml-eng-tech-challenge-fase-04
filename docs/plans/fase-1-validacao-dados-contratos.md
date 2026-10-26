@@ -19,9 +19,9 @@ Random Forest, modelo selecionado/congelado e recuperação verificável de dado
 Atende à etapa de validação do enunciado; a comparação dos dois algoritmos e o DagsHub são
 escolhas internas. Não inclui simulação de drift nem dashboard integrado.
 
-Aplicar o protocolo agêntico da seção 11 do plano geral a cada pacote. Responsáveis, revisores
-e datas por ID precisam ser confirmados; a semana 1 é relativa. Aceites abaixo são observações
-esperadas para a implementação futura, não resultados obtidos nesta revisão.
+Aplicar o protocolo agêntico da seção 11 do plano geral a cada pacote. A semana 1 é relativa.
+Aceites abaixo são observações esperadas para a implementação futura, não resultados obtidos
+nesta revisão.
 
 A revisão de 2026-10-26 não muda o escopo da fase. Ela **corrige o diagnóstico inicial** (o plano
 anterior partia de um código e de um ambiente não verificados), **acrescenta a peça de aquisição
@@ -74,7 +74,6 @@ Verificado por execução local (uv 0.12.18, Python 3.12.14) e leitura de códig
 |---|---|
 | Autorização de rede e credenciais do DagsHub (owner, endpoint, chave/segredo) | 1.1 e 1.6 ficam sem aceite de recuperação; M1 não fecha |
 | Manter ou mover o XLS de 5,5 MB do Git para o DVC | 1.2 fica sem política de proveniência; o repositório mantém um dataset binário no histórico |
-| Responsável e revisor por ID | Nenhum pacote pode ser marcado como concluído |
 | Como registrar a exposição prévia do teste | 1.6 pode declarar avaliação final sem descrever a exposição |
 
 ### 2.4 Ordem de execução

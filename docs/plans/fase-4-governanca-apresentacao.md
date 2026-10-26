@@ -16,8 +16,8 @@ fintech hipotética. Não declarar conformidade jurídica, ausência de viés ou
 real de crédito a partir desta demonstração acadêmica.
 
 Privacidade, atribuição e minimização começam na aquisição. Esta fase consolida, revisa e
-expõe lacunas; não serve para autorizar retroativamente compartilhamento indevido. Responsável
-e revisor por ID continuam a confirmar, assim como datas de entrega e disponibilidade para gravação.
+expõe lacunas; não serve para autorizar retroativamente compartilhamento indevido. Datas de
+entrega e disponibilidade para gravação continuam a confirmar.
 
 ## 2. Entrada e sequência
 
@@ -178,8 +178,8 @@ coincidem com os artefatos. O ensaio de reprodução identifica correções ante
 
 **Ações do agente e participação humana:**
 1. Preparar roteiro e ordem de cenas, usando os IDs de execução das evidências e dados agregados.
-   Agente pode compor roteiro/checklist e preparar telas; atribuir gravação/narração e revisão
-   a integrante confirmado, sem alegar que o vídeo foi produzido apenas por escrever o roteiro.
+   Agente pode compor roteiro/checklist e preparar telas; atribuir gravação/narração a integrante
+   confirmado, sem alegar que o vídeo foi produzido apenas por escrever o roteiro.
 2. Ensaiar com serviços locais prontos e artefatos já gerados. Marcar edição/cortes honestamente;
    não apresentar relatório antigo como execução ao vivo de outra versão.
 3. Capturar contrato bloqueando lote inválido, modelo selecionado, controle/drift, MLflow/UI,
@@ -206,7 +206,7 @@ mesmo com roteiro pronto. Não substituir evidência dinâmica por promessa de i
 
 **Ações do agente:**
 1. Criar índice/matriz de cobertura do enunciado com requisito, peso quando aplicável, ID,
-   caminho/hash/run ID, resultado observado, revisor e pendência. Conferir as 28 entregas.
+   caminho/hash/run ID, resultado observado e pendência. Conferir as 28 entregas.
 2. Identificar SHA candidato e lock; usar checkout separado no mesmo SHA com cache DVC vazio
    próprio, sem apagar nem reutilizar o cache principal. Preparar diretório de trabalho
    aprovado, confirmar espaço e registrar caminhos do ensaio sem credenciais.
@@ -226,8 +226,8 @@ mesmo com roteiro pronto. Não substituir evidência dinâmica por promessa de i
    publicação final ou submissão acadêmica seguem solicitação/autorização explícita; não tratar
    revisão local aprovada como se a entrega externa já tivesse ocorrido.
 
-**Verificação/aceite:** reprodução independente por hash, README executável, vídeo acessível,
-matriz completa e revisão humana atribuída/registrada. Se houver correção de código/configuração
+**Verificação/aceite:** reprodução independente por hash, README executável, vídeo acessível e
+matriz completa conferida. Se houver correção de código/configuração
 após o ensaio, selecionar nova versão candidata e repetir apenas os aceites invalidados, além
 de revisar se vídeo/README ainda correspondem ao pacote.
 

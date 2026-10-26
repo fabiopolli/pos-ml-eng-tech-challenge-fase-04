@@ -18,7 +18,7 @@ Não criar serviço de alertas externo, compute remoto ou retreinamento automát
 drift pode coexistir com execução tecnicamente bem-sucedida; contrato inválido bloqueia o modelo.
 O Streamlit é consumidor de evidências, não deve treinar nem refazer inferência ao renderizar.
 
-Aplicar o protocolo comum do plano geral, confirmando responsável/revisor de cada ID. Código
+Aplicar o protocolo comum do plano geral. Código
 inicial existente: `dashboard/app.py` é uma shell com placeholders, não monitoramento integrado.
 Verificar o estado real dos módulos e logs produzidos nas fases 1/2 antes de duplicar instrumentação.
 

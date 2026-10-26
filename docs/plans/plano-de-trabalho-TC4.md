@@ -345,8 +345,6 @@ A etapa estará concluída quando o README apresentar toda a documentação de g
 
 ## 7. Organização do trabalho em grupo
 
-As 28 entregas serão acompanhadas pelo GitHub Projects, com registro de responsáveis e status.
-
 As frentes iniciais registradas no README são:
 
 | Integrante | Frente inicial (não atribui automaticamente cada entrega) |
@@ -356,9 +354,9 @@ As frentes iniciais registradas no README são:
 | Denis Barros Melo | Engenharia e qualidade de dados |
 | Romario Silva | Observabilidade, dashboard e integração |
 
-Para cada ID, confirmar responsável único, revisor, dependências, prazo e link de evidência no
-GitHub Projects e no checklist. Atribuição de governança/causalidade e o revisor de cada entrega
-ainda precisam ser confirmados; a tabela não representa aceite de responsabilidade individual.
+Para cada ID, registrar dependências, prazo e link de evidência no checklist. A tabela de frentes
+iniciais organiza o trabalho em grupo; não constitui atribuição formal de responsabilidade
+individual nem etapa de aprovação.
 
 Cada entrega deverá possuir evidência verificável: código/testes/documentação no Git e, para
 objetos grandes, hash DVC e recuperação no DagsHub. Capturas/relatórios compartilháveis devem
@@ -450,15 +448,14 @@ Ao final das quatro semanas, o grupo deverá possuir:
 
 ### Unidade de trabalho e autonomia
 
-Executar um ID por vez, ou um recorte verificável dele, com um agente executor e revisão humana
-atribuída pela equipe. A solicitação atual de detalhamento é de Bill Kopp; os responsáveis e
-revisores da implementação continuam a confirmar. Os planos não pressupõem subagentes,
-execução paralela automática ou nova plataforma de orquestração.
+Executar um ID por vez, ou um recorte verificável dele, com um agente executor. A solicitação
+atual de detalhamento é de Bill Kopp. Os planos não pressupõem subagentes, execução paralela
+automática ou nova plataforma de orquestração.
 
 Antes de editar, ler `AGENTS.md`, este plano, o plano da fase, o checklist e a arquitetura;
 inspecionar branch, diff, configuração, testes e artefatos atuais. Reaproveitar implementação
 existente após verificá-la. Trabalhar em branch `<tipo>/<integrante>/<descricao-curta>`, respeitar
-o trabalho de outros integrantes e confirmar o responsável do ID no início da execução.
+o trabalho de outros integrantes.
 
 O agente pode inspecionar, implementar e testar localmente dentro da tarefa autorizada. Commit,
 push, PR, publicação de objetos DVC/vídeo, criação de recursos externos e exclusão de versões
@@ -469,20 +466,20 @@ Não declarar o marco completo sem a evidência faltante.
 ### Ciclo de execução
 
 1. **Reconstruir:** verificar entradas, hashes, versão do ambiente, dependências e estado real.
-2. **Delimitar:** registrar ID, objetivo, arquivos, responsável/revisor e teste de aceite antes
-   de implementar; decompor mudanças grandes em recortes que preservem um caminho funcional.
+2. **Delimitar:** registrar ID, objetivo, arquivos e teste de aceite antes de implementar;
+   decompor mudanças grandes em recortes que preservam um caminho funcional.
 3. **Executar:** fazer a menor mudança que satisfaça o recorte, com configuração explícita e
    efeitos locais previsíveis. Não sobrescrever lotes, resultados ou decisões de outra execução.
 4. **Verificar:** executar teste proporcional e controle negativo quando o requisito envolve
    bloqueio/detecção; registrar comando, versão, código de saída e evidência, inclusive falhas.
 5. **Revisar:** inspecionar diff, privacidade e consistência entre código, configuração e docs;
-   encaminhar para revisão com limitações e dependências ainda abertas.
+   registrar limitações e dependências ainda abertas.
 6. **Transferir:** informar o que mudou, o que passou, o que não foi executado e o próximo ID.
-   Atualizar o checklist apenas quando status, aceite, responsável ou evidência realmente mudar.
+   Atualizar o checklist apenas quando status, aceite ou evidência realmente mudar.
 
 Usar `Pendente`, `Em andamento`, `Em revisão` e `Concluído` como no checklist. Registrar bloqueio
-como motivo junto ao status existente, sem inventar conclusão. Aceite técnico verificado segue
-para revisão; somente registrar conclusão após a revisão definida pela equipe.
+como motivo junto ao status existente, sem inventar conclusão. O aceite técnico verificado, com a
+evidência registrada, encerra o ID.
 
 ### Contrato de entrada e saída da tarefa
 
@@ -492,7 +489,7 @@ pendentes. Datas e estimativas dependem da disponibilidade confirmada, sem compr
 ```text
 ID / recorte:
 Objetivo e limite da mudança:
-Responsável / revisor / prazo confirmado ou pendente:
+Prazo confirmado ou pendente:
 Dependências aceitas e entradas (caminho + hash/versão):
 Branch / SHA de base / alterações preexistentes relevantes:
 Arquivos permitidos e interfaces a preservar:

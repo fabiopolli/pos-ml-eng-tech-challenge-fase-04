@@ -24,9 +24,8 @@ simulação e detecção de drift, rastreamento de experimentos e documentação
 | Denis Barros Melo | [`denisbmelo`](https://github.com/denisbmelo) | Engenharia e qualidade de dados |
 | Romario Silva | [`romagrinho`](https://github.com/romagrinho) | Observabilidade, dashboard e integração |
 
-As responsabilidades detalhadas de cada entrega devem ser registradas no GitHub Projects e em
-[`docs/CHECKLIST.md`](docs/CHECKLIST.md); a tabela acima é o ponto de partida, não uma limitação
-de colaboração.
+O detalhamento de cada entrega fica em [`docs/CHECKLIST.md`](docs/CHECKLIST.md); a tabela acima é
+o ponto de partida para a organização do trabalho em grupo.
 
 ## Objetivo
 
@@ -242,9 +241,9 @@ O acompanhamento operacional está em [`docs/CHECKLIST.md`](docs/CHECKLIST.md).
 
 | Entrega | Estado | Evidência atual |
 |---|---|---|
-| Fundação do repositório e remote | Em revisão | `dvc[s3]` e `xlrd` travados; pipeline e `dvc.lock` coerentes; workbook original migrado do Git para o DVC; remote DagsHub configurado, objetos enviados e **recuperação provada em checkout separado** |
-| Aquisição, auditoria e preparação | Em revisão | Estágios `acquire`/`eda`/`prepare`/`explore`; proveniência com DOI e licença em [`docs/DATASET.md`](docs/DATASET.md); exposição do teste declarada em [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md) |
-| Modelos e Data Contract | Em revisão | Contrato Pandera integrado antes do `fit`; seleção na validação e avaliação final em estágios separados; [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md) |
+| Fundação do repositório e remote | Concluído | `dvc[s3]` e `xlrd` travados; pipeline e `dvc.lock` coerentes; workbook original migrado do Git para o DVC; remote DagsHub configurado, objetos enviados e **recuperação provada em checkout separado** |
+| Aquisição, auditoria e preparação | Concluído | Estágios `acquire`/`eda`/`prepare`/`explore`; proveniência com DOI e licença em [`docs/DATASET.md`](docs/DATASET.md); exposição do teste declarada em [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md) |
+| Modelos e Data Contract | Concluído | Contrato Pandera integrado antes do `fit`; seleção na validação e avaliação final em estágios separados; [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md) |
 | Simulação e relatório de drift | Pendente | Cenário inicial documentado |
 | MLflow e Streamlit | Em preparação | Shell do dashboard criada |
 | Governança e vídeo | Em preparação | Documento-base e roteiro de entregas |
@@ -254,7 +253,6 @@ O acompanhamento operacional está em [`docs/CHECKLIST.md`](docs/CHECKLIST.md).
 - branch: `<tipo>/<integrante>/<descricao-curta>`;
 - commits semânticos e focados;
 - PR com evidências, comandos de validação e impacto no checklist;
-- revisão de outro integrante;
 - dados, modelos e execuções locais fora do Git.
 
 Consulte [`CONTRIBUTING.md`](CONTRIBUTING.md) e [`AGENTS.md`](AGENTS.md) antes de iniciar uma

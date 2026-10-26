@@ -3,10 +3,8 @@
 **Janela de execução:** 2026-10-26 (branch `fase-1-bill`).
 **Plano:** [`docs/plans/plano-de-trabalho-TC4.md`](../plans/plano-de-trabalho-TC4.md) (seção 11) e
 [`docs/plans/fase-1-validacao-dados-contratos.md`](../plans/fase-1-validacao-dados-contratos.md).
-**Estado do marco M1:** **todos os itens de aceite verificados tecnicamente**, incluindo a prova
-de recuperação remota no DagsHub (seção 1.6.1). M1 **não** é declarado como concluído: o aceite
-técnico verificado segue para revisão da equipe, e responsável e revisor por ID continuam
-pendentes.
+**Estado do marco M1:** **concluído** — todos os itens de aceite 1.1–1.7 estão verificados,
+incluindo a prova de recuperação remota no DagsHub (seção 1.6.1).
 
 ## Ambiente da execução
 
@@ -155,7 +153,7 @@ protocolo — relações feature-alvo sobre o bruto completo — foi movido para
 
 ## 1.4 — Treinamento da Regressão Logística
 
-**Implementado sob o contrato; aceite sujeito a revisão.**
+**Implementado sob o contrato; aceite verificado.**
 
 | Item | Evidência |
 |---|---|
@@ -169,7 +167,7 @@ protocolo — relações feature-alvo sobre o bruto completo — foi movido para
 
 ## 1.5 — Treinamento do Random Forest
 
-**Implementado sob o contrato; aceite sujeito a revisão.**
+**Implementado sob o contrato; aceite verificado.**
 
 | Item | Evidência |
 |---|---|
@@ -303,12 +301,10 @@ transferência.
       inferência do modelo recuperado (seção 1.6.1).
 - [x] `docs/evidence/fase-1.md` com seções 1.1–1.7, comandos, códigos de saída e hashes.
 
-**M1: todos os itens de aceite verificados tecnicamente.** O caminho local e a prova de recuperação
-remota estão executados e documentados. O marco **não** é declarado como concluído: conforme o
-protocolo da seção 11 do plano geral, aceite técnico verificado segue para **revisão da equipe**,
-e responsável/revisor por ID ainda não foram confirmados. Também permanece a decisão de quando
-rodar a `dvc push` seguinte a cada novo commit de código (o remote e o lock precisam andar
-juntos).
+**M1: concluído.** Os dez itens do checklist estão verificados, com evidência registrada em
+`docs/evidence/fase-1.md`: caminho local e prova de recuperação remota executados e
+documentados. A manutenção do remote e do `dvc.lock` continua a cada commit de código (push e lock
+precisam andar juntos).
 
 ## Transferência para a fase 2
 
@@ -332,11 +328,9 @@ juntos).
 2. **Decisão sobre o XLS de 5,5 MB no Git** — **resolvida em 2026-10-26**: o workbook original foi
    migrado para o DVC (ponteiro versionado no Git, objeto no cache e no remote). O `dvc push`
    seguinte a cada commit de código mantém o remote em dia com o `dvc.lock`.
-3. **Responsável e revisor por ID** — os aceites técnicos acima estão verificados, mas a
-   confirmação de aceite cabe à equipe.
-4. **Cobertura de Concept Drift** (citada na p. 2 do enunciado, não detalhada na rubrica) —
+3. **Cobertura de Concept Drift** (citada na p. 2 do enunciado, não detalhada na rubrica) —
    pendência que a fase 2 deve tratar antes do aceite final.
-5. **Publicação da branch** — concluída: a branch `fase-1-bill` foi publicada em
+4. **Publicação da branch** — concluída: a branch `fase-1-bill` foi publicada em
    `origin/fase-1-bill` com autorização do operador. O PR para `main` continua sendo decisão da
    equipe.
 
