@@ -10,6 +10,123 @@
       "convergence_warnings": []
     }
   },
+  "optimization": {
+    "ablation": {
+      "logistic_regression": {
+        "adopted": false,
+        "base_mean_roc_auc": 0.7254644741488219,
+        "base_reused_from_search": true,
+        "base_trial_id": "logistic_regression:search:10",
+        "decision": "original features kept: the ablation gain did not reach the threshold",
+        "formulas": {
+          "bill_amt1_over_limit_bal": "BILL_AMT1 / LIMIT_BAL",
+          "pay_amt1_over_abs_bill_amt1": "PAY_AMT1 / max(abs(BILL_AMT1), 1.0)",
+          "pay_amt1_over_limit_bal": "PAY_AMT1 / LIMIT_BAL"
+        },
+        "gain": -0.0021889857010707336,
+        "min_gain_required": 0.005,
+        "ratio_fold_scores": [
+          0.7357095445871159,
+          0.734613373419873,
+          0.7142772756905038,
+          0.7132505407635157,
+          0.7185267077777474
+        ],
+        "ratio_mean_roc_auc": 0.7232754884477511,
+        "ratio_status": "ok",
+        "ratio_trial_id": "logistic_regression:ablation:00"
+      },
+      "random_forest": {
+        "adopted": false,
+        "base_mean_roc_auc": 0.7844164344720987,
+        "base_reused_from_search": true,
+        "base_trial_id": "random_forest:search:08",
+        "decision": "original features kept: the ablation gain did not reach the threshold",
+        "formulas": {
+          "bill_amt1_over_limit_bal": "BILL_AMT1 / LIMIT_BAL",
+          "pay_amt1_over_abs_bill_amt1": "PAY_AMT1 / max(abs(BILL_AMT1), 1.0)",
+          "pay_amt1_over_limit_bal": "PAY_AMT1 / LIMIT_BAL"
+        },
+        "gain": 0.001290526823614413,
+        "min_gain_required": 0.005,
+        "ratio_fold_scores": [
+          0.7863540675650816,
+          0.8022505239803486,
+          0.7791404319987205,
+          0.7783557366675014,
+          0.7824340462669135
+        ],
+        "ratio_mean_roc_auc": 0.7857069612957132,
+        "ratio_status": "ok",
+        "ratio_trial_id": "random_forest:ablation:00"
+      }
+    },
+    "candidates": {
+      "logistic_regression_finalist": {
+        "algorithm": "logistic_regression",
+        "control_mean_roc_auc": 0.7254623022095533,
+        "cv_mean_roc_auc": 0.7254644741488219,
+        "sha256": "933c6cbec350b71f055a5f365751d8de39ac905acffcfee7001f8ddc4b06c0a9",
+        "validation_roc_auc": 0.714508634470498,
+        "version": "base"
+      },
+      "random_forest_finalist": {
+        "algorithm": "random_forest",
+        "control_mean_roc_auc": 0.7809496574094885,
+        "cv_mean_roc_auc": 0.7844164344720987,
+        "sha256": "a1800a97a28e85b7af4334515d66082ad91d49dda1efa7d1a0e4bffb3b3740a0",
+        "validation_roc_auc": 0.7752445537243995,
+        "version": "base"
+      }
+    },
+    "comparison_report": "reports/optimization/opt-20261026-01/selection/comparison.json",
+    "comparison_sha256": "66d632dcd24e4e38ee6b8cc3934ae03f9b1cabbe0e54658ca9a14ffbe409021c",
+    "decision": {
+      "action": "keep_current",
+      "kept_current": true,
+      "reason": "Nenhum finalista satisfaz todos os criterios: ganho insuficiente ou inconclusivo. O RF vigente e mantido.",
+      "selected": "random_forest"
+    },
+    "experiment_id": "opt-20261026-01",
+    "fold_fingerprint": "b19d867de65d387aa53f275a2a4cf2c25ef24695fd2bfcd4a953461bedd21505",
+    "note": "A rodada de validacao da campanha e a do fluxo publicado sao a mesma rodada: incumbent, controle e finalistas foram pontuados juntos.",
+    "protocol_version": "1.6.0",
+    "stability": {
+      "algorithm": "random_forest",
+      "control_mean_roc_auc": 0.7809496574094885,
+      "note": "As repeticoes 17 e 73 sao reportadas com a semente 42, sem escolher a melhor. A versao final mantem a semente 42.",
+      "primary_mean_roc_auc": 0.7844164344720987,
+      "primary_seed": 42,
+      "repetition_mean_roc_auc": 0.7846664213911008,
+      "repetitions_beat_control": true,
+      "seeds": {
+        "17": {
+          "fold_scores": [
+            0.7846813452465298,
+            0.8011816665948172,
+            0.7799544156018953,
+            0.7786282163212023,
+            0.7786239382590063
+          ],
+          "mean_roc_auc": 0.7846139164046901,
+          "status": "ok"
+        },
+        "73": {
+          "fold_scores": [
+            0.784278220155004,
+            0.8013593707167957,
+            0.7804590624001442,
+            0.778929326083444,
+            0.7785686525321687
+          ],
+          "mean_roc_auc": 0.7847189263775113,
+          "status": "ok"
+        }
+      }
+    },
+    "train_sha256": "9ebd48b6d31c67f46cc28aff0bde36b48f62936aff0011007b7cb78d26108c26",
+    "validation_sha256": "e910967511f31406edbc3c9fe0528571d079c45da10116dba4e53e379d285106"
+  },
   "primary_metric": "roc_auc",
   "reload_check": {
     "max_abs_probability_difference": 0.0,
@@ -17,14 +134,24 @@
     "tolerance": 1e-12
   },
   "selected_model": "random_forest",
+  "selected_version": {
+    "algorithm": "random_forest",
+    "candidate_id": "random_forest",
+    "decision": "keep_current",
+    "experiment_id": "opt-20261026-01",
+    "kind": "incumbent",
+    "sha256": null
+  },
   "selection": {
-    "baseline": "logistic_regression",
+    "baseline": "random_forest",
     "metric": "roc_auc",
     "rounded_metrics_used_for_decision": false,
-    "rule": "highest_validation_metric_with_baseline_tie_break",
+    "rule": "optimization_campaign_predeclared_criteria",
     "scores": {
       "logistic_regression": 0.7144974515946351,
-      "random_forest": 0.7741034702757726
+      "logistic_regression_finalist": 0.714508634470498,
+      "random_forest": 0.7741034702757726,
+      "random_forest_finalist": 0.7752445537243995
     },
     "tie_break": "baseline"
   },
@@ -32,6 +159,8 @@
   "validation": {
     "logistic_regression": {
       "accuracy": 0.677111,
+      "average_precision": 0.499824,
+      "brier": 0.208525,
       "confusion_matrix": {
         "fn": 360,
         "fp": 1093,
@@ -43,8 +172,25 @@
       "recall": 0.638191,
       "roc_auc": 0.714497
     },
+    "logistic_regression_finalist": {
+      "accuracy": 0.677333,
+      "average_precision": 0.499806,
+      "brier": 0.208521,
+      "confusion_matrix": {
+        "fn": 360,
+        "fp": 1092,
+        "tn": 2413,
+        "tp": 635
+      },
+      "f1": 0.466569,
+      "precision": 0.36769,
+      "recall": 0.638191,
+      "roc_auc": 0.714509
+    },
     "random_forest": {
       "accuracy": 0.777333,
+      "average_precision": 0.545323,
+      "brier": 0.178755,
       "confusion_matrix": {
         "fn": 418,
         "fp": 584,
@@ -55,6 +201,21 @@
       "precision": 0.496985,
       "recall": 0.579899,
       "roc_auc": 0.774103
+    },
+    "random_forest_finalist": {
+      "accuracy": 0.765778,
+      "average_precision": 0.540936,
+      "brier": 0.177954,
+      "confusion_matrix": {
+        "fn": 398,
+        "fp": 656,
+        "tn": 2849,
+        "tp": 597
+      },
+      "f1": 0.531139,
+      "precision": 0.476457,
+      "recall": 0.6,
+      "roc_auc": 0.775245
     }
   }
 }

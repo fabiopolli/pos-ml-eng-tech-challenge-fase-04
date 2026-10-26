@@ -1,0 +1,269 @@
+{
+  "criteria": {
+    "logistic_regression_finalist": {
+      "candidate": "logistic_regression_finalist",
+      "checks": [
+        {
+          "criterion": "validation_gain_at_least_min_gain",
+          "detail": "delta=-0.05959483580527469 against the required 0.01",
+          "passed": false
+        },
+        {
+          "criterion": "cross_validation_gain_over_same_family_control",
+          "detail": "cv_gain=2.171939268547085e-06 against the required 0.005",
+          "passed": false
+        },
+        {
+          "criterion": "paired_bootstrap_lower_bound_above_zero",
+          "detail": "ci_low=-0.07502717223779375, ci_high=-0.04467708729094835",
+          "passed": false
+        },
+        {
+          "criterion": "integrity_checks",
+          "detail": "trained_on_train_split_only=True; artifact_present=True; converged=True; hash_recorded=True",
+          "passed": true
+        }
+      ],
+      "cv_gain_over_control": 2.171939268547085e-06,
+      "passed": false,
+      "validation_gain": -0.05959483580527469
+    },
+    "random_forest_finalist": {
+      "candidate": "random_forest_finalist",
+      "checks": [
+        {
+          "criterion": "validation_gain_at_least_min_gain",
+          "detail": "delta=0.001141083448626845 against the required 0.01",
+          "passed": false
+        },
+        {
+          "criterion": "cross_validation_gain_over_same_family_control",
+          "detail": "cv_gain=0.0034667770626102268 against the required 0.005",
+          "passed": false
+        },
+        {
+          "criterion": "paired_bootstrap_lower_bound_above_zero",
+          "detail": "ci_low=-0.0028590635058316147, ci_high=0.004967687940415214",
+          "passed": false
+        },
+        {
+          "criterion": "random_forest_repetitions_beat_control",
+          "detail": "repetition mean=0.7846664213911008 against control mean=0.7809496574094885",
+          "passed": true
+        },
+        {
+          "criterion": "integrity_checks",
+          "detail": "trained_on_train_split_only=True; artifact_present=True; converged=True; hash_recorded=True",
+          "passed": true
+        }
+      ],
+      "cv_gain_over_control": 0.0034667770626102268,
+      "passed": false,
+      "validation_gain": 0.001141083448626845
+    }
+  },
+  "criteria_config": {
+    "bootstrap_resamples": 2000,
+    "bootstrap_seed": 42,
+    "ci_level": 0.95,
+    "min_ablation_gain": 0.005,
+    "min_gain_cv_mean": 0.005,
+    "min_gain_validation": 0.01
+  },
+  "decision": {
+    "action": "keep_current",
+    "kept_current": true,
+    "reason": "Nenhum finalista satisfaz todos os criterios: ganho insuficiente ou inconclusivo. O RF vigente e mantido.",
+    "selected": "random_forest"
+  },
+  "experiment_id": "opt-20261026-01",
+  "incumbent": "random_forest",
+  "interpretation_limits": [
+    "O intervalo e condicional aos modelos ajustados e a esta validacao.",
+    "O intervalo nao incorpora todo o processo de busca nem corrige a exposicao historica da validacao.",
+    "O desvio-padrao dos cinco folds nao e um intervalo de confianca.",
+    "Um intervalo positivo nao e prova de generalizacao nem de adequacao ao credito real."
+  ],
+  "models": {
+    "logistic_regression_finalist": {
+      "algorithm": "logistic_regression",
+      "contrast": {
+        "candidate_mean_in_replicas": 0.7147211083233571,
+        "ci_high": -0.04467708729094835,
+        "ci_low": -0.07502717223779375,
+        "delta": -0.05959483580527469,
+        "incumbent_mean_in_replicas": 0.7745134038236834,
+        "level": 0.95,
+        "method": "paired stratified percentile bootstrap",
+        "metric": "roc_auc",
+        "n_resamples": 2000,
+        "quantiles": [
+          0.025000000000000022,
+          0.975
+        ],
+        "replicas_with_positive_delta": 0,
+        "seed": 42
+      },
+      "integrity": {
+        "artifact_sha256": "933c6cbec350b71f055a5f365751d8de39ac905acffcfee7001f8ddc4b06c0a9",
+        "checks": {
+          "artifact_present": true,
+          "converged": true,
+          "hash_recorded": true,
+          "trained_on_train_split_only": true
+        },
+        "detail": "trained_on_train_split_only=True; artifact_present=True; converged=True; hash_recorded=True",
+        "passed": true,
+        "train_sha256": "9ebd48b6d31c67f46cc28aff0bde36b48f62936aff0011007b7cb78d26108c26"
+      },
+      "key": "logistic_regression_finalist",
+      "metrics": {
+        "accuracy": 0.677333,
+        "average_precision": 0.499806,
+        "brier": 0.208521,
+        "confusion_matrix": {
+          "fn": 360,
+          "fp": 1092,
+          "tn": 2413,
+          "tp": 635
+        },
+        "f1": 0.466569,
+        "precision": 0.36769,
+        "recall": 0.638191,
+        "roc_auc": 0.714509
+      },
+      "metrics_unrounded": {
+        "accuracy": 0.6773333333333333,
+        "average_precision": 0.4998059362032272,
+        "brier": 0.2085212827138413,
+        "confusion_matrix": {
+          "fn": 360,
+          "fp": 1092,
+          "tn": 2413,
+          "tp": 635
+        },
+        "f1": 0.4665686994856723,
+        "precision": 0.36768963520555875,
+        "recall": 0.6381909547738693,
+        "roc_auc": 0.714508634470498
+      },
+      "role": "finalist",
+      "sha256": "933c6cbec350b71f055a5f365751d8de39ac905acffcfee7001f8ddc4b06c0a9",
+      "version": "base"
+    },
+    "random_forest": {
+      "algorithm": "random_forest",
+      "contrast": null,
+      "key": "random_forest",
+      "metrics": {
+        "accuracy": 0.777333,
+        "average_precision": 0.545323,
+        "brier": 0.178755,
+        "confusion_matrix": {
+          "fn": 418,
+          "fp": 584,
+          "tn": 2921,
+          "tp": 577
+        },
+        "f1": 0.53525,
+        "precision": 0.496985,
+        "recall": 0.579899,
+        "roc_auc": 0.774103
+      },
+      "metrics_unrounded": {
+        "accuracy": 0.7773333333333333,
+        "average_precision": 0.5453226129320522,
+        "brier": 0.17875450376119326,
+        "confusion_matrix": {
+          "fn": 418,
+          "fp": 584,
+          "tn": 2921,
+          "tp": 577
+        },
+        "f1": 0.5352504638218923,
+        "precision": 0.49698535745047373,
+        "recall": 0.5798994974874372,
+        "roc_auc": 0.7741034702757726
+      },
+      "role": "incumbent",
+      "sha256": null,
+      "version": "incumbent"
+    },
+    "random_forest_finalist": {
+      "algorithm": "random_forest",
+      "contrast": {
+        "candidate_mean_in_replicas": 0.7755800083154718,
+        "ci_high": 0.004967687940415214,
+        "ci_low": -0.0028590635058316147,
+        "delta": 0.001141083448626845,
+        "incumbent_mean_in_replicas": 0.7745134038236834,
+        "level": 0.95,
+        "method": "paired stratified percentile bootstrap",
+        "metric": "roc_auc",
+        "n_resamples": 2000,
+        "quantiles": [
+          0.025000000000000022,
+          0.975
+        ],
+        "replicas_with_positive_delta": 1421,
+        "seed": 42
+      },
+      "integrity": {
+        "artifact_sha256": "a1800a97a28e85b7af4334515d66082ad91d49dda1efa7d1a0e4bffb3b3740a0",
+        "checks": {
+          "artifact_present": true,
+          "converged": true,
+          "hash_recorded": true,
+          "trained_on_train_split_only": true
+        },
+        "detail": "trained_on_train_split_only=True; artifact_present=True; converged=True; hash_recorded=True",
+        "passed": true,
+        "train_sha256": "9ebd48b6d31c67f46cc28aff0bde36b48f62936aff0011007b7cb78d26108c26"
+      },
+      "key": "random_forest_finalist",
+      "metrics": {
+        "accuracy": 0.765778,
+        "average_precision": 0.540936,
+        "brier": 0.177954,
+        "confusion_matrix": {
+          "fn": 398,
+          "fp": 656,
+          "tn": 2849,
+          "tp": 597
+        },
+        "f1": 0.531139,
+        "precision": 0.476457,
+        "recall": 0.6,
+        "roc_auc": 0.775245
+      },
+      "metrics_unrounded": {
+        "accuracy": 0.7657777777777778,
+        "average_precision": 0.5409364323392478,
+        "brier": 0.17795443275407405,
+        "confusion_matrix": {
+          "fn": 398,
+          "fp": 656,
+          "tn": 2849,
+          "tp": 597
+        },
+        "f1": 0.5311387900355872,
+        "precision": 0.4764565043894653,
+        "recall": 0.6,
+        "roc_auc": 0.7752445537243995
+      },
+      "role": "finalist",
+      "sha256": "a1800a97a28e85b7af4334515d66082ad91d49dda1efa7d1a0e4bffb3b3740a0",
+      "version": "base"
+    }
+  },
+  "primary_metric": "roc_auc",
+  "protocol_version": "1.6.0",
+  "schema_version": "1.0.0",
+  "state": "frozen_decision",
+  "threshold": 0.5,
+  "validation": {
+    "positives": 995,
+    "rows": 4500,
+    "sha256": "e910967511f31406edbc3c9fe0528571d079c45da10116dba4e53e379d285106"
+  }
+}

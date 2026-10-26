@@ -15,8 +15,40 @@ def _out_paths(stage: dict) -> list[str]:
     return [next(iter(out)) if isinstance(out, dict) else out for out in stage.get("outs", [])]
 
 
-def test_pipeline_stage_order_is_acquire_eda_prepare_explore_train_evaluate():
-    assert list(_stages()) == ["acquire", "eda", "prepare", "explore", "train", "evaluate"]
+def test_pipeline_stage_order_is_acquire_eda_prepare_explore_tune_train_evaluate():
+    assert list(_stages()) == [
+        "acquire",
+        "eda",
+        "prepare",
+        "explore",
+        "tune",
+        "train",
+        "evaluate",
+    ]
+
+
+def test_the_tuning_stage_reads_only_the_training_split():
+    """The campaign of plan 1.6 must never see the validation or the test split."""
+    stages = _stages()
+    assert "data/processed/train.csv" in stages["tune"]["deps"]
+    assert "data/processed/validation.csv" not in stages["tune"]["deps"]
+    assert "data/processed/test.csv" not in stages["tune"]["deps"]
+    assert "data/processed/test.csv" not in stages["tune"].get("outs", [])
+
+
+def test_the_tuning_stage_does_not_own_the_published_model():
+    """There is a single owner for the published artifact."""
+    stages = _stages()
+    assert "models/credit_model.joblib" not in _out_paths(stages["tune"])
+    assert "models/credit_model.joblib" in _out_paths(stages["train"])
+
+
+def test_the_selection_stage_consumes_the_frozen_finalists():
+    stages = _stages()
+    deps = stages["train"]["deps"]
+    assert "reports/optimization/opt-20261026-01/tuning" in deps
+    assert "models/optimization/opt-20261026-01/finalists" in deps
+    assert "configs/optimization.yaml" in deps
 
 
 def test_acquire_rebuilds_the_raw_csv_from_the_source_workbook():

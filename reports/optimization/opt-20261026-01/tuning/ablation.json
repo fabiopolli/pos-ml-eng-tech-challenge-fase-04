@@ -1,0 +1,50 @@
+{
+  "logistic_regression": {
+    "adopted": false,
+    "base_mean_roc_auc": 0.7254644741488219,
+    "base_reused_from_search": true,
+    "base_trial_id": "logistic_regression:search:10",
+    "decision": "original features kept: the ablation gain did not reach the threshold",
+    "formulas": {
+      "bill_amt1_over_limit_bal": "BILL_AMT1 / LIMIT_BAL",
+      "pay_amt1_over_abs_bill_amt1": "PAY_AMT1 / max(abs(BILL_AMT1), 1.0)",
+      "pay_amt1_over_limit_bal": "PAY_AMT1 / LIMIT_BAL"
+    },
+    "gain": -0.0021889857010707336,
+    "min_gain_required": 0.005,
+    "ratio_fold_scores": [
+      0.7357095445871159,
+      0.734613373419873,
+      0.7142772756905038,
+      0.7132505407635157,
+      0.7185267077777474
+    ],
+    "ratio_mean_roc_auc": 0.7232754884477511,
+    "ratio_status": "ok",
+    "ratio_trial_id": "logistic_regression:ablation:00"
+  },
+  "random_forest": {
+    "adopted": false,
+    "base_mean_roc_auc": 0.7844164344720987,
+    "base_reused_from_search": true,
+    "base_trial_id": "random_forest:search:08",
+    "decision": "original features kept: the ablation gain did not reach the threshold",
+    "formulas": {
+      "bill_amt1_over_limit_bal": "BILL_AMT1 / LIMIT_BAL",
+      "pay_amt1_over_abs_bill_amt1": "PAY_AMT1 / max(abs(BILL_AMT1), 1.0)",
+      "pay_amt1_over_limit_bal": "PAY_AMT1 / LIMIT_BAL"
+    },
+    "gain": 0.001290526823614413,
+    "min_gain_required": 0.005,
+    "ratio_fold_scores": [
+      0.7863540675650816,
+      0.8022505239803486,
+      0.7791404319987205,
+      0.7783557366675014,
+      0.7824340462669135
+    ],
+    "ratio_mean_roc_auc": 0.7857069612957132,
+    "ratio_status": "ok",
+    "ratio_trial_id": "random_forest:ablation:00"
+  }
+}

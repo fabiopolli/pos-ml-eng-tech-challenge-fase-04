@@ -64,12 +64,13 @@ stages:
           cache: false
       - reports/figures/explore
 
-  train:
-    cmd: python -m credit_monitoring.models.train
+  tune:
+    cmd: python -m credit_monitoring.models.tune
     deps:
       - data/processed/train.csv
-      - data/processed/validation.csv
-      - src/credit_monitoring/models/train.py
+      - src/credit_monitoring/models/tune.py
+      - src/credit_monitoring/models/features.py
+      - src/credit_monitoring/models/metrics.py
       - src/credit_monitoring/config.py
       - src/credit_monitoring/contracts
     params:
@@ -79,10 +80,45 @@ stages:
           - dataset.canonical_target
           - contract
           - modeling
+      - configs/optimization.yaml:
+          - optimization
+    outs:
+      - reports/optimization/opt-20261026-01/tuning:
+          cache: false
+      - models/optimization/opt-20261026-01/finalists
+
+  train:
+    cmd: python -m credit_monitoring.models.train --optimization-config configs/optimization.yaml
+    deps:
+      - data/processed/train.csv
+      - data/processed/validation.csv
+      - src/credit_monitoring/models/train.py
+      - src/credit_monitoring/models/metrics.py
+      - src/credit_monitoring/models/promotion.py
+      - src/credit_monitoring/models/features.py
+      - src/credit_monitoring/models/tune.py
+      - src/credit_monitoring/config.py
+      - src/credit_monitoring/contracts
+      - configs/optimization.yaml
+      - reports/optimization/opt-20261026-01/tuning
+      - models/optimization/opt-20261026-01/finalists
+    params:
+      - configs/project.yaml:
+          - project.random_seed
+          - dataset.financial_features
+          - dataset.canonical_target
+          - contract
+          - modeling
+      - configs/optimization.yaml:
+          - optimization
     outs:
       - models/credit_model.joblib
       - models/credit_model_metadata.json
       - models/candidates
+      - models/optimization/opt-20261026-01/incumbent
+      - models/optimization/opt-20261026-01/selection
+      - reports/optimization/opt-20261026-01/selection:
+          cache: false
       - reports/figures/model
     metrics:
       - reports/metrics.json:

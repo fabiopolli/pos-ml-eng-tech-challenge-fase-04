@@ -10,6 +10,8 @@
   "selected_model": "random_forest",
   "test": {
     "accuracy": 0.777111,
+    "average_precision": 0.550029,
+    "brier": 0.178694,
     "confusion_matrix": {
       "fn": 393,
       "fp": 610,

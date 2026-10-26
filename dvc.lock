@@ -197,8 +197,13 @@ stages:
       md5: dd57d28df2ec5b23960b1bbda5e36d00
       size: 2007586
   train:
-    cmd: python -m credit_monitoring.models.train
+    cmd: python -m credit_monitoring.models.train --optimization-config 
+      configs/optimization.yaml
     deps:
+    - path: configs/optimization.yaml
+      hash: md5
+      md5: fd6c2b9865f9d83c5feff56c0e58c624
+      size: 2771
     - path: data/processed/train.csv
       hash: md5
       md5: dd57d28df2ec5b23960b1bbda5e36d00
@@ -207,6 +212,16 @@ stages:
       hash: md5
       md5: b3b783043ad58b194cf3d2dd1d2aa5be
       size: 430389
+    - path: models/optimization/opt-20261026-01/finalists
+      hash: md5
+      md5: 692f412b650fceaacb77d00147cc890c.dir
+      size: 16959955
+      nfiles: 2
+    - path: reports/optimization/opt-20261026-01/tuning
+      hash: md5
+      md5: 79da42ea47b134b2ac1e6f87e317e9b2.dir
+      size: 78882
+      nfiles: 6
     - path: src/credit_monitoring/config.py
       hash: md5
       md5: dcc6b47dd5862af2c46c60615575c10d
@@ -216,11 +231,106 @@ stages:
       md5: b189eeeffd023c038bd06a40d72dba69.dir
       size: 13977
       nfiles: 6
+    - path: src/credit_monitoring/models/features.py
+      hash: md5
+      md5: 9ef4551a1ad4b332fc67b7653e9cc53a
+      size: 3990
+    - path: src/credit_monitoring/models/metrics.py
+      hash: md5
+      md5: 8e6f55bc35676a9c4024530f7aca103d
+      size: 3150
+    - path: src/credit_monitoring/models/promotion.py
+      hash: md5
+      md5: 8dc74bda3b9d65c934b2c4909775a050
+      size: 13436
     - path: src/credit_monitoring/models/train.py
       hash: md5
-      md5: ed153dedba797ff29f9d243945dd444f
-      size: 17425
+      md5: 2d1811d9b7e0946e8983d98b357bc88e
+      size: 32435
+    - path: src/credit_monitoring/models/tune.py
+      hash: md5
+      md5: 59da4a6b23dd3e1c744990c325158049
+      size: 32461
     params:
+      configs/optimization.yaml:
+        optimization:
+          protocol_version: 1.6.0
+          experiment_id: opt-20261026-01
+          primary_metric: roc_auc
+          threshold: 0.5
+          folds:
+            n_splits: 5
+            shuffle: true
+            random_state: 42
+          seeds:
+            primary: 42
+            stability:
+            - 17
+            - 73
+          budget:
+            max_fits: 220
+          criteria:
+            min_gain_validation: 0.01
+            min_gain_cv_mean: 0.005
+            min_ablation_gain: 0.005
+            ci_level: 0.95
+            bootstrap_resamples: 2000
+            bootstrap_seed: 42
+          search:
+            random_forest:
+              n_draws: 24
+              sampler_seed: 42
+              grid:
+                n_estimators:
+                - 200
+                - 300
+                - 600
+                max_depth:
+                - 6
+                - 8
+                - 12
+                - 16
+                - 
+                min_samples_leaf:
+                - 1
+                - 2
+                - 5
+                - 10
+                - 20
+                - 40
+                min_samples_split:
+                - 2
+                - 10
+                - 20
+                max_features:
+                - sqrt
+                - 0.5
+                - 1.0
+                class_weight:
+                - 
+                - balanced
+                - balanced_subsample
+            logistic_regression:
+              C:
+              - 0.001
+              - 0.01
+              - 0.1
+              - 1.0
+              - 10.0
+              - 100.0
+              class_weight:
+              - 
+              - balanced
+              solver: lbfgs
+              penalty: l2
+              max_iter: 5000
+          ratio_features:
+            min_denominator: 1.0
+            names:
+            - bill_amt1_over_limit_bal
+            - pay_amt1_over_limit_bal
+            - pay_amt1_over_abs_bill_amt1
+          n_jobs: 1
       configs/project.yaml:
         contract:
           age_min: 18
@@ -284,17 +394,32 @@ stages:
       size: 5490050
     - path: models/credit_model_metadata.json
       hash: md5
-      md5: 546d28eb64e2b5ba4a53ce2449153d4a
-      size: 3614
+      md5: b568597e176da6cfb941b08898c0184f
+      size: 11371
+    - path: models/optimization/opt-20261026-01/incumbent
+      hash: md5
+      md5: e64122fb4fc16af39af4138bac9e855a.dir
+      size: 5490530
+      nfiles: 2
+    - path: models/optimization/opt-20261026-01/selection
+      hash: md5
+      md5: b97104d04b79e7c9ffee4279b1da47a1.dir
+      size: 303887
+      nfiles: 1
     - path: reports/figures/model
       hash: md5
-      md5: 74b028f2f285543f7ac91271b3d62d8c.dir
-      size: 87161
+      md5: d6a6d5ebcc28db61cccee098d63c009c.dir
+      size: 104691
       nfiles: 2
     - path: reports/metrics.json
       hash: md5
-      md5: 04ac0cbff18ff46f66440cb2c902cd8c
-      size: 1347
+      md5: 89d53a4a537d6117db45e8ba9b5116d4
+      size: 7073
+    - path: reports/optimization/opt-20261026-01/selection
+      hash: md5
+      md5: bd99cbb798d29c9541f92362e595fea5.dir
+      size: 8715
+      nfiles: 1
   acquire:
     cmd: python -m credit_monitoring.data.acquire
     deps:
@@ -400,8 +525,8 @@ stages:
       size: 5490050
     - path: models/credit_model_metadata.json
       hash: md5
-      md5: 546d28eb64e2b5ba4a53ce2449153d4a
-      size: 3614
+      md5: b568597e176da6cfb941b08898c0184f
+      size: 11371
     - path: src/credit_monitoring/config.py
       hash: md5
       md5: dcc6b47dd5862af2c46c60615575c10d
@@ -448,5 +573,175 @@ stages:
     outs:
     - path: reports/test_metrics.json
       hash: md5
-      md5: b644f603ab3f5e4aecf9a28e368efd59
-      size: 1214
+      md5: 0130eb8f7b655ecbc739a3adcc91b8f6
+      size: 1272
+  tune:
+    cmd: python -m credit_monitoring.models.tune
+    deps:
+    - path: data/processed/train.csv
+      hash: md5
+      md5: dd57d28df2ec5b23960b1bbda5e36d00
+      size: 2007586
+    - path: src/credit_monitoring/config.py
+      hash: md5
+      md5: dcc6b47dd5862af2c46c60615575c10d
+      size: 987
+    - path: src/credit_monitoring/contracts
+      hash: md5
+      md5: b189eeeffd023c038bd06a40d72dba69.dir
+      size: 13977
+      nfiles: 6
+    - path: src/credit_monitoring/models/features.py
+      hash: md5
+      md5: 9ef4551a1ad4b332fc67b7653e9cc53a
+      size: 3990
+    - path: src/credit_monitoring/models/metrics.py
+      hash: md5
+      md5: 8e6f55bc35676a9c4024530f7aca103d
+      size: 3150
+    - path: src/credit_monitoring/models/tune.py
+      hash: md5
+      md5: 59da4a6b23dd3e1c744990c325158049
+      size: 32461
+    params:
+      configs/optimization.yaml:
+        optimization:
+          protocol_version: 1.6.0
+          experiment_id: opt-20261026-01
+          primary_metric: roc_auc
+          threshold: 0.5
+          folds:
+            n_splits: 5
+            shuffle: true
+            random_state: 42
+          seeds:
+            primary: 42
+            stability:
+            - 17
+            - 73
+          budget:
+            max_fits: 220
+          criteria:
+            min_gain_validation: 0.01
+            min_gain_cv_mean: 0.005
+            min_ablation_gain: 0.005
+            ci_level: 0.95
+            bootstrap_resamples: 2000
+            bootstrap_seed: 42
+          search:
+            random_forest:
+              n_draws: 24
+              sampler_seed: 42
+              grid:
+                n_estimators:
+                - 200
+                - 300
+                - 600
+                max_depth:
+                - 6
+                - 8
+                - 12
+                - 16
+                - 
+                min_samples_leaf:
+                - 1
+                - 2
+                - 5
+                - 10
+                - 20
+                - 40
+                min_samples_split:
+                - 2
+                - 10
+                - 20
+                max_features:
+                - sqrt
+                - 0.5
+                - 1.0
+                class_weight:
+                - 
+                - balanced
+                - balanced_subsample
+            logistic_regression:
+              C:
+              - 0.001
+              - 0.01
+              - 0.1
+              - 1.0
+              - 10.0
+              - 100.0
+              class_weight:
+              - 
+              - balanced
+              solver: lbfgs
+              penalty: l2
+              max_iter: 5000
+          ratio_features:
+            min_denominator: 1.0
+            names:
+            - bill_amt1_over_limit_bal
+            - pay_amt1_over_limit_bal
+            - pay_amt1_over_abs_bill_amt1
+          n_jobs: 1
+      configs/project.yaml:
+        contract:
+          age_min: 18
+          age_max: 100
+          require_unique_id: true
+          require_positive_limit_bal: true
+          reject_null_features: true
+        dataset.canonical_target: default_payment_next_month
+        dataset.financial_features:
+        - LIMIT_BAL
+        - PAY_0
+        - PAY_2
+        - PAY_3
+        - PAY_4
+        - PAY_5
+        - PAY_6
+        - BILL_AMT1
+        - BILL_AMT2
+        - BILL_AMT3
+        - BILL_AMT4
+        - BILL_AMT5
+        - BILL_AMT6
+        - PAY_AMT1
+        - PAY_AMT2
+        - PAY_AMT3
+        - PAY_AMT4
+        - PAY_AMT5
+        - PAY_AMT6
+        modeling:
+          primary_metric: roc_auc
+          secondary_metrics:
+          - precision
+          - recall
+          - f1
+          - accuracy
+          candidates:
+          - logistic_regression
+          - random_forest
+          baseline: logistic_regression
+          tie_break: baseline
+          logistic_regression:
+            C: 1.0
+            max_iter: 1000
+            class_weight: balanced
+          random_forest:
+            n_estimators: 300
+            max_depth: 8
+            min_samples_leaf: 20
+            class_weight: balanced_subsample
+            n_jobs: -1
+        project.random_seed: 42
+    outs:
+    - path: models/optimization/opt-20261026-01/finalists
+      hash: md5
+      md5: 692f412b650fceaacb77d00147cc890c.dir
+      size: 16959955
+      nfiles: 2
+    - path: reports/optimization/opt-20261026-01/tuning
+      hash: md5
+      md5: 79da42ea47b134b2ac1e6f87e317e9b2.dir
+      size: 78882
+      nfiles: 6
