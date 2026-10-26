@@ -108,6 +108,7 @@ UCI 350 (XLS, objeto DVC)
   -> produção original = features da validação + cópia com drift
   -> contrato + inferência + Evidently (controle e lote alterado)
   -> MLflow local + relatórios -> dashboard Streamlit
+  -> laboratório Streamlit de comparação e teste dos modelos (plano 1.6)
 
 Datasets/modelo <-> cache DVC <-> DagsHub Storage
 Código, parâmetros, ponteiros e dvc.lock -> GitHub
@@ -199,7 +200,7 @@ DVC**, não um arquivo do Git: em um clone novo ele vem do remote com `uv run dv
 (ver [`data/raw/README.md`](data/raw/README.md) e [`docs/DATASET.md`](docs/DATASET.md)):
 
 ```bash
-uv run dvc repro      # acquire -> eda -> prepare -> explore -> train -> evaluate
+uv run dvc repro      # acquire -> eda -> prepare -> explore -> tune -> train -> evaluate
 uv run dvc dag        # ordem dos estágios
 uv run dvc metrics show
 ```
@@ -208,6 +209,42 @@ O notebook [`notebooks/01_eda.ipynb`](notebooks/01_eda.ipynb) apresenta a audito
 do bruto e [`notebooks/02_explore_train.ipynb`](notebooks/02_explore_train.ipynb) a exploração
 supervisionada restrita ao treino; a descrição do dataset está em
 [`docs/DATASET.md`](docs/DATASET.md).
+
+### Campanha de otimização dos modelos (plano 1.6)
+
+O estágio `tune` executa a campanha limitada descrita em
+[`docs/plans/1.6-otimizacao-modelos.md`](docs/plans/1.6-otimizacao-modelos.md): controles,
+busca de hiperparâmetros, uma ablação de razões financeiras e a checagem de estabilidade do
+Random Forest, **somente sobre o conjunto de treino**. O estágio `train` recebe os finalistas
+congelados, roda a rodada única de validação e registra a decisão `promote` ou `keep_current`
+antes de qualquer avaliação de teste.
+
+```bash
+uv run dvc repro tune    # campanha: só o treino é lido
+uv run dvc repro train   # rodada de validação e decisão
+uv run dvc repro evaluate # avaliação final do modelo efetivamente publicado
+```
+
+O protocolo (folds, sementes, orçamento, critérios e lista de trials) fica congelado em
+`configs/optimization.yaml`; o manifesto com hashes, versões e a lista efetiva de trials é
+gravado em `reports/optimization/<experiment_id>/tuning/manifest.json` **antes** dos
+resultados. A decisão congelada fica em
+`reports/optimization/<experiment_id>/selection/comparison.json`, e a evidência textual em
+[`docs/evidence/1.6-otimizacao-modelos.md`](docs/evidence/1.6-otimizacao-modelos.md).
+
+### Laboratório de modelos
+
+Aplicação local para inspecionar, comparar e testar os modelos congelados (o publicado, os
+dois controles e os finalistas). Ela não treina, não promove e não altera datasets, métricas
+officiais ou o `dvc.lock`:
+
+```bash
+uv sync --dev --locked --extra model_lab
+uv run --extra model_lab streamlit run dashboard/app_dev.py --server.address 127.0.0.1
+```
+
+O painel operacional da fase 3 (`dashboard/app.py`) continua respondendo pela observabilidade
+do pipeline; ver [`dashboard/README.md`](dashboard/README.md).
 
 O dashboard inicial já pode ser aberto; a integração de observabilidade e os dados de produção
 simulados serão concluídos nas etapas seguintes. `streamlit` e `mlflow` são **extras** e não são
@@ -247,6 +284,7 @@ O acompanhamento operacional está em [`docs/CHECKLIST.md`](docs/CHECKLIST.md).
 | Fundação do repositório e remote | Concluído | `dvc[s3]` e `xlrd` travados; pipeline e `dvc.lock` coerentes; workbook original migrado do Git para o DVC; remote DagsHub configurado, objetos enviados e **recuperação provada em checkout separado** |
 | Aquisição, auditoria e preparação | Concluído | Estágios `acquire`/`eda`/`prepare`/`explore`; proveniência com DOI e licença em [`docs/DATASET.md`](docs/DATASET.md); exposição do teste declarada em [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md) |
 | Modelos e Data Contract | Concluído | Contrato Pandera integrado antes do `fit`; seleção na validação e avaliação final em estágios separados; [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md) |
+| Campanha de otimização (plano 1.6) | Concluído | Estágio `tune` (só treino) + rodada única de validação com decisão registrada; laboratório Streamlit de comparação e teste; [`docs/evidence/1.6-otimizacao-modelos.md`](docs/evidence/1.6-otimizacao-modelos.md) |
 | Simulação e relatório de drift | Pendente | Cenário inicial documentado |
 | MLflow e Streamlit | Em preparação | Shell do dashboard criada |
 | Governança e vídeo | Em preparação | Documento-base e roteiro de entregas |

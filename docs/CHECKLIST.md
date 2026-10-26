@@ -18,6 +18,19 @@ seção" de [`docs/evidence/fase-1.md`](evidence/fase-1.md).
 - [x] **1.6** Seleção, serialização e versionamento - Concluído - `train` (seleção) e `evaluate` (avaliação final) em estágios separados; desempate explícito pelo baseline sobre métricas não arredondadas; recarga verificada (tolerância 1e-12); metadados completos com limiar, hashes, SHA do código, versão do contrato e exposição declarada; **recuperação remota provada** (hashes conferidos e inferência do modelo recuperado com diferença de 3,33e-16). **Caminho local revalidado por execução** em §1.6.2.
 - [x] **1.7** Pandera antes do treino/inferência - Concluído - `src/credit_monitoring/contracts/`; lote válido aceito, 7+ perturbações isoladas rejeitadas com rejeição integral do lote e diagnóstico por regra/coluna/contagem; CLI com saída não zero; evidência em [`docs/evidence/fase-1.md`](evidence/fase-1.md) §1.7; **revalidada por execução** em §1.7.1, com o spy de predição (zero chamadas em falha) e a prova de validação do lote integral antes da seleção das 19 entradas agora automatizadas e verificadas por mutação.
 
+## Extensão do plano 1.6 — campanha de otimização dos modelos
+
+Extensão **planejada** por Bill Kopp, sem criar uma quinta fase e sem substituir o aceite
+histórico de M1. Detalhes em [`docs/plans/1.6-otimizacao-modelos.md`](plans/1.6-otimizacao-modelos.md);
+evidência em [`docs/evidence/1.6-otimizacao-modelos.md`](evidence/1.6-otimizacao-modelos.md).
+
+- [x] **1.6-O1** Protocolo e preservação - Concluído - `configs/optimization.yaml` congela folds, sementes, orçamento, critérios e espaços de busca; manifesto com hashes, versões, fontes e lista efetiva de trials gravado em `reports/optimization/<exp>/tuning/manifest.json` antes de qualquer resultado.
+- [x] **1.6-O2** Busca no treino - Concluído - `src/credit_monitoring/models/tune.py` lê **somente** `train.csv`; controles, 24 configurações de RF e 12 de LR nos mesmos cinco folds, com pré-processamento ajustado dentro dos folds; falhas registradas, nunca convertidas em score zero.
+- [x] **1.6-O3** Ablação e finalistas - Concluído - uma única variante de razões financeiras por família (`src/credit_monitoring/models/features.py`), repetição do RF com as sementes 17 e 73 sem escolher a melhor, e um finalista congelado por algoritmo.
+- [x] **1.6-O4** Seleção e promoção - Concluído - rodada única de validação com o RF vigente e os dois finalistas, bootstrap pareado e estratificado (2.000 reamostragens, seed 42, intervalo de 97,5% por contraste), decisão explícita `promote` ou `keep_current` em `reports/optimization/<exp>/selection/comparison.json`, sem acesso ao teste.
+- [x] **1.6-O5** Congelamento e transferência - Concluído - decisão integrada ao estágio de seleção (`src/credit_monitoring/models/train.py`): artefato publicado, metadados estendidos (algoritmo e versão candidata separados), incumbente arquivado e recarregado com paridade de probabilidades, `dvc.lock` coerente e sem dois donos para a mesma saída.
+- [x] **1.6-O6** Laboratório de modelos - Concluído - `dashboard/app_dev.py` (Streamlit, extra `model_lab`) com artefatos e prontidão, comparação lado a lado com curvas ROC/PR, predição individual e em lote e cenários de contrato; serviço de inferência compartilhado em `src/credit_monitoring/models/inference.py`; testes com `streamlit.testing.v1.AppTest` e `dashboard/README.md`. Inspeção visual em navegador local registrada na evidência (§11.3), com o defeito de renderização encontrado e corrigido durante a inspeção (§11.4) e teste de regressão correspondente.
+
 ## Semana 2 - Simulação e detecção de drift
 
 - [ ] **2.1** Referência = treino; produção original = features da validação após seleção; IDs disjuntos entre referência/produção, sem usar o teste.
