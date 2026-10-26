@@ -33,9 +33,9 @@ registrado.
 | §1.1 | Configuração do repositório | Execução original + recuperação remota provada (§1.6.1) | Execução original |
 | §1.2 | Aquisição e auditoria do dataset | §1.2.1 (exposição declarada) + **§1.2.2 (revalidação por execução)** | Execução revalidada |
 | §1.3 | Preparação dos dados | **§1.3.1 (revalidação por execução)** | Execução revalidada |
-| §1.4 | Treinamento da Regressão Logística | Execução original (testes automatizados e métricas de validação) | Execução original — revalidação independente pendente |
-| §1.5 | Treinamento do Random Forest | Execução original (testes automatizados e métricas de validação) | Execução original — revalidação independente pendente |
-| §1.6 | Avaliação, seleção e versionamento | Execução original + **§1.6.1 (recuperação remota executada em checkout separado)** | Execução original no caminho local — revalidação independente pendente |
+| §1.4 | Treinamento da Regressão Logística | **§1.4.1 (revalidação por execução)** | Execução revalidada |
+| §1.5 | Treinamento do Random Forest | **§1.5.1 (revalidação por execução)** | Execução revalidada |
+| §1.6 | Avaliação, seleção e versionamento | **§1.6.2 (revalidação do caminho local)** + **§1.6.1 (recuperação remota executada em checkout separado)** | Execução revalidada |
 | §1.7 | Data Contract (Pandera) | **§1.7.1 (revalidação por execução)** | Execução revalidada |
 
 Nenhuma seção registra resultado que não tenha sido observado: onde falta prova, a ausência está
@@ -63,15 +63,16 @@ repositório.
 | `uv run dvc push -r dagshub` | 0 | 25 objetos enviados |
 | `git diff --check` | 0 | sem saída |
 
-### Verificações mais recentes (2026-10-26, após a revalidação do contrato)
+### Verificações mais recentes (2026-10-26, após a revalidação de 1.4/1.5/1.6)
 
 | Comando | Código de saída | Resultado |
 |---|---|---|
-| `uv run pytest -q` | 0 | **78 passed** (74 anteriores + 4 do contrato) |
+| `uv run pytest -q` | 0 | **80 passed** (74 + 4 do contrato + 2 do escopo do `fit` e da recalculabilidade) |
 | `uv run ruff check .` | 0 | All checks passed |
 | `uv run ruff format --check .` | 0 | 53 files already formatted |
 | `uv run dvc status` | 0 | `Data and pipelines are up to date.` |
 | `uv run dvc status -c -r dagshub` | 0 | `Cache and remote 'dagshub' are in sync.` |
+| `uv run dvc repro -f` (clone isolado) | 0 | 6 estágios em 28 s; 13 artefatos byte a byte idênticos, exceto `git_sha` nos metadados |
 | `git diff --check` | 0 | sem saída |
 
 ## Hashes dos artefatos
@@ -315,8 +316,7 @@ responder *Cache and remote 'dagshub' are in sync*. Suíte: `uv run pytest -q` �
 
 ## 1.4 — Treinamento da Regressão Logística
 
-**Implementado sob o contrato; aceite verificado.** A revalidação independente por execução desta
-etapa ainda não foi feita (ver "Grau de evidência por seção").
+**Implementado sob o contrato; aceite verificado e revalidado por execução (§1.4.1).**
 
 | Item | Evidência |
 |---|---|
@@ -328,10 +328,60 @@ etapa ainda não foi feita (ver "Grau de evidência por seção").
 | Métricas de validação | ROC-AUC **0,714497** · precision 0,367477 · recall 0,638191 · F1 0,466397 · accuracy 0,677111 · matriz TN 2.412 / FP 1.093 / FN 360 / TP 635 |
 | Recursos | wall 0,091 s · CPU 0,264 s · ΔRSS 30,6 MiB (medições em `reports/run_resources.json`, fora dos artefatos versionados) |
 
+### 1.4.1 — Revalidação independente do treino (2026-10-26, 13:20–13:45)
+
+A 1.4 já estava implementada e seu aceite estava registrado por testes automatizados. Esta
+passagem **reexecutou o estágio de treino contra o código real**, em ambiente isolado, e
+confrontou o resultado com o publicado. Uma lacuna de prova foi fechada.
+
+**Ambiente da revalidação.** Clone local do branch `fase-1-bill` @ `9955345` em
+`/home/bill/.positronic/runtime/tmp/opencode/reval-1.4-1.6/clone`, com o cache DVC copiado do
+projeto de origem (23 MB, 45 objetos) — **sem depender do remote nem das credenciais do DagsHub** —
+e ambiente travado com `uv sync --dev --locked` sobre o mesmo `uv.lock`.
+
+| Verificação | Resultado observado |
+|---|---|
+| R1 — pipeline completo | `uv run dvc repro -f` (6 estágios, 28 s) reproduziu os artefatos publicados **byte a byte** (tabela abaixo) |
+| R2 — isolamento do teste | com `data/processed/test.csv` removido, `python -m credit_monitoring.models.train` → exit 0, `Modelo selecionado: random_forest (validacao roc_auc=0.7741)`, hash do modelo inalterado (`a5a4a740…`) |
+| R3 — disciplina de ajuste | com `validation.csv` perturbado (`LIMIT_BAL × 1000`), o ROC-AUC de validação foi de 0,774103 para **0,765874** e a matriz mudou (fn 418→450, fp 584→497, tp 577→545) — a validação é usada para **avaliar** — enquanto o **artefato do modelo permaneceu byte-a-byte idêntico**: o ajuste usou só o treino |
+| R4 — métricas recalculáveis | ROC-AUC recalculado do artefato **0,774103** (publicado 0,774103); accuracy **0,777333** (publicado 0,777333); `selection.scores` **não arredondados** (0,7144974515946351 / 0,7741034702757726); regra e desempate pelo baseline registrados |
+| R11 — o contrato precede o ajuste | `train.csv` com `LIMIT_BAL=0` → `ContractViolation: 21000 rows rejected (require_positive_limit_bal[LIMIT_BAL]=1)`, exit 1, e o **modelo não foi reescrito** |
+
+Comparação dos artefatos entre o clone reexecutado e o projeto de origem, após `dvc repro -f`:
+
+| Artefato | SHA-256 | Veredito |
+|---|---|---|
+| `data/default of credit card clients.xls` | `63c47faa4cf5e224…` | idêntico |
+| `data/raw/default_of_credit_card_clients.csv` | `1fc7fe04822413cf…` | idêntico |
+| `data/processed/train.csv` | `9ebd48b6d31c67f4…` | idêntico |
+| `data/processed/validation.csv` | `e910967511f31406…` | idêntico |
+| `data/processed/test.csv` | `70642cbcc7497240…` | idêntico |
+| `data/processed/preparation_report.json` | `60fc337b673dd871…` | idêntico |
+| `data/reference/reference.csv` | `9ebd48b6d31c67f4…` | idêntico |
+| `models/credit_model.joblib` | `a5a4a740902fab9e…` | **idêntico** |
+| `reports/eda/eda_summary.json` | `cd33ed3a49e52c27…` | idêntico |
+| `reports/explore/train_exploration.json` | `0f6b8b8af79a4ad5…` | idêntico |
+| `reports/metrics.json` | `37a3fc84c371af2c…` | idêntico |
+| `reports/test_metrics.json` | `f9aa6f218a76df55…` | idêntico |
+| `models/credit_model_metadata.json` | `8eb3743e…` → `d301a354…` | **difere em um campo**: `git_sha` `80c9694…` → `9955345…` (o commit do checkout que produziu o artefato) |
+| `dvc.lock` | `131f9f98…` → `e3a16972…` | **difere apenas** no hash do `credit_model_metadata.json` |
+
+As duas diferenças são o comportamento já documentado em §1.6.1: o modelo, os dados e os relatórios
+são reproduzidos a partir do workbook de origem; só o carimbo de código nos metadados acompanha o
+checkout. **O repositório de origem não foi alterado por esta revalidação** — nenhum artefato
+publicado mudou, `dvc status` permaneceu limpo e nada foi enviado ao remote.
+
+**Lacuna fechada.** *"Garantir `fit` de scaler/classificador somente no treino; validação apenas
+para avaliação"* era garantido pelo código (`_fit_with_convergence(model, x_train, y_train)`), mas
+**nenhum teste observava o que chegava ao `fit`**. Acrescentado
+`tests/test_train.py::test_estimators_are_fitted_on_the_training_split_only`: um spy de
+`Pipeline.fit` captura a matriz recebida e exige que sejam exatamente as features do treino, nas
+linhas do treino, e que **os dois candidatos recebam as mesmas entradas** — comparabilidade exigida
+pela 1.5. Mutação aplicada: ajustar em treino+validação → o teste falha (`AssertionError`).
+
 ## 1.5 — Treinamento do Random Forest
 
-**Implementado sob o contrato; aceite verificado.** A revalidação independente por execução desta
-etapa ainda não foi feita (ver "Grau de evidência por seção").
+**Implementado sob o contrato; aceite verificado e revalidado por execução (§1.5.1).**
 
 | Item | Evidência |
 |---|---|
@@ -340,6 +390,33 @@ etapa ainda não foi feita (ver "Grau de evidência por seção").
 | Custo local | wall 1,472 s · CPU 10,478 s · ΔRSS 23,5 MiB · pico de RSS do processo 303,7 MiB. `n_jobs=-1` (configurado) usa todos os núcleos locais; não inviabilizou o ambiente e está registrado na configuração |
 | Métricas de validação | ROC-AUC **0,774103** · precision 0,496985 · recall 0,579899 · F1 0,535250 · accuracy 0,777333 · matriz TN 2.921 / FP 584 / FN 418 / TP 577 |
 | Matriz conferível | TN+FP+FN+TP = 4.500 = linhas de validação |
+
+### 1.5.1 — Revalidação independente do Random Forest (2026-10-26, 13:45–13:50)
+
+A 1.5 compartilha o mesmo estágio de treino da 1.4; a revalidação descrita em §1.4.1 cobre a
+reexecução do Random Forest junto com a do baseline. O que é próprio desta etapa — comparabilidade
+das entradas e recalculabilidade das métricas — foi verificado separadamente.
+
+| Verificação | Resultado observado |
+|---|---|
+| R1 — retreinamento e seleção | O RF foi retreinado do zero no clone e o **artefato saiu byte-a-byte idêntico** ao publicado (`a5a4a740…`); a seleção voltou a ser `random_forest`, com os scores não arredondados `logistic_regression` 0,7144974515946351 e `random_forest` 0,7741034702757726 |
+| R4 — matriz confere com a validação | TN 2.921 + FP 584 + FN 418 + TP 577 = **4.500**, exatamente as linhas de validação |
+| R4 — métricas recalculáveis do artefato | ROC-AUC 0,774103 e accuracy 0,777333 recalculadas do `credit_model.joblib` publicado — iguais às registradas |
+| Comparabilidade das entradas | O teste novo de escopo do `fit` (§1.4.1) prova que **os dois candidatos são ajustados sobre exatamente a mesma matriz** — as features e linhas do treino — e o mesmo teste exige que ambos recebam os mesmos valores |
+| Custo local remedido | RF: wall 1,212 s · CPU 10,311 s · ΔRSS 23,9 MiB · pico de RSS 304,4 MiB. LR: wall 0,109 s · CPU 0,504 s · ΔRSS 30,7 MiB (`reports/run_resources.json` do clone; não versionado, por decisão de projeto) |
+| Convergência | `fit.random_forest.converged = true`, sem avisos de convergência |
+
+O RF **venceu** o baseline (0,774103 contra 0,714497), o que é um resultado e não um requisito: o
+plão proíbe exigir a vitória e exige a comparabilidade das entradas, que está verificada acima.
+
+**Lacuna fechada.** *"Métricas são recalculáveis e somas da matriz correspondem à validação"* não
+tinha prova automatizada: nada checava que a matriz de confusão cobrisse a validação inteira, nem
+que as métricas reportadas fossem reconstruíveis a partir dela. Acrescentado
+`tests/test_train.py::test_validation_metrics_are_recomputable_and_account_for_every_row`: para
+**cada** candidato, `tn+fp+fn+tp` deve igualar o número de linhas da validação, e accuracy,
+precision, recall e F1 recalculadas da matriz devem coincidir com as reportadas (tolerância 1e-6,
+a precisão do arredondamento da apresentação). Mutação aplicada: avaliar as métricas no treino em
+vez da validação → o teste falha (`AssertionError`).
 
 ## 1.7 — Data Contract (Pandera)
 
@@ -456,11 +533,11 @@ meio da fase; o que muda a decisão está explicitado):
 ## 1.6 — Avaliação, seleção e versionamento
 
 **Recorte local e remoto — implementados e verificados.** O bloqueio remoto registrado na passagem
-original foi resolvido; a recuperação remota está provada em §1.6.1.
+original foi resolvido; a recuperação remota está provada em §1.6.1 e o caminho local foi
+revalidado por execução em §1.6.2.
 
-> O recorte **local** tem aceite da execução original; a **revalidação independente por
-> execução** do caminho local (retreinar, refazer a seleção, reexecutar a recarga) ainda não foi
-> feita. O recorte **remoto** tem prova executada em §1.6.1. Ver "Grau de evidência por seção".
+> O recorte **local** foi revalidado por execução em §1.6.2; o recorte **remoto** tem prova
+> executada em §1.6.1. Ver "Grau de evidência por seção".
 
 | Item | Evidência |
 |---|---|
@@ -530,6 +607,27 @@ demais saídas — dados, modelo e relatórios — permanecem byte-a-byte idênt
 esperado de metadados que registram a versão do código, e está documentado no registro de
 transferência.
 
+### 1.6.2 — Revalidação independente do caminho local (2026-10-26, 13:20–13:50)
+
+A §1.6.1 provou o **recorte remoto**. Esta passagem revalidou o **caminho local** — seleção,
+avaliação final, recarga e versionamento — por execução, no mesmo clone isolado descrito em
+§1.4.1 (branch `fase-1-bill` @ `9955345`, cache DVC local, sem credenciais do remote).
+
+| Verificação | Resultado observado |
+|---|---|
+| R7 — avaliação final em estágio próprio | `uv run dvc repro -f evaluate` reproduziu `reports/test_metrics.json` **byte a byte** (`f9aa6f21…`) |
+| R7 — métricas do teste recalculáveis do artefato | ROC-AUC **0,777198** (publicado 0,777198), accuracy **0,777111** (publicado 0,777111), matriz **tn 2.894 / fp 610 / fn 393 / tp 603** — idêntica à publicada |
+| R7 — protocolo declarado | `protocol.frozen = true` e `test_exposure.declared = true` no relatório final; a exposição prévia declarada em §1.2.1 continua registrada nos metadados |
+| R8 — recarga do modelo | `max |Δp|` entre a instância em memória e o artefato recarregado = **3,33e-16**, dentro da tolerância declarada de 1e-12; `reload_check` nos metadados e em `reports/metrics.json` |
+| R9 — congelamento do artefato | com um byte acrescentado ao `credit_model.joblib`, o avaliador **recusa** a execução: `ValueError: Frozen model hash mismatch: ebb1dc1b… != a5a4a740…`, exit 1, e nenhum relatório de avaliação é escrito |
+| R10 — a avaliação não altera a seleção | `reports/metrics.json` e `models/credit_model_metadata.json` permanecem idênticos antes e depois de `repro -f evaluate`; o estágio `train` não declara `test.csv` entre suas dependências |
+| R1 — reprodutibilidade do conjunto | `dvc repro -f` reproduziu os 13 artefatos, com as duas diferenças esperadas já descritas em §1.4.1 |
+| R11 — o contrato precede o ajuste | lote de treino inválido → `ContractViolation` e **nenhum ajuste realizado** (ver §1.4.1) |
+
+**Nenhuma pendência foi criada e nenhum artefato publicado mudou.** O repositório de origem
+permanece com `dvc status` limpo, o `dvc.lock` coerente e o remote `dagshub` em sincronia; o modelo
+publicado continua sendo o mesmo artefato (`a5a4a740…`), byte a byte o mesmo que o retreinado aqui.
+
 ---
 
 ## Checklist do gate M1
@@ -581,10 +679,9 @@ precisam andar juntos).
 4. **Publicação da branch** — concluída: a branch `fase-1-bill` foi publicada em
    `origin/fase-1-bill` com autorização do operador. O PR para `main` continua sendo decisão da
    equipe.
-5. **Revalidação independente de 1.4, 1.5 e 1.6 (caminho local)** — **pendente**: essas três
-   seções se apoiam na execução original. 1.2, 1.3 e 1.7 já têm revalidação por execução
-   (§1.2.2, §1.3.1, §1.7.1). A pendência não bloqueia M1 — que exige aceite, não revalidação
-   duplicada — mas é o próximo trabalho de qualidade antes da Fase 2.
+5. **Revalidação independente de 1.4, 1.5 e 1.6 (caminho local)** — **concluída em 2026-10-26**:
+   §1.4.1, §1.5.1 e §1.6.2, executadas em clone isolado. As sete entregas da fase 1 têm agora
+   registro de aceite com prova de execução, e não apenas leitura de código.
 
 ## Limitações conhecidas desta execução
 

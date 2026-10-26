@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import joblib
+import numpy as np
 import pandas as pd
 import pytest
 from conftest import RAW_TARGET, make_raw
@@ -127,6 +128,83 @@ def test_run_training_is_reproducible(tmp_path, config, processed_dir):
 
 def test_model_does_not_use_governance_features(config):
     assert not set(feature_columns(config)) & set(config["dataset"]["governance_features"])
+
+
+def test_estimators_are_fitted_on_the_training_split_only(
+    tmp_path, config, processed_dir, monkeypatch
+):
+    """The scaler and the classifier must be fitted on the train split alone.
+
+    The plan (1.4) requires the fit to happen on the training split only, with
+    the validation split used exclusively for evaluation. The spy captures the
+    matrix handed to every ``Pipeline.fit``: it must be the training features,
+    without the validation rows, and both candidates must receive exactly the
+    same inputs — the comparability required by 1.5.
+    """
+    fitted = []
+    from sklearn.pipeline import Pipeline
+
+    original_fit = Pipeline.fit
+
+    def capturing_fit(self, X, y, *args, **kwargs):
+        fitted.append((X.copy(), y.copy()))
+        return original_fit(self, X, y, *args, **kwargs)
+
+    monkeypatch.setattr(Pipeline, "fit", capturing_fit)
+
+    _train(tmp_path, config, processed_dir, "fit-scope")
+
+    train = pd.read_csv(processed_dir / "train.csv")
+    validation = pd.read_csv(processed_dir / "validation.csv")
+    features = feature_columns(config)
+    target = config["dataset"]["canonical_target"]
+
+    assert len(fitted) == len(config["modeling"]["candidates"])
+    for x, y in fitted:
+        assert list(x.columns) == features
+        assert len(x) == len(train)
+        assert len(y) == len(train)
+        np.testing.assert_allclose(x.to_numpy(dtype=float), train[features].to_numpy(dtype=float))
+        np.testing.assert_array_equal(y.to_numpy(), train[target].to_numpy())
+
+    # The validation rows were never part of the fitted matrix.
+    assert len(validation) > 0
+    for x, _ in fitted:
+        assert len(x) != len(train) + len(validation)
+
+    # Both candidates were fitted on exactly the same rows and values.
+    np.testing.assert_allclose(
+        fitted[0][0].to_numpy(dtype=float), fitted[1][0].to_numpy(dtype=float)
+    )
+    np.testing.assert_array_equal(fitted[0][1].to_numpy(), fitted[1][1].to_numpy())
+
+
+def test_validation_metrics_are_recomputable_and_account_for_every_row(
+    tmp_path, config, processed_dir
+):
+    """Every candidate's metrics must be recomputable from its confusion matrix.
+
+    The plan (1.5) requires that the metrics are recalculable and that the sums
+    of the confusion matrix correspond to the validation split.
+    """
+    metrics = _train(tmp_path, config, processed_dir, "recomputable")
+    rows = len(pd.read_csv(processed_dir / "validation.csv"))
+
+    for values in metrics["validation"].values():
+        matrix = values["confusion_matrix"]
+        tn, fp, fn, tp = matrix["tn"], matrix["fp"], matrix["fn"], matrix["tp"]
+        assert tn + fp + fn + tp == rows
+        assert values["accuracy"] == pytest.approx((tn + tp) / rows, abs=1e-6)
+        expected_precision = tp / (tp + fp) if tp + fp else 0.0
+        expected_recall = tp / (tp + fn) if tp + fn else 0.0
+        assert values["precision"] == pytest.approx(expected_precision, abs=1e-6)
+        assert values["recall"] == pytest.approx(expected_recall, abs=1e-6)
+        expected_f1 = (
+            2 * expected_precision * expected_recall / (expected_precision + expected_recall)
+            if expected_precision + expected_recall
+            else 0.0
+        )
+        assert values["f1"] == pytest.approx(expected_f1, abs=1e-6)
 
 
 def test_selection_runs_without_the_test_split(tmp_path, config, processed_dir):

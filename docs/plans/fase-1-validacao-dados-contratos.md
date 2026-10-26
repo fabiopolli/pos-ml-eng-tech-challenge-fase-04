@@ -294,10 +294,10 @@ em falha. Se várias regras falharem, o lote é contado uma só vez como rejeita
 chegam ao estimador; probabilidades são finitas no intervalo [0,1]. Execução de seleção funciona
 mesmo sem acesso ao arquivo de teste, comprovando isolamento por comportamento.
 
-> **Executada em 2026-10-26** (registro de aceite em
-> [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) §1.4). A **revalidação independente
-> por execução** desta etapa ainda não foi feita — ao contrário de 1.2, 1.3 e 1.7, que têm
-> §1.2.2, §1.3.1 e §1.7.1.
+> **Executada e revalidada por execução em 2026-10-26** (registro de aceite em
+> [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) §1.4 e **§1.4.1**). A revalidação
+> reexecutou o estágio de treino em clone isolado: artefatos reproduzidos byte a byte, ajuste
+> provado restrito ao treino e uma lacuna de prova automatizada fechada (escopo do `fit`).
 
 ### 1.5 — Treinamento do Random Forest
 
@@ -316,9 +316,10 @@ mesmo sem acesso ao arquivo de teste, comprovando isolamento por comportamento.
 **Verificação/aceite:** entradas/hashes coincidem com 1.4, contrato é aplicado, métricas são
 recalculáveis e somas da matriz correspondem à validação. Não exigir que RF vença o baseline.
 
-> **Executada em 2026-10-26** (registro de aceite em
-> [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) §1.5). A **revalidação independente
-> por execução** desta etapa ainda não foi feita.
+> **Executada e revalidada por execução em 2026-10-26** (registro de aceite em
+> [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) §1.5 e **§1.5.1**): comparabilidade
+> das entradas e recalculabilidade das métricas verificadas por execução, com uma lacuna de prova
+> automatizada fechada (somas da matriz e métricas rederivadas da matriz).
 
 ### 1.6 — Avaliação, seleção e versionamento
 
@@ -354,11 +355,10 @@ recarregado preserva probabilidades dentro de tolerância numérica declarada. R
 do bruto, preparados, referência e modelo deve funcionar sem depender do cache principal.
 Relatório e metadados não descrevem a avaliação como intocada se houve exposição anterior.
 
-> **Executada em 2026-10-26** (registro de aceite em
+> **Executada e revalidada por execução em 2026-10-26** (registro de aceite em
 > [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) §1.6, com a **prova de recuperação
-> remota executada** em checkout e cache separados em §1.6.1). A revalidação independente por
-> execução do **caminho local** — retreinar, refazer a seleção e reexecutar a recarga — ainda não
-> foi feita.
+> remota executada** em checkout e cache separados em §1.6.1 e a **revalidação do caminho local**
+> em §1.6.2).
 
 ## 5. Estratégia de verificação e comandos
 
