@@ -6,6 +6,13 @@
 > [`reports/analise-estado-fase-1.md`](../../reports/analise-estado-fase-1.md); os demais itens
 > continuam sendo trabalho planejado.
 
+> **Status de execução (2026-10-26):** os pacotes 1.1a, 1.1b, 1.2, 1.3, 1.4, 1.5, 1.6 e 1.7
+> foram executados no branch `fase-1-bill` e verificados; o registro por ID, com comandos, códigos
+> de saída e hashes, está em [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md).
+> A seção 2.1 abaixo é o **diagnóstico anterior à execução** e permanece como referência
+> histórica — não como estado corrente do repositório. Onde os dois registros divergirem, vale
+> o registro de evidências, verificado por execução.
+
 - **Plano geral:** [escopo, protocolo e aceites](plano-de-trabalho-TC4.md).
 - **Próxima fase:** [Simulação e Detecção de Drift](fase-2-simulacao-deteccao-drift.md).
 - **Referências:** [arquitetura](../ARCHITECTURE.md), [checklist](../CHECKLIST.md),
@@ -390,3 +397,7 @@ e evidências. Recomenda-se registro textual `docs/evidence/fase-1.md`, com seç
 leitura de `.xls`, regularizar o `dvc.lock` e abrir o registro do recorte local. Em seguida, 1.2
 para restaurar o bruto; se o acesso externo faltar, seguir pela conversão do XLS versionado e
 registrar a dependência pendente para 1.1b.
+
+> **Cumprida em 2026-10-26** (1.1a, 1.2 e 1.1b). O checklist do gate acima permanece aqui como
+> especificação; a verificação item a item, com os comandos executados e os hashes conferidos,
+> está em [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) ("Checklist do gate M1").

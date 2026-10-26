@@ -137,6 +137,58 @@ proporções de classe de cada partição. A margem global de classe do conjunto
 determinística pelo protocolo — não é uma exposição adicional. O que **não** é inerente ao
 protocolo — relações feature-alvo sobre o bruto completo — foi movido para o treino.
 
+### 1.2.2 — Revalidação independente da aquisição (2026-10-26, 11:40–11:45)
+
+Execução posterior, em nova sessão, com o objetivo de reexecutar a etapa 1.2 pelo caminho
+previsto no plano (restaurar o bruto a partir da fonte versionada) e conferir, de primeira mão,
+cada aceite da seção 1.2 — sem depender das afirmações das sessões anteriores.
+
+**Aquisição reexecutada do zero.** O bruto e o registro de proveniência foram removidos do disco
+e reconstruídos pelo estágio DVC:
+
+| Passo | Comando | Código de saída | Resultado |
+|---|---|---|---|
+| 1 | `rm data/raw/default_of_credit_card_clients.csv reports/acquisition_provenance.json` | 0 | bruto **ausente do disco** |
+| 2 | `uv run dvc repro acquire` | 0 | `Bruto reconstruido: default_of_credit_card_clients.csv (sha256=1fc7fe04822413cf48d0f5ca974cbe47061b21ea10fa1d114bb56b8feac79358, rows=30000)` |
+| 3 | `cmp` com a cópia do bruto anterior | 0 | **byte-a-byte idêntico** |
+| 4 | `diff` com a proveniência anterior | 0 | **idêntica** (md5, sha256, tamanho, parâmetros de leitura) |
+| 5 | `uv run dvc status` | 0 | `Data and pipelines are up to date.` |
+| 6 | `git status --short` | 0 | sem saída (saídas DVC não sujam a árvore) |
+
+Hashes conferidos na sessão: XLS `sha256 63c47faa…f38a44` / `md5 c0a9cb82…1bf6e`; CSV
+`sha256 1fc7fe04…79358` / `md5 a6ee086d…ed2c9` — idênticos aos esperados em
+`configs/project.yaml`, ao ponteiro `.dvc` e a `docs/DATASET.md`.
+
+**Falhas explícitas (o caminho de erro também é verificado).**
+
+| Cenário induzido | Resultado observado |
+|---|---|
+| XLS adulterado (byte alterado no offset 1024) | `AcquisitionError: Source workbook md5 diverged: got 82b78cf83e6cfcfd2450e87b0db01e9a, expected c0a9cb828ded9c446574ede877bf1f6e` — exit 1, nenhum CSV produzido |
+| Planilha inexistente no workbook | `AcquisitionError: Sheet 'Sheet_inexistente' not found in default of credit card clients.xls; available sheets: ['Data']` |
+| CSV com layout incompatível | `ValueError: Raw dataset is missing columns: ['ID', 'LIMIT_BAL', …]` (`data/loading.py:37`) |
+| EDA gerado de outro bruto | `ValueError: EDA summary was generated from a different raw file. Re-run the EDA.` (`data/prepare.py:114`) — a preparação continua dependente da auditoria do **mesmo** hash, sem ciclo EDA supervisionado → split → EDA |
+
+**Auditoria estrutural e separação da exploração supervisionada.** `reports/eda/eda_summary.json`
+confere: `scope: "structural_audit_only"`, `supervised_analysis: false`, 30.000 linhas, 25
+colunas, 0 nulos, 0 linhas duplicadas, 0 IDs duplicados, `LIMIT_BAL` de 10.000 a 1.000.000 (0 não
+positivos), `AGE` de 21 a 79, 3.932 valores negativos em `BILL_AMT*`, 0 em `PAY_AMT*`, códigos não
+documentados reportados e não recodificados, `raw_sha256` = `1fc7fe04…`. As relações feature-alvo
+existem apenas em `reports/explore/train_exploration.json` (`split: train`), cujo estágio depende
+**somente** de `data/processed/train.csv`. Notebooks conferidos: `01_eda.ipynb` carrega o bruto e
+consome o resumo estrutural; `02_explore_train.ipynb` lê o treino.
+
+**Procedência reconferida na fonte.** Página oficial da UCI lida em 2026-10-26: DOI
+**10.24432/C55S3H**, licença **CC BY 4.0**, citação *Yeh, I. (2009)*, arquivo
+`default of credit card clients.xls` (5,3 MB), 30.000 instâncias, 23 features, unidades em NT$,
+pagamentos de abril a setembro de 2005 — todos conferem com `docs/DATASET.md`.
+
+**Linha de base da fase.** `uv sync --dev --locked` → 0 (247 pacotes); `uv run pytest -q` → 0,
+**70 passed**; `uv run ruff check .` → 0, *All checks passed*; `uv run ruff format --check .` → 0,
+*53 files already formatted*; `uv run dvc dag` → `acquire → eda → prepare → explore → train →
+evaluate`. A contagem de testes deste registro (70) é superior à anotada antes (69) porque o
+teste `test_source_workbook_is_an_object_of_dvc_and_not_a_git_file` entrou junto com a migração do
+XLS para o DVC (`0e20346`), depois da última atualização da tabela de comandos.
+
 ## 1.3 — Preparação dos dados
 
 **Implementado e verificado** (`data/processed/preparation_report.json`).
