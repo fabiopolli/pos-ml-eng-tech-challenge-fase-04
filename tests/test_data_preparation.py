@@ -137,3 +137,49 @@ def test_run_preparation_writes_splits_reference_and_report(tmp_path, config):
     reference = pd.read_csv(tmp_path / "reference" / "reference.csv")
     pd.testing.assert_frame_equal(train, reference)
     assert summary["splits"]["train"]["rows"] == 420
+
+
+def test_removed_rows_counts_unique_rows_not_the_sum_of_reasons(config):
+    raw = make_raw(config).rename(columns={RAW_TARGET: "default_payment_next_month"})
+    # The same row violates two rules at once: duplicated ID and invalid target.
+    raw.loc[2, "ID"] = raw.loc[1, "ID"]
+    raw.loc[2, "default_payment_next_month"] = 2
+
+    _, report = prepare_dataset(raw, config)
+
+    assert report.duplicated_id_rows == 1
+    assert report.invalid_target_rows == 1
+    assert report.removed_rows == 1
+    assert report.rows_matching_multiple_reasons == 1
+    assert report.input_rows == report.output_rows + report.removed_rows
+
+
+def test_preparation_report_records_split_and_reference_evidence(tmp_path, config):
+    raw_csv = write_raw_csv(tmp_path / "raw.csv", make_raw(config))
+    eda_summary = tmp_path / "eda_summary.json"
+    eda_summary.write_text(json.dumps({"raw_sha256": file_sha256(raw_csv)}), encoding="utf-8")
+
+    summary = run_preparation(
+        raw_csv,
+        config,
+        eda_summary_path=eda_summary,
+        processed_dir=tmp_path / "processed",
+        reference_dir=tmp_path / "reference",
+    )
+
+    assert summary["cleaning"]["removed_rows"] == 0
+    assert "Nenhuma linha foi removida" in summary["cleaning_note"]
+    assert summary["useful_rows"] == {
+        "minimum_required": 5000,
+        "after_cleaning": 600,
+        "meets_minimum": False,
+    }
+    assert summary["id_audit"]["id_intersections"] == {}
+    assert summary["id_audit"]["coverage_complete"] is True
+    assert summary["id_audit"]["ids_unique_within_split"] == {
+        "train": True,
+        "validation": True,
+        "test": True,
+    }
+    assert summary["reference"]["identical_to_train"] is True
+    assert summary["reference"]["sha256"] == summary["reference"]["train_sha256"]
