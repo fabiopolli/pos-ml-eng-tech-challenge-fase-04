@@ -218,8 +218,8 @@ stages:
       nfiles: 6
     - path: src/credit_monitoring/models/train.py
       hash: md5
-      md5: 0ffd17e1c45b799c2f828fc45eb575e6
-      size: 16276
+      md5: ed153dedba797ff29f9d243945dd444f
+      size: 17425
     params:
       configs/project.yaml:
         contract:
@@ -273,14 +273,19 @@ stages:
             n_jobs: -1
         project.random_seed: 42
     outs:
+    - path: models/candidates
+      hash: md5
+      md5: db70591107a98b94ff5024c80c421973.dir
+      size: 5492419
+      nfiles: 2
     - path: models/credit_model.joblib
       hash: md5
       md5: 95e041c68a280caedc64f6eb93c895e6
       size: 5490050
     - path: models/credit_model_metadata.json
       hash: md5
-      md5: ec1351082a2eb9d302d70c7f86ff5a65
-      size: 2828
+      md5: 546d28eb64e2b5ba4a53ce2449153d4a
+      size: 3614
     - path: reports/figures/model
       hash: md5
       md5: 74b028f2f285543f7ac91271b3d62d8c.dir
@@ -395,8 +400,8 @@ stages:
       size: 5490050
     - path: models/credit_model_metadata.json
       hash: md5
-      md5: ec1351082a2eb9d302d70c7f86ff5a65
-      size: 2828
+      md5: 546d28eb64e2b5ba4a53ce2449153d4a
+      size: 3614
     - path: src/credit_monitoring/config.py
       hash: md5
       md5: dcc6b47dd5862af2c46c60615575c10d
