@@ -5,6 +5,7 @@ import pytest
 from conftest import RAW_TARGET, make_raw
 
 from credit_monitoring.contracts import ContractViolation
+from credit_monitoring.data.loading import file_sha256
 from credit_monitoring.data.prepare import prepare_dataset, split_dataset
 from credit_monitoring.models.evaluate import TEST_METRICS_FILE, run_evaluation
 from credit_monitoring.models.train import METADATA_FILE, MODEL_FILE, run_training
@@ -154,3 +155,41 @@ def test_evaluation_is_reproducible(tmp_path, config, processed_dir, frozen):
         config, processed_dir=processed_dir, models_dir=models_dir, reports_dir=reports_dir
     )
     assert first == second
+
+
+def test_evaluation_never_scores_the_baseline_candidate(
+    tmp_path, config, processed_dir, frozen, monkeypatch
+):
+    """Only the frozen selected model may be scored on the test split.
+
+    Every candidate is serialized for auditability, but scoring the baseline on
+    the test split would be an extra exposure of the test set, which the plan
+    forbids: only the chosen model is evaluated there.
+    """
+    models_dir, reports_dir = frozen
+    candidates = models_dir / "candidates"
+    assert candidates.is_dir()
+    before = {path.name: file_sha256(path) for path in sorted(candidates.glob("*.joblib"))}
+    assert len(before) == len(config["modeling"]["candidates"])
+
+    scored = []
+    from sklearn.pipeline import Pipeline
+
+    original_predict_proba = Pipeline.predict_proba
+
+    def recording_predict_proba(self, *args, **kwargs):
+        scored.append(self)
+        return original_predict_proba(self, *args, **kwargs)
+
+    monkeypatch.setattr(Pipeline, "predict_proba", recording_predict_proba)
+
+    run_evaluation(
+        config,
+        processed_dir=processed_dir,
+        models_dir=models_dir,
+        reports_dir=reports_dir,
+    )
+
+    assert len(scored) == 1
+    after = {path.name: file_sha256(path) for path in sorted(candidates.glob("*.joblib"))}
+    assert after == before

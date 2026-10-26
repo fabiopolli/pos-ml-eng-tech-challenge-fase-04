@@ -82,6 +82,7 @@ stages:
     outs:
       - models/credit_model.joblib
       - models/credit_model_metadata.json
+      - models/candidates
       - reports/figures/model
     metrics:
       - reports/metrics.json:

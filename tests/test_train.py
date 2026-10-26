@@ -6,9 +6,11 @@ import numpy as np
 import pandas as pd
 import pytest
 from conftest import RAW_TARGET, make_raw
+from sklearn.metrics import roc_auc_score
 
 from credit_monitoring.config import feature_columns
 from credit_monitoring.contracts import ContractViolation
+from credit_monitoring.data.loading import file_sha256
 from credit_monitoring.data.prepare import prepare_dataset, split_dataset
 from credit_monitoring.models.train import (
     METADATA_FILE,
@@ -354,3 +356,49 @@ def test_model_file_exists_after_training(tmp_path, config, processed_dir):
     _train(tmp_path, config, processed_dir, "files")
     assert (tmp_path / "files" / "models" / MODEL_FILE).is_file()
     assert Path(tmp_path / "files" / "models" / METADATA_FILE).is_file()
+
+
+def test_every_candidate_is_serialized_and_auditable(tmp_path, config, processed_dir):
+    """Both candidates must exist as artifacts, with hashes recorded in the metadata.
+
+    The comparison between the baseline and the candidate has to be auditable
+    from artifacts, without retraining: each candidate is serialized, and the
+    metadata records its path, its hash and whether it was selected.
+    """
+    _train(tmp_path, config, processed_dir, "candidates")
+    models_dir = tmp_path / "candidates" / "models"
+    metadata = json.loads((models_dir / METADATA_FILE).read_text(encoding="utf-8"))
+
+    assert set(metadata["candidates"]) == set(config["modeling"]["candidates"])
+    for name, record in metadata["candidates"].items():
+        path = models_dir / record["path"]
+        assert path.is_file()
+        assert file_sha256(path) == record["sha256"]
+        assert record["selected"] is (name == metadata["selected_model"])
+        assert record["hyperparameters"] == config["modeling"][name]
+
+    # The frozen artifact of the selected model is the very same estimator.
+    selected = metadata["candidates"][metadata["selected_model"]]
+    assert file_sha256(models_dir / MODEL_FILE) == selected["sha256"]
+
+
+def test_the_baseline_artifact_reproduces_its_recorded_validation_metrics(
+    tmp_path, config, processed_dir
+):
+    """The persisted baseline must be the estimator that produced the published numbers."""
+    _train(tmp_path, config, processed_dir, "baseline")
+    models_dir = tmp_path / "baseline" / "models"
+    metadata = json.loads((models_dir / METADATA_FILE).read_text(encoding="utf-8"))
+    metrics = json.loads((tmp_path / "baseline" / "reports" / "metrics.json").read_text("utf-8"))
+
+    baseline = config["modeling"]["baseline"]
+    record = metadata["candidates"][baseline]
+    model = joblib.load(models_dir / record["path"])
+
+    validation = pd.read_csv(processed_dir / "validation.csv")
+    target = config["dataset"]["canonical_target"]
+    probability = model.predict_proba(validation[feature_columns(config)])[:, 1]
+    recomputed = roc_auc_score(validation[target], probability)
+
+    assert recomputed == pytest.approx(metrics["selection"]["scores"][baseline], abs=1e-9)
+    assert recomputed == pytest.approx(metrics["validation"][baseline]["roc_auc"], abs=1e-6)

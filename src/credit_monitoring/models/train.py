@@ -13,7 +13,10 @@ Rules enforced here:
 - selection uses the highest validation ROC-AUC over **unrounded** metrics, and a tie
   explicitly favours the baseline;
 - the serialized artifact is reloaded and compared against the in-memory model within a
-  declared numerical tolerance.
+  declared numerical tolerance;
+- every candidate is serialized under ``models/candidates/``, so the comparison is auditable
+  from artifacts without retraining; only the selected model is the entry point of the
+  evaluation stage, and no candidate is ever evaluated on the test split.
 """
 
 import argparse
@@ -61,6 +64,7 @@ MODEL_FILE = "credit_model.joblib"
 METADATA_FILE = "credit_model_metadata.json"
 METRICS_FILE = "metrics.json"
 RESOURCES_FILE = "run_resources.json"
+CANDIDATES_DIR = "candidates"
 DEFAULT_FIGURES_DIR = FIGURES_DIR / "model"
 THRESHOLD = 0.5
 RELOAD_TOLERANCE = 1e-12
@@ -288,6 +292,23 @@ def run_training(
     model_path = models_dir / MODEL_FILE
     joblib.dump(best_model, model_path)
 
+    # Every candidate is serialized, not only the winner: the comparison must be
+    # auditable from artifacts, without retraining. The frozen artifact above
+    # stays the single entry point of the evaluation stage.
+    candidates_dir = models_dir / CANDIDATES_DIR
+    candidates_dir.mkdir(parents=True, exist_ok=True)
+    candidates: dict[str, dict[str, Any]] = {}
+    for name, model in models.items():
+        candidate_path = candidates_dir / f"credit_model_{name}.joblib"
+        joblib.dump(model, candidate_path)
+        candidates[name] = {
+            "path": f"{CANDIDATES_DIR}/{candidate_path.name}",
+            "sha256": file_sha256(candidate_path),
+            "selected": name == best_name,
+            "hyperparameters": config["modeling"][name],
+            "converged": fit_info[name]["converged"],
+        }
+
     # The serialized artifact must reproduce the in-memory model.
     reloaded = joblib.load(model_path)
     before = best_model.predict_proba(x_val)[:, 1]
@@ -335,6 +356,7 @@ def run_training(
         ),
         "features": features,
         "hyperparameters": config["modeling"][best_name],
+        "candidates": candidates,
         "random_seed": config["project"]["random_seed"],
         "threshold": THRESHOLD,
         "config_sha256": _config_fingerprint(config),
