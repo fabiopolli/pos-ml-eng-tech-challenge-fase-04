@@ -34,14 +34,19 @@ ENV_FILE="${1:-.env}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
-if [ ! -f "$ENV_FILE" ]; then
+case "$ENV_FILE" in
+  /*) ENV_PATH="$ENV_FILE" ;;
+  *)  ENV_PATH="$REPO_ROOT/$ENV_FILE" ;;
+esac
+
+if [ ! -f "$ENV_PATH" ]; then
   echo "Arquivo $ENV_FILE nao encontrado. Copie .env.example para .env e preencha." >&2
   exit 1
 fi
 
 set -a
 # shellcheck disable=SC1090
-. "./$ENV_FILE"
+. "$ENV_PATH"
 set +a
 
 missing=()
