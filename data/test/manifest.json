@@ -1,0 +1,38 @@
+{
+  "generator": "scripts/gerar_lotes_teste.py",
+  "seed": 42,
+  "jitter": 0.02,
+  "source": {
+    "path": "data/processed/train.csv",
+    "sha256": "9ebd48b6d31c67f46cc28aff0bde36b48f62936aff0011007b7cb78d26108c26",
+    "rows": 21000,
+    "note": "Somente a particao de treino; validacao e teste nunca sao lidos."
+  },
+  "files": {
+    "exemplo_lote_inferencia.csv": {
+      "rows": 3,
+      "columns": 24,
+      "sha256": "daa42e19121402c7c108aabd3f792740b9f7b1377e16fa3f3a3f66d8d659c735"
+    },
+    "lote_com_alvo.csv": {
+      "rows": 200,
+      "columns": 25,
+      "sha256": "4f26cbeedc4202e4e72344156c5444bd0c109b06dcf769574182d300fbd16afd"
+    },
+    "lote_perfis_6.csv": {
+      "rows": 6,
+      "columns": 25,
+      "sha256": "dcb1dbea4f92c199013302972530967396faaaa0736ce6c7fc1edeaf126eb926"
+    },
+    "lote_rejeitado.csv": {
+      "rows": 4,
+      "columns": 24,
+      "sha256": "6a4bcb77a14b1120518648ace118e5b506f1e955612b00bf96cd0f9097e32427"
+    },
+    "lote_teste_200.csv": {
+      "rows": 200,
+      "columns": 24,
+      "sha256": "0b50c692eb896903c539de60a17f74419373d034a3cfc74871cc0314b05ce0b0"
+    }
+  }
+}

@@ -173,7 +173,7 @@ na rubrica: a interpretação deve ser confirmada com a docência, conforme a pe
 ```text
 configs/                 configuração versionada do experimento
 dashboard/               aplicação Streamlit
-data/                    zonas raw, processed, reference e production
+data/                    zonas raw, processed, reference, production e test (fixtures)
 docs/                    arquitetura, checklist e governança
 models/                  artefatos locais ignorados pelo Git
 notebooks/               exploração e evidências reproduzíveis
@@ -294,6 +294,13 @@ financeiras e as quatro de governança) e **sem** a coluna de alvo — o upload 
 por ser uma tela de inferência, não de avaliação. Acima de 500 linhas o laboratório avisa o
 limite por chamada.
 
+**Lotes prontos para testar:** [`data/test/`](data/test/) traz um lote de 200 linhas, um lote
+didático de seis perfis rotulados, um lote que viola o contrato e um lote com coluna de alvo
+(recusado no upload). Todos são derivados **apenas** da partição de treino, com IDs novos e
+jitter determinístico, e são regeneráveis por
+`uv run python scripts/gerar_lotes_teste.py`; a proveniência e os resultados esperados estão
+em [`data/test/README.md`](data/test/README.md).
+
 **Limites:** trocar a seleção de modelos ou o lote invalida o resultado guardado, e o valor
 antigo deixa de ser apresentado como resultado atual. Os exemplos são sintéticos: nenhum
 registro real de cliente entra nas telas, nas exportações ou na evidência. A aplicação não
@@ -368,10 +375,13 @@ tarefa.
 Dados brutos, processados, lotes de produção e modelos não devem ser adicionados diretamente ao
 Git. Os dados e modelos autorizados para compartilhamento serão versionados pelo DVC e armazenados
 no DagsHub Storage; o GitHub conterá apenas código, configurações, documentação e ponteiros DVC.
-Tokens e credenciais permanecem em configuração local não versionada. Antes de enviar dados ao
-serviço, confirmar a origem, os termos de uso e a autorização para armazenamento remoto. O plano de
-governança será consolidado em
-[`docs/GOVERNANCE.md`](docs/GOVERNANCE.md) e resumido aqui antes da entrega.
+A única zona de dados versionada no Git é [`data/test/`](data/test/): fixtures de inferência
+pequenas (~60 KB), derivadas da partição de treino e com IDs novos, existindo para que um
+revisor reproduza a demonstração do laboratório sem depender de artefatos DVC — a exceção está
+documentada em [`data/test/README.md`](data/test/README.md). Tokens e credenciais permanecem em
+configuração local não versionada. Antes de enviar dados ao serviço, confirmar a origem, os
+termos de uso e a autorização para armazenamento remoto. O plano de governança será consolidado
+em [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md) e resumido aqui antes da entrega.
 
 ## Escopo deliberadamente excluído
 
