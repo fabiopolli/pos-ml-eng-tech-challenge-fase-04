@@ -240,6 +240,33 @@ congelados: o publicado, os dois controles serializados e os finalistas da campa
 métricas oficiais nem o `dvc.lock`. O painel operacional da fase 3 (`dashboard/app.py`) é outra
 aplicação, destinada à observabilidade do pipeline.
 
+**Resumo do guia de uso** — o que cada tela mostra e o que observar:
+
+| Tela | O que mostra | O que observar |
+|---|---|---|
+| **Artefatos e prontidao** | os quatro artefatos (dois controles, dois finalistas) com algoritmo, versão, papel, SHA-256 e disponibilidade | apenas o RF está marcado como **vigente**, pela decisão `keep_current`; o finalist tem ROC-AUC maior (0,775245) e mesmo assim não foi promovido |
+| **Comparacao dos modelos** | a rodada única de validação lado a lado: métricas, deltas contra o RF vigente, intervalos pareados, matrizes, a decisão congelada com os critérios e as curvas ROC/PR | os números vêm do relatório congelado e a aplicação não recalcula nada; o intervalo do finalist do RF é [−0,002859; +0,004968] e **inclui zero** |
+| **Predicao** (registro individual e lote CSV) | probabilidade de inadimplência, classe no limiar 0,5, divergências entre os modelos e duração local da chamada | o lote é validado **antes** de qualquer chamada: inválido ⇒ recusado por inteiro, com **zero chamadas** a qualquer modelo |
+| **Cenarios de contrato** | cinco lotes sintéticos (válido, ID duplicado, limite não positivo, idade fora da faixa, feature nula) com o resultado esperado, o observado e o diagnóstico por regra | servem para comprovar a recusa integral do lote, não para medir qualidade |
+
+**Cuidados de leitura** (o guia completo detalha cada um):
+
+- a probabilidade **não é uma "chance" calibrada**: o modelo ordena risco de forma confiável
+  (3,6% → 68,9% de inadimplência observada por decil) mas infla o risco absoluto (prevê 0,196
+  onde se observou 0,036) — prefira "escore de risco" a "X% de chance";
+- `positivos_previstos` é a **contagem de clientes marcados** pela regra do limiar 0,5, não o
+  número de inadimplentes: no RF vigente, 49,7% dos marcados realmente inadimplentaram;
+- a média de um lote **não** descreve nenhum cliente — compare com a mediana e com a taxa de
+  sinalização;
+- a duração da chamada é **tempo de inferência nesta máquina**, não métrica de qualidade do
+  modelo;
+- um registro ou lote isolado produz **previsões**, nunca métricas de generalização.
+
+O guia completo — variáveis do formulário com faixas observadas, os seis perfis de teste e a
+leitura esperada, interpretação da saída em lote, proveniência dos lotes prontos e a tabela de
+confiabilidade — está em
+[`docs/user_guides/laboratorio-de-modelos.md`](docs/user_guides/laboratorio-de-modelos.md).
+
 **Pré-requisitos:** Python 3.12, [`uv`](https://docs.astral.sh/uv/) e os artefatos locais do
 modelo e da campanha (`models/credit_model.joblib`, `models/candidates/`,
 `models/optimization/<experiment_id>/` e `reports/optimization/<experiment_id>/selection/`). Em
@@ -314,7 +341,9 @@ uv run --extra model_lab pytest tests/test_app_dev.py
 ```
 
 O roteiro completo, com os estados previstos e a distinção frente ao painel da fase 3, está em
-[`dashboard/README.md`](dashboard/README.md); a evidência de execução e de inspeção visual, em
+[`dashboard/README.md`](dashboard/README.md); o guia operacional com exemplos verificados, em
+[`docs/user_guides/laboratorio-de-modelos.md`](docs/user_guides/laboratorio-de-modelos.md); e a
+evidência de execução e de inspeção visual, em
 [`docs/evidence/1.6-otimizacao-modelos.md`](docs/evidence/1.6-otimizacao-modelos.md) (§11).
 
 O dashboard inicial já pode ser aberto; a integração de observabilidade e os dados de produção
