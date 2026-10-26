@@ -25,6 +25,15 @@ Nenhum deles declara as entregas realizadas. Todos usam o [protocolo comum](#11-
 | 3 — Observabilidade de Pipelines e Modelos | [Execução da fase 3](fase-3-observabilidade-pipelines-modelos.md) | 3.1–3.7 | M3: quatro cenários rastreáveis no MLflow/Streamlit |
 | 4 — Governança e Apresentação | [Execução da fase 4](fase-4-governanca-apresentacao.md) | 4.1–4.7 | M4: evidências consolidadas, reprodução e vídeo |
 
+**Extensão planejada em 2026-10-26, solicitada por Bill Kopp:** o
+[plano 1.6 — otimização dos modelos](1.6-otimizacao-modelos.md) detalha uma campanha limitada
+de otimização de LR/RF, com prioridade para RF, antes do aceite integrado da fase 2. Preserva
+os 28 IDs e o aceite histórico de M1; acrescenta comparação com o modelo atual, orçamento e
+critérios explícitos de promoção. Inclui o recorte **1.6-O6**, laboratório Streamlit para testar
+e comparar modelos, inspirado nos dashboards da Fase 3 anterior; seu aceite compõe a extensão.
+A restrição a otimização **extensa** permanece; esta campanha tem limites próprios e ainda não
+foi executada.
+
 ---
 
 ## 1. Objetivo do projeto

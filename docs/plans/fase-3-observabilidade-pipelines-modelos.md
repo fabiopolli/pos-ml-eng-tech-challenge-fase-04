@@ -152,6 +152,11 @@ consultável, inclusive quando não há HTML/predições. Nova tentativa não so
 
 ### 3.5 — Desenvolvimento do dashboard Streamlit
 
+> O [laboratório de modelos 1.6-O6](1.6-otimizacao-modelos.md#51-etapa-adicional-16-o6--laboratório-streamlit-de-modelos)
+> planeja `dashboard/app_dev.py` para comparação e inferência manual. Esta entrega mantém
+> `dashboard/app.py` como consulta operacional de execuções/drift. Reaproveitar helpers de
+> leitura compatíveis, preservando a regra de que o painel operacional não executa inferência.
+
 **Dependências:** contrato de consulta/artefatos de 3.4.
 
 **Ações do agente:**

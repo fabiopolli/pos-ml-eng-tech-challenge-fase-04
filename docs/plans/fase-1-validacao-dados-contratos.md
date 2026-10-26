@@ -331,6 +331,12 @@ recalculáveis e somas da matriz correspondem à validação. Não exigir que RF
 
 ### 1.6 — Avaliação, seleção e versionamento
 
+> **Extensão planejada em 2026-10-26:** o [plano 1.6 — otimização dos modelos](1.6-otimizacao-modelos.md)
+> acrescenta uma campanha limitada de melhoria de LR/RF, priorizando RF, e nova decisão de
+> promoção antes do aceite integrado da fase 2. Inclui o laboratório Streamlit **1.6-O6** para
+> testar e comparar os modelos. A execução dessa extensão está pendente; o aceite e as evidências
+> da versão original abaixo permanecem como histórico.
+
 **Dependências:** 1.4/1.5 e contrato aceitos; acesso remoto de 1.1b para completar M1.
 
 **Ações do agente:**
