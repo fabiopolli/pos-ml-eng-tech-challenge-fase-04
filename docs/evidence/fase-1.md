@@ -18,7 +18,7 @@ comissão: responsável e revisor por ID continuam pendentes.
 | scikit-learn / pandas / numpy | 1.9.1 / 2.3.3 / 2.5.4 |
 | Pandera / joblib | 0.34.1 / 1.6.0 |
 | Branch | `fase-1-bill` (base `main` @ `c560b46`) |
-| Commit do código que gerou os artefatos | `9fda5f3` (registrado em `models/credit_model_metadata.json` como `git_sha`) |
+| Commit do código que gerou os artefatos | `fb5ee7b` (registrado em `models/credit_model_metadata.json` como `git_sha`) |
 
 > `git_sha` registra o commit do **código** que produziu o artefato; o commit que versiona o
 > artefato vem logo depois, na linha de tempo do Git.
@@ -250,7 +250,7 @@ e pelo gate.
 
 | Item | Valor |
 |---|---|
-| SHA do código | `9fda5f3` (`git_sha` nos metadados) |
+| SHA do código | `fb5ee7b` (`git_sha` nos metadados) |
 | `dvc.lock` | versionado no branch `fase-1-bill`, coerente com o código |
 | Hash do treino / validação / teste / referência | `9ebd48b6…` / `e9109675…` / `70642cbc…` / `9ebd48b6…` |
 | Hash do modelo | `a5a4a740…` (5.490.002 B) |
