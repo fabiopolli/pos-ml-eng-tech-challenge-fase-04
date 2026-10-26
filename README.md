@@ -234,17 +234,81 @@ resultados. A decisão congelada fica em
 
 ### Laboratório de modelos
 
-Aplicação local para inspecionar, comparar e testar os modelos congelados (o publicado, os
-dois controles e os finalistas). Ela não treina, não promove e não altera datasets, métricas
-officiais ou o `dvc.lock`:
+Aplicação local (`dashboard/app_dev.py`) para **inspecionar, comparar e testar** os modelos
+congelados: o publicado, os dois controles serializados e os finalistas da campanha do plano
+1.6. Ela não treina, não promove, não avalia o conjunto de teste e não altera datasets,
+métricas oficiais nem o `dvc.lock`. O painel operacional da fase 3 (`dashboard/app.py`) é outra
+aplicação, destinada à observabilidade do pipeline.
+
+**Pré-requisitos:** Python 3.12, [`uv`](https://docs.astral.sh/uv/) e os artefatos locais do
+modelo e da campanha (`models/credit_model.joblib`, `models/candidates/`,
+`models/optimization/<experiment_id>/` e `reports/optimization/<experiment_id>/selection/`). Em
+um clone novo, eles vêm do remote com `uv run dvc pull -r dagshub` (ver
+[`docs/DAGSHUB.md`](docs/DAGSHUB.md)) ou são reconstruídos pelo pipeline; sem eles, a aplicação
+abre e informa quais artefatos estão indisponíveis.
+
+**Instalação e execução** (o processo abre apenas em `127.0.0.1`):
 
 ```bash
 uv sync --dev --locked --extra model_lab
 uv run --extra model_lab streamlit run dashboard/app_dev.py --server.address 127.0.0.1
 ```
 
-O painel operacional da fase 3 (`dashboard/app.py`) continua respondendo pela observabilidade
-do pipeline; ver [`dashboard/README.md`](dashboard/README.md).
+Acesse `http://127.0.0.1:8501` (use `--server.port <n>` para outra porta e `--server.headless
+true` sem abrir o navegador). Para encerrar, interrompa o comando no terminal (`Ctrl+C`). O extra
+`model_lab` instala apenas o Streamlit: o ambiente padrão de treino continua sem ele.
+
+**Roteiro de uso**
+
+1. **Barra lateral — "Modelos para comparar".** Selecione dois ou mais artefatos para a
+   comparação. A seleção inicial é o modelo **vigente**, marcado pela decisão registrada da
+   campanha, não por um botão de promoção. Os expanders de "Rastreabilidade" mostram algoritmo,
+   versão, papel, `candidate_id`, `experiment_id`, SHA-256, número de features e limiar de cada
+   artefato; artefatos ausentes ou com hash divergente aparecem como indisponíveis, com o motivo.
+2. **Aba "Artefatos e prontidao".** Confirme a disponibilidade de modelo, manifesto, contrato e
+   relatório, e abra os expanders de manifesto, decisão congelada e contrato de dados.
+3. **Aba "Comparacao dos modelos".** Tabela lado a lado da **rodada única de validação** da
+   campanha (ROC-AUC, average precision, precision, recall, F1, accuracy, Brier, delta contra o
+   RF vigente e limites do intervalo pareado), matrizes de confusão por modelo, a **decisão
+   congelada** (`promote` ou `keep_current`) com os critérios de cada finalista, e as **curvas
+   ROC/PR** da rodada com a distribuição das probabilidades. Todos os números vêm do relatório
+   congelado (`comparison.json`): a aplicação não recalcula avaliações e não mistura a média de
+   CV com a métrica de validação. Sem o artefato de probabilidades da rodada, a tela informa
+   "indisponível" em vez de fabricar curvas.
+4. **Aba "Predicao" — painel "Registro individual".** Preencha o ID, as 19 features financeiras e
+   os quatro atributos de governança e clique em **"Pontuar o registro"**. O resultado traz a
+   probabilidade de inadimplência, a classe no limiar `0.5` e as divergências entre os modelos
+   selecionados. Um registro isolado produz **previsões**, nunca métricas de generalização.
+5. **Aba "Predicao" — painel "Lote CSV".** Envie um CSV **sem a coluna de alvo** e clique em
+   **"Pontuar o lote nos modelos selecionados"**. O lote é validado por inteiro antes de
+   qualquer chamada: um lote inválido é recusado com diagnóstico por regra e coluna, com
+   **zero chamadas a qualquer modelo**. A saída mostra a probabilidade média, os positivos
+   previstos no limiar `0.5`, as divergências entre modelos e a duração local da chamada
+   (tempo de inferência nesta máquina, não métrica de qualidade do modelo).
+6. **Aba "Cenarios de contrato".** Cinco predefinições sintéticas — lote válido, ID duplicado,
+   limite não positivo, idade fora do intervalo e feature nula — cada uma com o resultado
+   esperado, o observado e o diagnóstico agregado por regra e coluna.
+
+**Formato do lote de inferência:** colunas canônicas do projeto (`ID`, as 19 features
+financeiras e as quatro de governança) e **sem** a coluna de alvo — o upload com alvo é recusado
+por ser uma tela de inferência, não de avaliação. Acima de 500 linhas o laboratório avisa o
+limite por chamada.
+
+**Limites:** trocar a seleção de modelos ou o lote invalida o resultado guardado, e o valor
+antigo deixa de ser apresentado como resultado atual. Os exemplos são sintéticos: nenhum
+registro real de cliente entra nas telas, nas exportações ou na evidência. A aplicação não
+treina, não promove, não grava sobre datasets, sobre as métricas oficiais nem sobre o
+`dvc.lock`.
+
+**Verificação dos testes da aplicação:**
+
+```bash
+uv run --extra model_lab pytest tests/test_app_dev.py
+```
+
+O roteiro completo, com os estados previstos e a distinção frente ao painel da fase 3, está em
+[`dashboard/README.md`](dashboard/README.md); a evidência de execução e de inspeção visual, em
+[`docs/evidence/1.6-otimizacao-modelos.md`](docs/evidence/1.6-otimizacao-modelos.md) (§11).
 
 O dashboard inicial já pode ser aberto; a integração de observabilidade e os dados de produção
 simulados serão concluídos nas etapas seguintes. `streamlit` e `mlflow` são **extras** e não são
