@@ -98,7 +98,7 @@ credenciais em arquivos versionados.
 ## Arquitetura planejada
 
 ```text
-UCI 350 (XLS)
+UCI 350 (XLS, objeto DVC)
   -> aquisição versionada (hash conferido) -> CSV bruto
   -> auditoria estrutural do bruto
   -> preparação + split 70/15/15 + referência = treino
@@ -195,8 +195,9 @@ uv run ruff format --check .
 ```
 
 Pipeline de dados e modelo. O bruto é reconstruído a partir do workbook original da UCI pelo
-estágio `acquire`, que confere os hashes esperados e falha se divergir (ver
-[`data/raw/README.md`](data/raw/README.md) e [`docs/DATASET.md`](docs/DATASET.md)):
+estágio `acquire`, que confere os hashes esperados e falha se divergir. O workbook é um **objeto
+DVC**, não um arquivo do Git: em um clone novo ele vem do remote com `uv run dvc pull -r dagshub`
+(ver [`data/raw/README.md`](data/raw/README.md) e [`docs/DATASET.md`](docs/DATASET.md)):
 
 ```bash
 uv run dvc repro      # acquire -> eda -> prepare -> explore -> train -> evaluate
@@ -241,7 +242,7 @@ O acompanhamento operacional está em [`docs/CHECKLIST.md`](docs/CHECKLIST.md).
 
 | Entrega | Estado | Evidência atual |
 |---|---|---|
-| Fundação do repositório e remote | Em andamento | `dvc[s3]` e `xlrd` travados; pipeline e `dvc.lock` coerentes; **remote DagsHub e recuperação pendentes de autorização** |
+| Fundação do repositório e remote | Em andamento | `dvc[s3]` e `xlrd` travados; pipeline e `dvc.lock` coerentes; workbook original migrado do Git para o DVC; **remote DagsHub e recuperação pendentes das credenciais** (`.env` + `scripts/configure_dagshub.sh` prontos) |
 | Aquisição, auditoria e preparação | Em revisão | Estágios `acquire`/`eda`/`prepare`/`explore`; proveniência com DOI e licença em [`docs/DATASET.md`](docs/DATASET.md); exposição do teste declarada em [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md) |
 | Modelos e Data Contract | Em revisão | Contrato Pandera integrado antes do `fit`; seleção na validação e avaliação final em estágios separados; [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md) |
 | Simulação e relatório de drift | Pendente | Cenário inicial documentado |

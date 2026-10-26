@@ -73,16 +73,25 @@ ao código do repositório: todos os hashes de fonte e de relatório divergiam (
 e os CSVs gerados localmente usam LF enquanto os hashes do lock correspondiam a arquivos CRLF
 (+1 B por linha). O lock atual foi regenerado pelo código atual e é reprodutível.
 
+**Decisão de equipe sobre o XLS (2026-10-26): migrar o workbook original do Git para o DVC.**
+O operador optou por tirar o binário de 5,5 MB do histórico do Git; o arquivo passou a ser objeto
+do DVC, com ponteiro `data/default of credit card clients.xls.dvc` no repositório. Verificado:
+remover o arquivo da árvore e rodar `uv run dvc checkout` o restaura do cache com o md5
+esperado, e o pipeline segue íntegro. **Consequência a registrar:** um clone novo só reproduz o
+pipeline depois de `uv run dvc pull -r dagshub`, porque a fonte do bruto não está mais no Git —
+isso acopla a reprodução ao remote da entrega 1.1b, ainda não configurado. O histórico Git
+anterior continua contendo o XLS; a remoção é do estado atual do repositório.
+
 **Recorte 1.1b (remoto) — bloqueado.** `.dvc/config` continua sem remote
 (`uv run dvc remote list` vazio) e não há credenciais. Depende de decisões de equipe:
 
 1. autorização de rede e credenciais do DagsHub (owner, endpoint, chave/segredo);
-2. quais saídas DVC podem ser compartilhadas;
-3. manutenção ou migração do XLS de 5,5 MB do Git para o DVC.
+2. quais saídas DVC podem ser compartilhadas.
 
-O procedimento está pronto em [`docs/DAGSHUB.md`](../DAGSHUB.md) e a dependência S3 já está
-travada. **Enquanto a decisão sobre o XLS não existir, ele não foi removido do Git** — é a única
-cópia local da fonte.
+Para destravar: preencha `.env` (ignorado pelo Git) com `DAGSHUB_OWNER`, `DAGSHUB_REPO` e as duas
+chaves, e rode `scripts/configure_dagshub.sh`, que grava as credenciais apenas em
+`.dvc/config.local` e falha com mensagem explícita se alguma variável estiver vazia. O procedimento
+completo está em [`docs/DAGSHUB.md`](../DAGSHUB.md).
 
 ## 1.2 — Aquisição e auditoria do dataset
 
@@ -90,7 +99,7 @@ cópia local da fonte.
 
 | Ação do plano | Evidência |
 |---|---|
-| Restaurar o bruto | Estágio DVC `acquire` reconstrói o CSV a partir do XLS versionado. Hash conferido: `sha256 1fc7fe04…`, `md5 a6ee086d…`, idênticos ao ponteiro `.dvc` anterior e ao registrado no `eda_summary.json` histórico. Divergência de hash **falha o comando** (`AcquisitionError`), invalidando a via. |
+| Restaurar o bruto | Estágio DVC `acquire` reconstrói o CSV a partir do XLS. Hash conferido: `sha256 1fc7fe04…`, `md5 a6ee086d…`, idênticos ao ponteiro `.dvc` anterior e ao registrado no `eda_summary.json` histórico. Divergência de hash **falha o comando** (`AcquisitionError`), invalidando a via. |
 | Versionar a aquisição | `src/credit_monitoring/data/acquire.py` (script versionado, entry point `credit-monitoring-acquire`) registra md5/sha256 do XLS, md5/sha256/tamanho do CSV e todos os parâmetros de leitura em `reports/acquisition_provenance.json`. |
 | Procedência UCI, licença, DOI | `docs/DATASET.md` registra DOI **10.24432/C55S3H**, licença **CC BY 4.0**, atribuição (Yeh, I. 2009), URL da fonte, hashes e parâmetros de leitura. Conferidos na página oficial do dataset em 2026-10-26. |
 | Conferir separador, cabeçalho, nomes e unidades | `sep=";"`, `header_row=1`, linha `;X1;…;X23;Y` descartada; unidades NT$ documentadas. O hash identifica a versão efetivamente lida. |
@@ -264,15 +273,17 @@ e pelo gate.
 ## Pendências que exigem a equipe
 
 1. **Autorização de rede e credenciais do DagsHub** (owner, endpoint, chave/segredo) — bloqueia
-   1.1b, o aceite de recuperação de 1.6 e o fechamento de M1.
-2. **Decisão sobre o XLS de 5,5 MB no Git** — manter com política de proveniência explícita ou
-   migrar para o DVC. Enquanto não houver decisão, o arquivo permanece no Git.
+   1.1b, o aceite de recuperação de 1.6 e o fechamento de M1. O `.env` e o script de configuração
+   já estão prontos; falta apenas o preenchimento pelo operador.
+2. **Decisão sobre o XLS de 5,5 MB no Git** — **resolvida em 2026-10-26**: o workbook original foi
+   migrado para o DVC (ponteiro versionado no Git, objeto no cache/remote). Pendente apenas o
+   `dvc push` para que a fonte exista fora desta máquina.
 3. **Responsável e revisor por ID** — os aceites técnicos acima estão verificados, mas a
    confirmação de aceite cabe à equipe.
 4. **Cobertura de Concept Drift** (citada na p. 2 do enunciado, não detalhada na rubrica) —
    pendência que a fase 2 deve tratar antes do aceite final.
-5. **Publicação da branch** — as alterações estão em commits locais da branch `fase-1-bill`;
-   o `git push` não foi executado (escrita externa depende de autorização).
+5. **Publicação da branch** — as alterações estão em commits locais da branch `fase-1-bill`; o
+   `git push` foi autorizado pelo operador e executado no fechamento desta janela.
 
 ## Limitações conhecidas desta execução
 

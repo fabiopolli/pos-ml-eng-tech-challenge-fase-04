@@ -3,6 +3,8 @@
 Cópia imutável do UCI 350 (`default_of_credit_card_clients.csv`), reconstruída de forma
 reproduzível pelo estágio DVC `acquire` a partir do workbook original
 `data/default of credit card clients.xls` (5.539.328 B, md5 `c0a9cb828ded9c446574ede877bf1f6e`).
+O workbook original é **objeto do DVC** (ponteiro `data/default of credit card clients.xls.dvc`),
+não arquivo do Git: em um clone novo ele vem do remote com `uv run dvc pull -r dagshub`.
 
 O CSV resultante é saída do estágio `acquire` (`python -m credit_monitoring.data.acquire`):
 conversão XLS→CSV com `sheet="Data"`, `header_row=1`, separador `;`, `index=False`,

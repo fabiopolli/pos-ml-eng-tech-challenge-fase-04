@@ -15,7 +15,7 @@
 O `dvc.yaml` encadeia seis estágios locais, executados com `uv run dvc repro`:
 
 ```text
-data/default of credit card clients.xls -> acquire -> eda -> prepare -> explore -> train -> evaluate
+data/default of credit card clients.xls (objeto DVC) -> acquire -> eda -> prepare -> explore -> train -> evaluate
 ```
 
 | Estágio | Entrada | Saída |
@@ -29,8 +29,9 @@ data/default of credit card clients.xls -> acquire -> eda -> prepare -> explore 
 
 Fronteiras que o DAG impõe:
 
-- `acquire` reconstrói o CSV bruto a partir do XLS versionado e falha se os hashes
-  esperados divergirem; o bruto tem um único dono (o estágio), sem ponteiro `.dvc` avulso.
+- `acquire` reconstrói o CSV bruto a partir do workbook original (objeto DVC, fora do Git) e
+  falha se os hashes esperados divergirem; o CSV bruto tem um único dono (o estágio), sem
+  ponteiro `.dvc` avulso.
 - `eda` faz **auditoria estrutural** do bruto; nenhuma relação feature-alvo é calculada.
   `explore` calcula as relações feature-alvo **apenas sobre o treino**.
 - `train` é o estágio de **seleção**: valida o contrato antes de qualquer `fit`, ajusta no

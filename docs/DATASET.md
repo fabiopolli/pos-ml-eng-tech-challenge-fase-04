@@ -9,7 +9,7 @@ versionado com DVC.
 | Item | Valor |
 |---|---|
 | Repositório | UCI Machine Learning Repository, dataset ID 350 |
-| Arquivo original | `default of credit card clients.xls` (5.539.328 B) |
+| Arquivo original | `data/default of credit card clients.xls` (5.539.328 B) — **versionado pelo DVC**, não pelo Git (ponteiro `data/default of credit card clients.xls.dvc`) |
 | md5 do XLS | `c0a9cb828ded9c446574ede877bf1f6e` |
 | DOI | [10.24432/C55S3H](https://doi.org/10.24432/C55S3H) |
 | Licença | CC BY 4.0 (Creative Commons Attribution 4.0 International) |
@@ -41,8 +41,12 @@ O script confere os hashes esperados e **falha com erro explícito** se houver d
 
 | Artefato | md5 | sha256 |
 |---|---|---|
-| `data/default of credit card clients.xls` | `c0a9cb828ded9c446574ede877bf1f6e` | `63c47faa4cf5e224c3494cd5f776721bcdc4a374ecf16665632f3afab8f38a44` |
+| `data/default of credit card clients.xls` (objeto DVC) | `c0a9cb828ded9c446574ede877bf1f6e` | `63c47faa4cf5e224c3494cd5f776721bcdc4a374ecf16665632f3afab8f38a44` |
 | `data/raw/default_of_credit_card_clients.csv` | `a6ee086d1eafba5566f666b3ff2ed2c9` | `1fc7fe04822413cf48d0f5ca974cbe47061b21ea10fa1d114bb56b8feac79358` |
+
+> O workbook original saiu do Git e passou a ser objeto do DVC (decisão da equipe em 2026-10-26,
+> durante a fase 1). Um clone novo precisa de `uv run dvc pull -r dagshub` para obter a fonte —
+> ver [`DAGSHUB.md`](DAGSHUB.md).
 
 O registro gerado pela aquisição fica em `reports/acquisition_provenance.json` (versionado no
 Git), com os hashes das duas fontes e todos os parâmetros de leitura. Os hashes esperados

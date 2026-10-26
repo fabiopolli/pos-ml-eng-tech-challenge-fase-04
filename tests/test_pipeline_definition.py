@@ -74,3 +74,12 @@ def test_no_file_is_tracked_as_the_output_of_two_stages():
         for path in _out_paths(stage):
             assert path not in owners, f"{path} is an output of {owners[path]} and {name}"
             owners[path] = name
+
+
+def test_source_workbook_is_an_object_of_dvc_and_not_a_git_file():
+    """The 5,5 MB binary must live in DVC, not in the Git history (team decision)."""
+    pointer = PROJECT_ROOT / "data" / "default of credit card clients.xls.dvc"
+    assert pointer.is_file()
+    content = yaml.safe_load(pointer.read_text(encoding="utf-8"))
+    assert content["outs"][0]["md5"] == "c0a9cb828ded9c446574ede877bf1f6e"
+    assert content["outs"][0]["size"] == 5539328
