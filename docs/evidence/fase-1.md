@@ -1,0 +1,275 @@
+# Evidências — Fase 1 (Validação de Dados e Contratos)
+
+**Janela de execução:** 2026-10-26 (branch `fase-1-bill`).
+**Plano:** [`docs/plans/plano-de-trabalho-TC4.md`](../plans/plano-de-trabalho-TC4.md) (seção 11) e
+[`docs/plans/fase-1-validacao-dados-contratos.md`](../plans/fase-1-validacao-dados-contratos.md).
+**Estado do marco M1:** **prontidão local parcial** — M1 **não** está fechado. Faltam a
+autorização de rede/credenciais do DagsHub (1.1b) e a prova de recuperação remota (1.6).
+Os itens aceitos abaixo são **observações verificadas nesta execução**, não aceitações da
+comissão: responsável e revisor por ID continuam pendentes.
+
+## Ambiente da execução
+
+| Item | Valor |
+|---|---|
+| Sistema | Linux 7.2.8-9-omarchy, x86_64, glibc 2.44 |
+| `uv` | 0.12.18 (`~/.local/bin/uv`; fora do PATH padrão do shell) |
+| Python | 3.12.14 (gerenciado pelo uv, `.python-version` = `3.12`) |
+| scikit-learn / pandas / numpy | 1.9.1 / 2.3.3 / 2.5.4 |
+| Pandera / joblib | 0.34.1 / 1.6.0 |
+| Branch | `fase-1-bill` (base `main` @ `c560b46`) |
+| Commit do código que gerou os artefatos | `9fda5f3` (registrado em `models/credit_model_metadata.json` como `git_sha`) |
+
+> `git_sha` registra o commit do **código** que produziu o artefato; o commit que versiona o
+> artefato vem logo depois, na linha de tempo do Git.
+
+## Comandos e códigos de saída
+
+| Comando | Código de saída | Resultado |
+|---|---|---|
+| `uv sync --dev --locked` | 0 | ambiente travado instalado (247 pacotes) |
+| `uv run pytest` | 0 | 69 passed |
+| `uv run ruff check .` | 0 | All checks passed |
+| `uv run ruff format --check .` | 0 | 52 files already formatted |
+| `uv run dvc dag` | 0 | `acquire → eda → prepare → explore → train → evaluate` |
+| `uv run dvc repro` | 0 | 6 estágios reproduzidos |
+| `uv run dvc repro -f` (2× consecutivas) | 0 | `dvc.lock` e artefatos **byte-a-byte idênticos** |
+| `uv run dvc status` | 0 | `Data and pipelines are up to date.` |
+| `uv run dvc remote list` | 0 | **vazio** — nenhum remote configurado (bloqueio 1.1b) |
+| `git diff --check` | 0 | sem saída |
+
+## Hashes dos artefatos
+
+| Artefato | SHA-256 |
+|---|---|
+| `data/default of credit card clients.xls` (fonte, versionada no Git) | `63c47faa4cf5e224c3494cd5f776721bcdc4a374ecf16665632f3afab8f38a44` (md5 `c0a9cb828ded9c446574ede877bf1f6e`) |
+| `data/raw/default_of_credit_card_clients.csv` | `1fc7fe04822413cf48d0f5ca974cbe47061b21ea10fa1d114bb56b8feac79358` (md5 `a6ee086d1eafba5566f666b3ff2ed2c9`) |
+| `data/processed/train.csv` | `9ebd48b6d31c67f46cc28aff0bde36b48f62936aff0011007b7cb78d26108c26` |
+| `data/processed/validation.csv` | `e910967511f31406edbc3c9fe0528571d079c45da10116dba4e53e379d285106` |
+| `data/processed/test.csv` | `70642cbcc74972400e63df96e78e1e07497f15b6b15fe278f232aaf18b725729` |
+| `data/reference/reference.csv` | `9ebd48b6d31c67f46cc28aff0bde36b48f62936aff0011007b7cb78d26108c26` (igual ao treino) |
+| `models/credit_model.joblib` | `a5a4a740902fab9efa5138f98917a8a7f447c5af7f7d97b707290c205c1e0464` |
+| `reports/eda/eda_summary.json` | `cd33ed3a49e52c27339d88b67dbbb1a4afcfe06a09b649205272e426a5f1dd65` |
+| `reports/explore/train_exploration.json` | `0f6b8b8af79a4ad51ecedb545707f3c77597a34ad9cf7c2bccf391d6df840628` |
+| `reports/metrics.json` (seleção) | `37a3fc84c371af2cf44f035f94791f4da9751f93c1b2ca0357cce477539a0050` |
+| `reports/test_metrics.json` (avaliação final) | `f9aa6f218a76df552e78f0cad3dff1c2622358994bfdc4816f25ec603daf38a8` |
+
+---
+
+## 1.1 — Configuração do repositório
+
+**Recorte 1.1a (local) — implementado e verificado.**
+
+| Ação do plano | Evidência |
+|---|---|
+| Conferir branch, CI, `.gitignore`, `pyproject.toml`, `uv.lock`, `.dvc/config` | Feito; ajustes locais preservados. O `.gitignore` ganhou `reports/run_resources.json` (medições não reprodutíveis fora dos artefatos versionados). |
+| `uv add --dev 'dvc[s3]>=3,<4'` | `dvc-s3==3.3.0` no `uv.lock`; suporte S3 carregável. |
+| Dependência de leitura de `.xls` declarada e travada | `xlrd>=2,<3` em dependências de runtime (`xlrd==2.0.2` no lock). |
+| Instalação travada e testes antes de atribuir falhas | `uv sync --dev --locked` → 0; `uv run pytest` → 69 passed. |
+| Regularizar o `dvc.lock` | `dvc.lock` reescrito a partir do código vigente; `uv run dvc status` → limpo. A divergência histórica (lock gerado contra um código anterior, com 46 linhas alteradas e CSVs em CRLF) está registrada em [`reports/analise-estado-fase-1.md`](../../reports/analise-estado-fase-1.md) §3.8 e §4. |
+
+**Divergência histórica registrada.** O `dvc.lock` versionado antes desta fase não correspondia
+ao código do repositório: todos os hashes de fonte e de relatório divergiam (deltas de 32–263 B),
+e os CSVs gerados localmente usam LF enquanto os hashes do lock correspondiam a arquivos CRLF
+(+1 B por linha). O lock atual foi regenerado pelo código atual e é reprodutível.
+
+**Recorte 1.1b (remoto) — bloqueado.** `.dvc/config` continua sem remote
+(`uv run dvc remote list` vazio) e não há credenciais. Depende de decisões de equipe:
+
+1. autorização de rede e credenciais do DagsHub (owner, endpoint, chave/segredo);
+2. quais saídas DVC podem ser compartilhadas;
+3. manutenção ou migração do XLS de 5,5 MB do Git para o DVC.
+
+O procedimento está pronto em [`docs/DAGSHUB.md`](../DAGSHUB.md) e a dependência S3 já está
+travada. **Enquanto a decisão sobre o XLS não existir, ele não foi removido do Git** — é a única
+cópia local da fonte.
+
+## 1.2 — Aquisição e auditoria do dataset
+
+**Implementado e verificado.**
+
+| Ação do plano | Evidência |
+|---|---|
+| Restaurar o bruto | Estágio DVC `acquire` reconstrói o CSV a partir do XLS versionado. Hash conferido: `sha256 1fc7fe04…`, `md5 a6ee086d…`, idênticos ao ponteiro `.dvc` anterior e ao registrado no `eda_summary.json` histórico. Divergência de hash **falha o comando** (`AcquisitionError`), invalidando a via. |
+| Versionar a aquisição | `src/credit_monitoring/data/acquire.py` (script versionado, entry point `credit-monitoring-acquire`) registra md5/sha256 do XLS, md5/sha256/tamanho do CSV e todos os parâmetros de leitura em `reports/acquisition_provenance.json`. |
+| Procedência UCI, licença, DOI | `docs/DATASET.md` registra DOI **10.24432/C55S3H**, licença **CC BY 4.0**, atribuição (Yeh, I. 2009), URL da fonte, hashes e parâmetros de leitura. Conferidos na página oficial do dataset em 2026-10-26. |
+| Conferir separador, cabeçalho, nomes e unidades | `sep=";"`, `header_row=1`, linha `;X1;…;X23;Y` descartada; unidades NT$ documentadas. O hash identifica a versão efetivamente lida. |
+| Auditar contagens, tipos, nulos, IDs duplicados e códigos | `reports/eda/eda_summary.json`: 30.000 linhas, 25 colunas, 0 nulos, 0 linhas duplicadas, 0 IDs duplicados, `LIMIT_BAL` de 10.000 a 1.000.000 (0 não positivos), `AGE` de 21 a 79, 3.932 valores negativos em `BILL_AMT*`, 0 em `PAY_AMT*`, códigos não documentados reportados e **não** recodificados (`EDUCATION` 0/5/6, `MARRIAGE` 0, `PAY_*` −2/0). |
+| Separar auditoria estrutural de exploração supervisionada | `eda.py` agora é **auditoria estrutural** (sem relação feature-alvo); `explore.py` (estágio `explore`) calcula as relações feature-alvo **apenas sobre `data/processed/train.csv`**. Notebooks `01_eda.ipynb` (bruto) e `02_explore_train.ipynb` (treino) reescritos e reexecutados. |
+
+### 1.2.1 — Exposição prévia do conjunto de teste (declaração formal)
+
+| Item | Registro |
+|---|---|
+| **Data** | Execução do EDA anterior a 2026-10-26; artefato congelado em `reports/eda/history/eda_summary_contaminated_2026-10-26.json` |
+| **Dados** | Bruto completo, 30.000 linhas (inclui as linhas que a estratificação depois atribuiu a validação e teste) |
+| **Variáveis** | 19 features financeiras × `default_payment_next_month` (correlação de Pearson); taxa de default por `SEX`, `EDUCATION`, `MARRIAGE` e faixa de `AGE`; `LIMIT_BAL` por alvo; `PAY_0` por alvo |
+| **Arquivos** | `reports/eda/history/eda_summary_contaminated_2026-10-26.json` (versionado, marcado como contaminante) e as figuras antigas, que nunca foram versionadas |
+| **Decisão afetada** | Nenhuma decisão de modelagem da fase 1 depende de forma nova dessas relações: a lista de 19 features, a seed e o protocolo de seleção vêm do plano e da configuração. As relações orientadoras passaram a ser calculadas **no treino**. |
+| **Consequência** | A avaliação final em `reports/test_metrics.json` é uma **reavaliação sob protocolo congelado**, não uma avaliação intocada. A declaração está replicada em `models/credit_model_metadata.json` (`test_exposure`) e em `reports/test_metrics.json` (`test_exposure`). |
+
+O histórico **não** foi apagado. O resumo histórico permanece no repositório, marcado como
+contaminante, com a explicação em
+[`reports/eda/history/README.md`](../../reports/eda/history/README.md).
+
+**Margem inevitável e declarada.** O EDA estrutural mantém a contagem marginal de classe do
+bruto (`target_rate` 0,2212). Essa informação é inerente ao protocolo de split estratificado
+exigido pelo plano: `train_test_split(stratify=y)` usa o vetor de alvo completo para definir as
+proporções de classe de cada partição. A margem global de classe do conjunto de teste é, portanto,
+determinística pelo protocolo — não é uma exposição adicional. O que **não** é inerente ao
+protocolo — relações feature-alvo sobre o bruto completo — foi movido para o treino.
+
+## 1.3 — Preparação dos dados
+
+**Implementado e verificado** (`data/processed/preparation_report.json`).
+
+| Item | Valor observado |
+|---|---|
+| Remoção no dado real | **0 linhas** — nenhuma das cinco regras disparou (nulo/não numérico 0, `ID` duplicado 0, alvo inválido 0, `LIMIT_BAL ≤ 0` 0, `AGE` fora de 18–100 0) |
+| Declaração sobre a ausência de remoção | O relatório afirma explicitamente que a remoção foi 0 no dado real e que **o caminho de remoção continua coberto por fixture controlada** (`tests/test_data_preparation.py`); ausência de remoção não é ausência de verificação |
+| União das remoções | `removed_rows` conta linhas **únicas** removidas; `rows_matching_multiple_reasons` registra a sobreposição de motivos. A razão pela qual uma linha com nulos não é contada em outras regras está no código (`~null_mask & …`) |
+| Split | 21.000 / 4.500 / 4.500, seed 42, taxas 0,2212 / 0,2211 / 0,2213 (arredondadas a 4 casas no relatório) |
+| Auditoria de IDs | IDs únicos dentro de cada partição, interseções vazias, cobertura completa (30.000 = soma das partições) |
+| Linhas úteis | 30.000 após limpeza ≥ 5.000 exigido pelo enunciado |
+| Referência | `data/reference/reference.csv` com SHA-256 **idêntico** ao de `train.csv` (igualdade verificada por hash e por teste) |
+| Transformações aprendidas | Nenhuma: o split é anterior a qualquer `scaler` ou ajuste de modelo |
+
+## 1.4 — Treinamento da Regressão Logística
+
+**Implementado sob o contrato; aceite sujeito a revisão.**
+
+| Item | Evidência |
+|---|---|
+| Pipeline e parâmetros versionados | `StandardScaler → LogisticRegression(C=1.0, max_iter=1000, class_weight=balanced)`, seed 42, conforme `configs/project.yaml` |
+| `fit` apenas no treino | O scaler e o classificador são ajustados em `train.csv`; a validação só avalia |
+| Ajuste em treino/validação, sem carregar o teste | O estágio `train` **não tem** `data/processed/test.csv` entre suas dependências; `tests/test_pipeline_definition.py::test_train_stage_never_depends_on_the_test_split` fixa isso e `tests/test_train.py::test_selection_runs_without_the_test_split` prova o isolamento por comportamento |
+| Contrato precede o `fit` | `tests/test_train.py::test_contract_violation_stops_the_fit` conta as chamadas a `Pipeline.fit` com um lote de treino inválido e verifica **zero chamadas** |
+| Convergência registrada | `fit.logistic_regression.converged = true`, sem avisos |
+| Métricas de validação | ROC-AUC **0,714497** · precision 0,367477 · recall 0,638191 · F1 0,466397 · accuracy 0,677111 · matriz TN 2.412 / FP 1.093 / FN 360 / TP 635 |
+| Recursos | wall 0,091 s · CPU 0,264 s · ΔRSS 30,6 MiB (medições em `reports/run_resources.json`, fora dos artefatos versionados) |
+
+## 1.5 — Treinamento do Random Forest
+
+**Implementado sob o contrato; aceite sujeito a revisão.**
+
+| Item | Evidência |
+|---|---|
+| Parâmetros | 300 árvores, `max_depth=8`, `min_samples_leaf=20`, `class_weight=balanced_subsample`, seed 42 — ponto de partida, não promessa de desempenho |
+| Comparabilidade | Mesmas features e mesmas linhas de validação do baseline; hashes de entrada idênticos aos de 1.4 |
+| Custo local | wall 1,472 s · CPU 10,478 s · ΔRSS 23,5 MiB · pico de RSS do processo 303,7 MiB. `n_jobs=-1` (configurado) usa todos os núcleos locais; não inviabilizou o ambiente e está registrado na configuração |
+| Métricas de validação | ROC-AUC **0,774103** · precision 0,496985 · recall 0,579899 · F1 0,535250 · accuracy 0,777333 · matriz TN 2.921 / FP 584 / FN 418 / TP 577 |
+| Matriz conferível | TN+FP+FN+TP = 4.500 = linhas de validação |
+
+## 1.7 — Data Contract (Pandera)
+
+**Implementado e verificado.** Implementado **antes** de 1.4/1.5, como exige o plano.
+
+| Item | Evidência |
+|---|---|
+| Esquemas | `credit_monitoring_labeled_v1.0.0` (alvo binário obrigatório) e `credit_monitoring_inference_v1.0.0` (sem alvo), com a mesma definição das 19 features |
+| Fonte única das regras | Bloco `contract:` de `configs/project.yaml` (`age_min`, `age_max`, `require_unique_id`, `require_positive_limit_bal`, `reject_null_features`) |
+| Regras rígidas | ID único · `LIMIT_BAL > 0` · `18 ≤ AGE ≤ 100` · features obrigatórias sem nulo · presença e tipo de todas as colunas · alvo em {0,1} no esquema rotulado |
+| Não proibido | Faturas negativas e códigos de pagamento não documentados permanecem aceitos (`test_negative_bill_amounts_and_undocumented_codes_are_accepted`) |
+| Validação do lote integral | `validate_batch` valida o lote inteiro (inclusive colunas de governança) **antes** de selecionar as 19 entradas do modelo; a limpeza histórica de `prepare.py` não é usada como filtro de lote operacional |
+| Rejeição integral | `ContractViolation` interrompe a execução; nenhuma linha é descartada. O lote é contado **uma única vez** como rejeitado, mesmo com várias regras quebradas (`test_batch_is_counted_once_when_several_rules_fail`) |
+| Diagnóstico | Regra, coluna e contagem, agregados; os valores que a biblioteca devolve por linha **não** são copiados (`test_diagnostic_reports_rule_column_and_count_without_client_records`) |
+| CLI | `python -m credit_monitoring.contracts.validate --input <csv> [--inference]`: saída **0** (aceito) ou **2** (rejeitado, com o diagnóstico em JSON); **1** para erro de leitura. Nenhum modelo é executado |
+| Perturbações isoladas | 7 testes: duplicidade de ID, `LIMIT_BAL ≤ 0`, `AGE` 17, `AGE` 101, nulo em feature, coluna ausente, tipo incompatível, alvo inválido — todas rejeitadas; limites 18 e 100 aceitos; inferência sem alvo aceita |
+| Bloqueio antes do modelo | Spy de `Pipeline.fit` com **zero chamadas** quando o contrato falha (`tests/test_train.py::test_contract_violation_stops_the_fit`) |
+| Versão do contrato | `1.0.0`, propagada para `reports/metrics.json`, `models/credit_model_metadata.json` e `reports/test_metrics.json` |
+
+Exemplo de diagnóstico (lote com 21.000 linhas e cinco violações):
+
+```json
+{
+  "rejected_rows": 21000,
+  "failed_rules": [
+    {"rule": "age_out_of_range", "column": "AGE", "count": 1},
+    {"rule": "invalid_target", "column": "default_payment_next_month", "count": 1},
+    {"rule": "reject_null_features", "column": "BILL_AMT1", "count": 1},
+    {"rule": "require_positive_limit_bal", "column": "LIMIT_BAL", "count": 1},
+    {"rule": "require_unique_id", "column": "ID", "count": 2}
+  ]
+}
+```
+
+## 1.6 — Avaliação, seleção e versionamento
+
+**Recorte local — implementado e verificado. Recorte remoto — bloqueado.**
+
+| Item | Evidência |
+|---|---|
+| Regra de seleção | Maior ROC-AUC de validação, sobre métricas **não arredondadas** (`scores` em `reports/metrics.json`), com desempate explícito pelo **baseline** (`logistic_regression`) — `modeling.baseline` e `modeling.tie_break` na configuração. O resultado **não** depende da ordem de dicionário nem do arredondamento: `select_best` compara valores brutos, ordena os empatados e prefere o baseline (`test_select_best_keeps_baseline_on_tie`, `test_selection_uses_unrounded_metrics`) |
+| Resultado preservado | RF selecionado (0,774103) contra LR (0,714497) — igual ao resultado histórico, verificado como não regressão |
+| Decisões congeladas | Modelo, 19 features, limiar 0,5, seed, hiperparâmetros e fingerprint da configuração gravados em `models/credit_model_metadata.json` |
+| Seleção × avaliação separadas | Estágios DVC distintos (`train` e `evaluate`). `train` não depende do teste; `evaluate` não altera a seleção (`tests/test_evaluate.py::test_evaluation_does_not_change_the_selection`) |
+| Protocolo congelado na avaliação final | `evaluate` confere o `model_sha256` do artefato contra o congelado, confere a lista de features e só então prevê; um artefato adulterado é recusado (`test_evaluation_refuses_a_model_that_does_not_match_the_frozen_hash`) |
+| Recarga do modelo | Verificada a cada execução: diferença máxima de probabilidade 0,0 dentro da tolerância declarada de 1e-12 (`reload_check` em `reports/metrics.json`) |
+| Metadados completos | Limiar, features, seed, `config_sha256`, `train_sha256`, `validation_sha256`, `model_sha256`, `git_sha`, versão do contrato, exposição do teste, ambiente (Python, scikit-learn, pandas, numpy, plataforma) e `reload_check` |
+| Exposição declarada | `test_exposure` nos metadados e no relatório de avaliação final |
+| Avaliação final (teste, RF) | ROC-AUC **0,777198** · precision 0,497115 · recall 0,605422 · F1 0,545948 · accuracy 0,777111 · matriz TN 2.894 / FP 610 / FN 393 / TP 603 |
+| Reprodutibilidade | `uv run dvc repro -f` duas vezes consecutivas produz `dvc.lock` e artefatos **byte-a-byte idênticos** (`dvc status` limpo ao final) |
+| Sem arquivo com dois donos | Teste `test_no_file_is_tracked_as_the_output_of_two_stages` garante que nenhum arquivo é saída de dois estágios |
+| Recuperação remota | **Bloqueada** — sem remote e sem credenciais (1.1b). Não há prova de recuperação a partir do DagsHub |
+
+### Observação sobre reprodutibilidade e metadados
+
+Duas decisões de projeto merecem registro:
+
+1. **Sem carimbo de tempo nos artefatos versionados.** Um `created_at` tornaria `dvc.lock`
+   instável a cada execução. A proveniência temporal vem do histórico Git e do próprio `dvc.lock`;
+   a versão do ambiente fica nos metadados.
+2. **Medições de recursos fora dos artefatos versionados.** Tempo e memória variam a cada
+   execução. Elas ficam em `reports/run_resources.json` (ignorado pelo Git, não é saída DVC) e
+   serão registradas no MLflow na fase 3. A fase 3 deve tratar esse arquivo como entrada
+   opcional, não como fonte versionada.
+
+---
+
+## Checklist do gate M1
+
+- [x] Bruto recuperado com hash conferido e script de aquisição versionado; proveniência (hash
+      XLS, hash CSV, DOI, licença CC BY 4.0) em `docs/DATASET.md`.
+- [x] `uv run dvc status` sem estágios modificados; `dvc.lock` coerente com o código.
+- [x] Contrato Pandera integrado antes do `fit`: lote válido aceito, 7+ perturbações isoladas
+      rejeitadas, zero chamadas ao estimador em falha.
+- [x] Split 70/15/15 auditado (tamanhos, taxas, seed, IDs disjuntos) e referência = treino por hash.
+- [x] Dois modelos comparados na validação; regra de desempate explícita e testada.
+- [x] Seleção e avaliação final em estágios separados; o ciclo de treino não avalia o teste.
+- [x] Modelo recarregado com probabilidades equivalentes dentro de tolerância declarada.
+- [x] Metadados completos: limiar, features, seed, hashes de dados/modelo, SHA Git, versões,
+      versão do contrato, exposição do teste declarada.
+- [ ] Objetos DVC no DagsHub e recuperação em checkout/cache separado, com hashes conferidos e
+      inferência do modelo recuperado. **Pendente de autorização (1.1b).**
+- [x] `docs/evidence/fase-1.md` com seções 1.1–1.7, comandos, códigos de saída e hashes.
+
+**M1: não fechado.** O caminho local está verificado; falta a prova remota exigida pelo enunciado
+e pelo gate.
+
+## Transferência para a fase 2
+
+| Item | Valor |
+|---|---|
+| SHA do código | `9fda5f3` (`git_sha` nos metadados) |
+| `dvc.lock` | versionado no branch `fase-1-bill`, coerente com o código |
+| Hash do treino / validação / teste / referência | `9ebd48b6…` / `e9109675…` / `70642cbc…` / `9ebd48b6…` |
+| Hash do modelo | `a5a4a740…` (5.490.002 B) |
+| Features | 19 features financeiras (`LIMIT_BAL`, `PAY_0`, `PAY_2`–`PAY_6`, `BILL_AMT1`–`BILL_AMT6`, `PAY_AMT1`–`PAY_AMT6`) |
+| Versão do contrato | `1.0.0` |
+| Seleção e limiar | `random_forest`, limiar 0,5, ROC-AUC de validação 0,774103 |
+| Exposição do teste | declarada na seção 1.2.1 |
+| Relatório de preparação | `data/processed/preparation_report.json` |
+| Comandos válidos | `uv run dvc repro`; `uv run dvc push -r dagshub` (após autorização); `uv run dvc pull -r dagshub` (em checkout/cache separado) |
+
+## Pendências que exigem a equipe
+
+1. **Autorização de rede e credenciais do DagsHub** (owner, endpoint, chave/segredo) — bloqueia
+   1.1b, o aceite de recuperação de 1.6 e o fechamento de M1.
+2. **Decisão sobre o XLS de 5,5 MB no Git** — manter com política de proveniência explícita ou
+   migrar para o DVC. Enquanto não houver decisão, o arquivo permanece no Git.
+3. **Responsável e revisor por ID** — os aceites técnicos acima estão verificados, mas a
+   confirmação de aceite cabe à equipe.
+4. **Cobertura de Concept Drift** (citada na p. 2 do enunciado, não detalhada na rubrica) —
+   pendência que a fase 2 deve tratar antes do aceite final.
+5. **Publicação da branch** — as alterações estão em commits locais da branch `fase-1-bill`;
+   o `git push` não foi executado (escrita externa depende de autorização).

@@ -7,9 +7,13 @@
 Solução local e reproduzível de **Credit Scoring**, com contratos de qualidade de dados,
 simulação e detecção de drift, rastreamento de experimentos e documentação de governança.
 
-> **Status atual:** pipeline de dados (EDA, preparação e split) e modelos baseline em revisão,
-> orquestrados por DVC. Contrato de dados, drift e monitoramento ainda serão implementados;
-> nenhum resultado de drift é alegado nesta versão.
+> **Status atual:** Fase 1 (validação de dados e contratos) implementada e verificada localmente
+> na branch `fase-1-bill`: aquisição versionada do bruto, auditoria estrutural, preparação
+> auditada, contrato Pandera integrado antes do treino, dois modelos comparados na validação,
+> modelo congelado e avaliação final em estágio separado. Simulação de drift e observabilidade
+> ainda serão implementadas; nenhum resultado de drift é alegado nesta versão. A recuperação dos
+> objetos no DagsHub continua pendente de autorização — ver
+> [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md).
 
 ## Equipe e frentes de trabalho
 
@@ -64,9 +68,14 @@ fica em [`configs/project.yaml`](configs/project.yaml).
   confusão como evidências complementares.
 
 O protocolo planejado reserva o teste para avaliar apenas o modelo escolhido após congelar as
-decisões. Toda transformação aprendida deve ser ajustada no treino. Há limitações a revisar:
-o EDA atual calcula correlações com o alvo no bruto completo e cada execução de `train` avalia
-o teste; não tratar reexecuções usadas para ajustar decisões como avaliações finais intocadas.
+decisões. Toda transformação aprendida deve ser ajustada no treino. **Limitação registrada:** o
+EDA executado antes da fase 1 calculou correlações com o alvo no bruto completo, incluindo as
+linhas do conjunto de teste. A exposição está declarada em
+[`docs/evidence/fase-1.md`](docs/evidence/fase-1.md) (seção 1.2.1) e o artefato histórico ficou
+preservado em `reports/eda/history/`. A partir da fase 1, a exploração que orienta modelagem é
+calculada **somente sobre o treino**, a seleção e a avaliação final são estágios separados e o
+estágio de treino não lê o conjunto de teste. A avaliação final é, portanto, uma reavaliação
+sob protocolo congelado — não uma avaliação intocada.
 
 ## Stack definida
 
@@ -89,11 +98,14 @@ credenciais em arquivos versionados.
 ## Arquitetura planejada
 
 ```text
-UCI 350
-  -> auditoria estrutural + preparação + split 70/15/15
+UCI 350 (XLS)
+  -> aquisição versionada (hash conferido) -> CSV bruto
+  -> auditoria estrutural do bruto
+  -> preparação + split 70/15/15 + referência = treino
+  -> explorationsupervisionada no treino
   -> contrato Pandera antes do treino
-  -> treino + seleção na validação + avaliação do escolhido no teste
-  -> modelo congelado + referência = treino
+  -> treino + seleção na validação -> modelo congelado
+  -> avaliação do escolhido no teste (estágio separado)
   -> produção original = features da validação + cópia com drift
   -> contrato + inferência + Evidently (controle e lote alterado)
   -> MLflow local + relatórios -> dashboard Streamlit
@@ -108,17 +120,31 @@ As decisões e fronteiras entre componentes estão em [`docs/ARCHITECTURE.md`](d
 
 ### Contrato de dados
 
-O Pandera deverá rejeitar o lote antes da inferência quando qualquer regra rígida falhar. O
-contrato inicial exige:
+O contrato Pandera está **implementado** (`src/credit_monitoring/contracts/`) e é aplicado antes
+de qualquer ajuste de modelo e antes de qualquer inferência. Um lote que viola uma regra rígida
+é **rejeitado por inteiro**, com diagnóstico por regra, coluna e contagem — sem remover linhas e
+sem imprimir valores de registro. As regras vêm do bloco `contract:` de `configs/project.yaml`:
 
 - identificador único no lote;
 - `LIMIT_BAL` positivo;
 - `AGE` entre 18 e 100 anos;
-- ausência de nulos nas features obrigatórias.
+- ausência de nulos nas features obrigatórias;
+- presença e tipo de todas as colunas; alvo binário obrigatório no esquema rotulado.
 
 O contrato de inferência não exige alvo. ID e atributos de governança ficam disponíveis ao
 contrato, mas não entram como preditores. A preparação histórica documenta remoções; um lote
-operacional inválido é rejeitado inteiro antes do modelo, sem limpeza silenciosa.
+operacional inválido é rejeitado inteiro antes do modelo, sem limpeza silenciosa. Faturas
+negativas e códigos de pagamento não documentados permanecem aceitos: são fatos documentados da
+fonte, não defeitos.
+
+Validação pontual de um lote:
+
+```bash
+uv run credit-monitoring-validate --input <lote.csv>            # rotulado
+uv run credit-monitoring-validate --input <lote.csv> --inference # sem alvo
+```
+
+Saída `0` (aceito) ou `2` (rejeitado, com o diagnóstico em JSON).
 
 ### Cenário de drift
 
@@ -168,17 +194,20 @@ uv run ruff check .
 uv run ruff format --check .
 ```
 
-Pipeline de dados e modelo (EDA, preparação e treino, nessa ordem). O CSV bruto deve estar em
-`data/raw/default_of_credit_card_clients.csv` (ver [`data/raw/README.md`](data/raw/README.md)):
+Pipeline de dados e modelo. O bruto é reconstruído a partir do workbook original da UCI pelo
+estágio `acquire`, que confere os hashes esperados e falha se divergir (ver
+[`data/raw/README.md`](data/raw/README.md) e [`docs/DATASET.md`](docs/DATASET.md)):
 
 ```bash
-uv run dvc repro      # eda -> prepare -> train
+uv run dvc repro      # acquire -> eda -> prepare -> explore -> train -> evaluate
 uv run dvc dag        # ordem dos estágios
 uv run dvc metrics show
 ```
 
-O notebook [`notebooks/01_eda.ipynb`](notebooks/01_eda.ipynb) apresenta o EDA; a descrição do dataset
-está em [`docs/DATASET.md`](docs/DATASET.md).
+O notebook [`notebooks/01_eda.ipynb`](notebooks/01_eda.ipynb) apresenta a auditoria estrutural
+do bruto e [`notebooks/02_explore_train.ipynb`](notebooks/02_explore_train.ipynb) a exploração
+supervisionada restrita ao treino; a descrição do dataset está em
+[`docs/DATASET.md`](docs/DATASET.md).
 
 O dashboard inicial já pode ser aberto; a integração de observabilidade e os dados de produção
 simulados serão concluídos nas etapas seguintes:
@@ -212,9 +241,9 @@ O acompanhamento operacional está em [`docs/CHECKLIST.md`](docs/CHECKLIST.md).
 
 | Entrega | Estado | Evidência atual |
 |---|---|---|
-| Fundação do repositório e remote | Em andamento | Estrutura/CI presentes; DagsHub e dependências S3 pendentes |
-| Aquisição e EDA | Em revisão | `notebooks/01_eda.ipynb`, estágio `eda` do `dvc.yaml` |
-| Modelos e Data Contract | Em andamento | Modelos (LR e RF) em revisão; contrato Pandera pendente |
+| Fundação do repositório e remote | Em andamento | `dvc[s3]` e `xlrd` travados; pipeline e `dvc.lock` coerentes; **remote DagsHub e recuperação pendentes de autorização** |
+| Aquisição, auditoria e preparação | Em revisão | Estágios `acquire`/`eda`/`prepare`/`explore`; proveniência com DOI e licença em [`docs/DATASET.md`](docs/DATASET.md); exposição do teste declarada em [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md) |
+| Modelos e Data Contract | Em revisão | Contrato Pandera integrado antes do `fit`; seleção na validação e avaliação final em estágios separados; [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md) |
 | Simulação e relatório de drift | Pendente | Cenário inicial documentado |
 | MLflow e Streamlit | Em preparação | Shell do dashboard criada |
 | Governança e vídeo | Em preparação | Documento-base e roteiro de entregas |

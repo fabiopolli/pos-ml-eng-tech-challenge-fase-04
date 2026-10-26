@@ -204,7 +204,7 @@ def run_preparation(
         },
         "id_audit": audit_split_ids(splits, id_column),
         "reference": {
-            "path": str(reference_dir / REFERENCE_FILE),
+            "file": REFERENCE_FILE,
             "sha256": reference_sha256,
             "train_sha256": train_sha256,
             "identical_to_train": reference_sha256 == train_sha256,

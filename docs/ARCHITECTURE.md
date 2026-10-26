@@ -12,23 +12,45 @@
 
 ## Pipeline implementado (DVC)
 
-O `dvc.yaml` encadeia três estágios locais, executados com `uv run dvc repro`:
+O `dvc.yaml` encadeia seis estágios locais, executados com `uv run dvc repro`:
 
 ```text
-data/raw (dvc add) -> eda -> prepare -> train
+data/default of credit card clients.xls -> acquire -> eda -> prepare -> explore -> train -> evaluate
 ```
 
 | Estágio | Entrada | Saída |
 |---|---|---|
-| `eda` | CSV bruto | `reports/eda/eda_summary.json`, `reports/figures/eda/` |
-| `prepare` | CSV bruto + `eda_summary.json` | `data/processed/{train,validation,test}.csv`, `data/reference/reference.csv` |
-| `train` | splits processados | `models/credit_model.joblib`, `reports/metrics.json`, `reports/figures/model/` |
+| `acquire` | workbook XLS da UCI | `data/raw/default_of_credit_card_clients.csv`, `reports/acquisition_provenance.json` |
+| `eda` | CSV bruto | `reports/eda/eda_summary.json` (auditoria estrutural), `reports/figures/eda/` |
+| `prepare` | CSV bruto + `eda_summary.json` | `data/processed/{train,validation,test}.csv`, `data/processed/preparation_report.json`, `data/reference/reference.csv` |
+| `explore` | `data/processed/train.csv` | `reports/explore/train_exploration.json`, `reports/figures/explore/` |
+| `train` | treino + validação | `models/credit_model.joblib`, `models/credit_model_metadata.json`, `reports/metrics.json`, `reports/figures/model/` |
+| `evaluate` | modelo congelado + `data/processed/test.csv` | `reports/test_metrics.json` |
+
+Fronteiras que o DAG impõe:
+
+- `acquire` reconstrói o CSV bruto a partir do XLS versionado e falha se os hashes
+  esperados divergirem; o bruto tem um único dono (o estágio), sem ponteiro `.dvc` avulso.
+- `eda` faz **auditoria estrutural** do bruto; nenhuma relação feature-alvo é calculada.
+  `explore` calcula as relações feature-alvo **apenas sobre o treino**.
+- `train` é o estágio de **seleção**: valida o contrato antes de qualquer `fit`, ajusta no
+  treino, compara na validação e congela o modelo. Ele **não** lê o conjunto de teste.
+- `evaluate` é o estágio de **avaliação final**: lê o artefato congelado, confere o hash
+  registrado na seleção, valida o lote de teste contra o contrato e só então prevê.
 
 O `prepare` depende do resumo do EDA e confere o SHA-256 do CSV bruto, garantindo que a preparação
-só rode após o EDA do mesmo dado. Os parâmetros vêm de `configs/project.yaml`. O DVC declara o CSV
-bruto e as saídas de preparação/treino (incluindo o modelo) para versionamento. DagsHub Storage é
+só rode após o EDA do mesmo dado. Os parâmetros vêm de `configs/project.yaml`. DagsHub Storage é
 o remote planejado; ainda não está configurado em `.dvc/config` neste checkout. Consulte
 [`DAGSHUB.md`](DAGSHUB.md) para conexão e configuração local de credenciais.
+
+## Contrato de dados
+
+`src/credit_monitoring/contracts/` define os esquemas Pandera rotulado e de inferência, lidos do
+bloco `contract:` de `configs/project.yaml`. A rejeição é **integral**: um lote operacional
+inválido é recusado por inteiro, com diagnóstico por regra, coluna e contagem, sem remover
+linhas e sem imprimir valores de registro. A limpeza histórica de `prepare.py` é distinta e
+não pode ser usada como filtro de lote operacional.
+
 
 ## Fluxo planejado
 
@@ -44,10 +66,12 @@ o remote planejado; ainda não está configurado em `.dvc/config` neste checkout
    com métodos, intensidades e limiares fixados antes do aceite.
 9. Consolidação de métricas, consumo local de recursos e alertas no Streamlit, por execução.
 
-Este fluxo é requisito de planejamento: o EDA atual inclui relações com o alvo no bruto completo,
-`train` avalia o teste a cada execução, Pandera ainda não está integrado e os estágios de produção,
-drift e observabilidade ainda precisam ser implementados. A revisão deve registrar qualquer uso
-prévio do teste antes de alegar avaliação intocada; não basta mudar a seed e omitir a exposição.
+Este fluxo é requisito de planejamento: os estágios de produção, drift e observabilidade ainda
+precisam ser implementados. A revisão da fase 1 **registrou** a exposição prévia do teste (o EDA
+histórico calculou relações feature-alvo sobre as 30.000 linhas do bruto) e separou a exploração
+supervisada no treino; a avaliação final é uma reavaliação sob protocolo congelado, não uma
+avaliação intocada. Ver [`evidence/fase-1.md`](evidence/fase-1.md) e
+[`reports/eda/history/`](../reports/eda/history/README.md).
 
 ## Componentes previstos
 
