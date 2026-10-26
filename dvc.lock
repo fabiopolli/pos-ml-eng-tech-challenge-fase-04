@@ -279,7 +279,7 @@ stages:
       size: 5490050
     - path: models/credit_model_metadata.json
       hash: md5
-      md5: fa6c371c7627d83d18e8f3648560a46a
+      md5: ec1351082a2eb9d302d70c7f86ff5a65
       size: 2828
     - path: reports/figures/model
       hash: md5
@@ -395,7 +395,7 @@ stages:
       size: 5490050
     - path: models/credit_model_metadata.json
       hash: md5
-      md5: fa6c371c7627d83d18e8f3648560a46a
+      md5: ec1351082a2eb9d302d70c7f86ff5a65
       size: 2828
     - path: src/credit_monitoring/config.py
       hash: md5
