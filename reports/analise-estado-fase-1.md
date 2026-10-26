@@ -1,5 +1,18 @@
 # Análise de estado do código — Fase 1 (Validação de Dados e Contratos)
 
+> ## ⚠️ Estado inicial, superado pela execução da fase
+>
+> Este documento é o **diagnóstico do repositório antes da execução da Fase 1** (base `main` @
+> `b27e077`), preservado como registro histórico e como ponto de partida do plano. As marcações
+> `✅ / ⚠️ / ❌` da seção 5 e os "bloqueadores de M1" da seção 6.1 descrevem **o estado naquela
+> data** — não o estado atual.
+>
+> **O que aconteceu depois:** a Fase 1 foi implementada e verificada por execução, e o gate **M1
+> foi concluído** em 2026-10-26. O registro de aceite, com comandos, códigos de saída e hashes, está
+> em [`docs/evidence/fase-1.md`](../docs/evidence/fase-1.md) (seções 1.1–1.7 e "Checklist do gate
+> M1"). Os achados abaixo **não foram apagados**: eles medem o ponto de partida e explicam por que
+> o plano existe.
+
 **Data da análise:** 2026-10-26
 **Base analisada:** `main` / branch de trabalho `docs/bill/planos-execucao-agentica` @ `b27e077`
 **Escopo:** confronto entre o que foi planejado em `docs/plans/plano-de-trabalho-TC4.md` e
@@ -22,7 +35,9 @@ O repositório tem uma **fundação de pipeline real e funcional** (EDA → prep
 com dois modelos), coberta por 24 testes automatizados e lint limpo. O pipeline **reproduz
 byte-a-byte os relatórios já versionados** e roda de ponta a ponta em **24 s** de CPU local.
 
-Porém, o marco M1 **está bloqueado** por quatro lacunas concretas, todas verificáveis:
+Porém, o marco M1 **está bloqueado** por quatro lacunas concretas, todas verificáveis *(situação
+**na data da análise** — ver o aviso no topo deste documento: as quatro foram resolvidas depois e
+M1 foi concluído)*:
 
 | # | Lacuna | Gravidade |
 |---|---|---|
@@ -314,6 +329,10 @@ linha de base para tempo de CPU e consumo.
 
 Legenda de estado: ✅ aceito pelo código · ⚠️ parcial / não conforme o plano · ❌ ausente.
 
+> **As marcações desta seção descrevem o repositório na data da análise** (base `b27e077`, antes
+> da execução da fase) — ver o aviso no topo do documento. O estado posterior, verificado por
+> execução, está em [`docs/evidence/fase-1.md`](../docs/evidence/fase-1.md).
+
 ### 1.1 — Configuração do repositório — ⚠️ parcial
 
 ✅ Diretórios, `uv.lock` travado, `pyproject.toml`, `.gitignore` (regras de dados/modelos),
@@ -432,6 +451,10 @@ contract:
 ## 6. Diagnóstico consolidado
 
 ### 6.1 Bloqueadores de M1 (ordenados por dependência)
+
+> **Lista histórica.** Estes eram os bloqueadores na data da análise; **todos foram resolvidos** e
+> M1 foi concluído — ver [`docs/evidence/fase-1.md`](../docs/evidence/fase-1.md) ("Checklist do
+> gate M1").
 
 1. **Bruto ausente** → nada é executável a partir do repositório. *Mitigação verificada: o bruto é
    reconstruível byte-a-byte a partir do XLS versionado* (§6.2). Alternativa: configurar o remote

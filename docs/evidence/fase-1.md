@@ -21,7 +21,32 @@ incluindo a prova de recuperação remota no DagsHub (seção 1.6.1).
 > `git_sha` registra o commit do **código** que produziu o artefato; o commit que versiona o
 > artefato vem logo depois, na linha de tempo do Git.
 
+## Grau de evidência por seção
+
+Nem toda seção deste documento tem o mesmo grau de prova. A distinção importa: a **execução
+original** é a passagem que implementou a entrega; a **revalidação independente** é uma passagem
+posterior que reexecutou a entrega contra o código real e confrontou o resultado com o que estava
+registrado.
+
+| Seção | Entrega | Prova registrada | Grau |
+|---|---|---|---|
+| §1.1 | Configuração do repositório | Execução original + recuperação remota provada (§1.6.1) | Execução original |
+| §1.2 | Aquisição e auditoria do dataset | §1.2.1 (exposição declarada) + **§1.2.2 (revalidação por execução)** | Execução revalidada |
+| §1.3 | Preparação dos dados | **§1.3.1 (revalidação por execução)** | Execução revalidada |
+| §1.4 | Treinamento da Regressão Logística | Execução original (testes automatizados e métricas de validação) | Execução original — revalidação independente pendente |
+| §1.5 | Treinamento do Random Forest | Execução original (testes automatizados e métricas de validação) | Execução original — revalidação independente pendente |
+| §1.6 | Avaliação, seleção e versionamento | Execução original + **§1.6.1 (recuperação remota executada em checkout separado)** | Execução original no caminho local — revalidação independente pendente |
+| §1.7 | Data Contract (Pandera) | **§1.7.1 (revalidação por execução)** | Execução revalidada |
+
+Nenhuma seção registra resultado que não tenha sido observado: onde falta prova, a ausência está
+declarada acima, e não substituída por leitura de código.
+
 ## Comandos e códigos de saída
+
+A tabela abaixo é a da **janela de execução original**. As passagens de revalidação
+(§1.2.2, §1.3.1, §1.6.1 e §1.7.1) têm os próprios comandos e códigos de saída registrados em
+cada seção; a tabela "Verificações mais recentes" ao final desta seção dá o estado atual do
+repositório.
 
 | Comando | Código de saída | Resultado |
 |---|---|---|
@@ -36,6 +61,17 @@ incluindo a prova de recuperação remota no DagsHub (seção 1.6.1).
 | `uv run dvc remote list` | 0 | `dagshub s3://dvc` (default) — remote configurado |
 | `uv run dvc status -c -r dagshub` | 0 | `Cache and remote 'dagshub' are in sync.` |
 | `uv run dvc push -r dagshub` | 0 | 25 objetos enviados |
+| `git diff --check` | 0 | sem saída |
+
+### Verificações mais recentes (2026-10-26, após a revalidação do contrato)
+
+| Comando | Código de saída | Resultado |
+|---|---|---|
+| `uv run pytest -q` | 0 | **78 passed** (74 anteriores + 4 do contrato) |
+| `uv run ruff check .` | 0 | All checks passed |
+| `uv run ruff format --check .` | 0 | 53 files already formatted |
+| `uv run dvc status` | 0 | `Data and pipelines are up to date.` |
+| `uv run dvc status -c -r dagshub` | 0 | `Cache and remote 'dagshub' are in sync.` |
 | `git diff --check` | 0 | sem saída |
 
 ## Hashes dos artefatos
@@ -279,7 +315,8 @@ responder *Cache and remote 'dagshub' are in sync*. Suíte: `uv run pytest -q` �
 
 ## 1.4 — Treinamento da Regressão Logística
 
-**Implementado sob o contrato; aceite verificado.**
+**Implementado sob o contrato; aceite verificado.** A revalidação independente por execução desta
+etapa ainda não foi feita (ver "Grau de evidência por seção").
 
 | Item | Evidência |
 |---|---|
@@ -293,7 +330,8 @@ responder *Cache and remote 'dagshub' are in sync*. Suíte: `uv run pytest -q` �
 
 ## 1.5 — Treinamento do Random Forest
 
-**Implementado sob o contrato; aceite verificado.**
+**Implementado sob o contrato; aceite verificado.** A revalidação independente por execução desta
+etapa ainda não foi feita (ver "Grau de evidência por seção").
 
 | Item | Evidência |
 |---|---|
@@ -417,7 +455,12 @@ meio da fase; o que muda a decisão está explicitado):
 
 ## 1.6 — Avaliação, seleção e versionamento
 
-**Recorte local — implementado e verificado. Recorte remoto — bloqueado.**
+**Recorte local e remoto — implementados e verificados.** O bloqueio remoto registrado na passagem
+original foi resolvido; a recuperação remota está provada em §1.6.1.
+
+> O recorte **local** tem aceite da execução original; a **revalidação independente por
+> execução** do caminho local (retreinar, refazer a seleção, reexecutar a recarga) ainda não foi
+> feita. O recorte **remoto** tem prova executada em §1.6.1. Ver "Grau de evidência por seção".
 
 | Item | Evidência |
 |---|---|
@@ -538,6 +581,10 @@ precisam andar juntos).
 4. **Publicação da branch** — concluída: a branch `fase-1-bill` foi publicada em
    `origin/fase-1-bill` com autorização do operador. O PR para `main` continua sendo decisão da
    equipe.
+5. **Revalidação independente de 1.4, 1.5 e 1.6 (caminho local)** — **pendente**: essas três
+   seções se apoiam na execução original. 1.2, 1.3 e 1.7 já têm revalidação por execução
+   (§1.2.2, §1.3.1, §1.7.1). A pendência não bloqueia M1 — que exige aceite, não revalidação
+   duplicada — mas é o próximo trabalho de qualidade antes da Fase 2.
 
 ## Limitações conhecidas desta execução
 

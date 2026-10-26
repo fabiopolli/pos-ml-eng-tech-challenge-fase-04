@@ -1,15 +1,15 @@
 # Fase 1 — Validação de Dados e Contratos
 
 > Plano de execução, revisado em 2026-10-26 após a análise de estado do código. Expande os IDs
-> 1.1–1.7; **não atesta implementação**. Os estados citados como "verificado" são observações de
-> 2026-10-26 registradas em
-> [`reports/analise-estado-fase-1.md`](../../reports/analise-estado-fase-1.md); os demais itens
-> continuam sendo trabalho planejado.
+> 1.1–1.7; **não atesta implementação**. O **registro de aceite**, verificado por execução, está em
+> [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md); o **diagnóstico de partida**, anterior
+> à execução, está em
+> [`reports/analise-estado-fase-1.md`](../../reports/analise-estado-fase-1.md).
 
 > **Status de execução (2026-10-26):** os pacotes 1.1a, 1.1b, 1.2, 1.3, 1.4, 1.5, 1.6 e 1.7
 > foram executados no branch `fase-1-bill` e verificados; o registro por ID, com comandos, códigos
 > de saída e hashes, está em [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md).
-> A seção 2.1 abaixo é o **diagnóstico anterior à execução** e permanece como referência
+> A seção 2 abaixo (2.1 a 2.4) é o **diagnóstico anterior à execução** e permanece como referência
 > histórica — não como estado corrente do repositório. Onde os dois registros divergirem, vale
 > o registro de evidências, verificado por execução.
 
@@ -294,6 +294,11 @@ em falha. Se várias regras falharem, o lote é contado uma só vez como rejeita
 chegam ao estimador; probabilidades são finitas no intervalo [0,1]. Execução de seleção funciona
 mesmo sem acesso ao arquivo de teste, comprovando isolamento por comportamento.
 
+> **Executada em 2026-10-26** (registro de aceite em
+> [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) §1.4). A **revalidação independente
+> por execução** desta etapa ainda não foi feita — ao contrário de 1.2, 1.3 e 1.7, que têm
+> §1.2.2, §1.3.1 e §1.7.1.
+
 ### 1.5 — Treinamento do Random Forest
 
 **Dependências:** mesmas entradas/contrato de 1.4; comparabilidade entre os modelos.
@@ -310,6 +315,10 @@ mesmo sem acesso ao arquivo de teste, comprovando isolamento por comportamento.
 
 **Verificação/aceite:** entradas/hashes coincidem com 1.4, contrato é aplicado, métricas são
 recalculáveis e somas da matriz correspondem à validação. Não exigir que RF vença o baseline.
+
+> **Executada em 2026-10-26** (registro de aceite em
+> [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) §1.5). A **revalidação independente
+> por execução** desta etapa ainda não foi feita.
 
 ### 1.6 — Avaliação, seleção e versionamento
 
@@ -344,6 +353,12 @@ recalculáveis e somas da matriz correspondem à validação. Não exigir que RF
 recarregado preserva probabilidades dentro de tolerância numérica declarada. Recuperação remota
 do bruto, preparados, referência e modelo deve funcionar sem depender do cache principal.
 Relatório e metadados não descrevem a avaliação como intocada se houve exposição anterior.
+
+> **Executada em 2026-10-26** (registro de aceite em
+> [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) §1.6, com a **prova de recuperação
+> remota executada** em checkout e cache separados em §1.6.1). A revalidação independente por
+> execução do **caminho local** — retreinar, refazer a seleção e reexecutar a recarga — ainda não
+> foi feita.
 
 ## 5. Estratégia de verificação e comandos
 
@@ -386,6 +401,13 @@ uv run dvc pull -r dagshub # em checkout/cache separado, como prova de recupera�
 M1 exige todos os aceites 1.1–1.7: contrato bloqueante demonstrado, splits auditados, comparação
 de modelos, decisão congelada, avaliação rastreável e recuperação remota dos objetos. Sem a
 prova remota, reportar prontidão local parcial, mantendo M1 aberto.
+
+> **Estado do gate em 2026-10-26: M1 concluído.** Os dez itens do checklist abaixo foram
+> verificados um a um — com comandos, códigos de saída e hashes — em
+> [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) ("Checklist do gate M1"). As caixas
+> ficam **desmarcadas de propósito**: esta seção é a *especificação* do gate; o *registro de
+> aceite* é o documento de evidências. Para o estado corrente de cada entrega, ver também o
+> "Status de execução" no topo deste plano.
 
 Checklist do gate, a ser verificado item a item antes de propor M1 como concluído:
 
