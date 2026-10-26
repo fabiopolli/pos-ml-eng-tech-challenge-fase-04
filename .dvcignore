@@ -1,3 +1,10 @@
 # Add patterns of files dvc should ignore, which could improve
 # the performance. Learn more at
 # https://dvc.org/doc/user-guide/dvcignore
+
+# Bytecode gerado na arvore de trabalho: sem esta regra, um diretorio usado
+# como dependencia (src/credit_monitoring/contracts) tem o hash alterado
+# conforme o cache de bytecode existe ou nao, e o dvc.lock deixa de descrever
+# o mesmo codigo em maquinas diferentes.
+__pycache__/
+*.py[cod]
