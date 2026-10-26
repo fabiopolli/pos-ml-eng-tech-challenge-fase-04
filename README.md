@@ -392,6 +392,8 @@ planejada para armazenamento remoto versionado de dados e modelos; o treinamento
 
 ## Documentação
 
+- [`docs/user_guides/README.md`](docs/user_guides/README.md): guias de uso das aplicações —
+  começo pelo [laboratório de modelos](docs/user_guides/laboratorio-de-modelos.md).
 - [`docs/plans/plano-de-trabalho-TC4.md`](docs/plans/plano-de-trabalho-TC4.md): plano técnico das
   quatro semanas.
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): fluxo, componentes e decisões de escopo.

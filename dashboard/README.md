@@ -4,6 +4,11 @@ Aplicacao Streamlit local para **inspecionar, comparar e testar** os modelos do
 projeto: o modelo publicado, os dois controles serializados e os finalistas da
 campanha de otimizacao (plano 1.6, recorte **1.6-O6**).
 
+O guia operacional completo — com as variaveis do formulario, os seis perfis de
+teste, a interpretacao dos resultados em lote e os limites do que se pode
+afirmar — esta em
+[`docs/user_guides/laboratorio-de-modelos.md`](../docs/user_guides/laboratorio-de-modelos.md).
+
 Esta aplicacao e distinta do painel operacional da fase 3:
 
 | | `dashboard/app_dev.py` (laboratorio) | `dashboard/app.py` (fase 3) |
