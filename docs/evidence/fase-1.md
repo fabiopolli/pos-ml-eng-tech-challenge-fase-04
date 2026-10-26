@@ -163,13 +163,30 @@ do zero.
 | Regressão do `.dvcignore` | com `__pycache__` criado dentro de `src/credit_monitoring/contracts`, `dvc status` continua limpo e o `dvc.lock` não muda — o defeito encontrado em §1.6.1 permanece corrigido |
 | CI | `uv sync --dev --locked` → `ruff format --check` → `ruff check` → `pytest`; a CI **não** valida o `dvc.lock` (limitação já registrada) |
 
-**Achado: a ação 2 da 1.1a (reavaliar as dependências de fases futuras) não foi executada.**
-`ucimlrepo`, `evidently`, `mlflow` e `streamlit` seguem declaradas como dependências de **runtime**
-em `pyproject.toml`, apesar de nenhuma ser importada pelo código da fase 1 (`streamlit` aparece
-apenas em `dashboard/app.py`, a casca do dashboard que é entrega da fase 3). O plano registra o
-motivo da reavaliação: *"mantê-las declaradas sem uso amplia a superfície do ambiente e confunde
-'instalado' com 'implementado'"*. O item está registrado em "Pendências que exigem a equipe", com a
-recomendação de movê-las para grupos opcionais por fase.
+**Achado (fechado em 2026-10-26, 15:10): a ação 2 da 1.1a (reavaliar as dependências de fases
+futuras) não tinha sido executada.** `ucimlrepo`, `evidently`, `mlflow` e `streamlit` seguiam
+declaradas como dependências de **runtime** em `pyproject.toml`, apesar de nenhuma ser importada
+pelo código da fase 1 (`streamlit` aparecia apenas em `dashboard/app.py`, a casca do dashboard que
+é entrega da fase 3). O plano registra o motivo da reavaliação: *"mantê-las declaradas sem uso
+amplia a superfície do ambiente e confunde 'instalado' com 'implementado'"*.
+
+**Correção aplicada.** As quatro passaram para **grupos opcionais por fase** em
+`[project.optional-dependencies]`, e o lock foi regenerado pela ferramenta (`uv lock`, não à mão):
+
+| Extra | Pacotes | Fase que os usa | Ambiente padrão |
+|---|---|---|---|
+| `drift` | `evidently` | 2 — simulação e detecção de drift | não instalado |
+| `observability` | `mlflow`, `streamlit` | 3 — observabilidade e dashboard | não instalado |
+| `provenance` | `ucimlrepo` | re-verificação da fonte na UCI (o bruto vem do XLS versionado no DVC) | não instalado |
+
+| Verificação | Resultado observado |
+|---|---|
+| `uv lock` | exit 0 — *Resolved 247 packages*; o lock passa a registrar os extras sem instalá-los |
+| Ambiente padrão | `uv sync --dev --locked` → exit 0; **170 pacotes instalados, contra 244 antes** (−74: as árvores de `mlflow`, `streamlit`, `evidently` e `ucimlrepo`) |
+| Extras instaláveis | `--extra drift` → 207 pacotes e `evidently 0.7.23`; `--extra observability` → 215 pacotes e `mlflow 3.17.2` + `streamlit 1.66.1`; `--extra provenance` → 171 pacotes e `ucimlrepo 0.0.7`; `--all-extras` → as quatro presentes. Todos com exit 0 e a partir do lock travado |
+| Suíte no ambiente padrão | `uv run pytest -q` → **83 passed**; `uv run ruff check .` → 0; `uv run ruff format --check .` → 0 |
+| Artefatos DVC | `uv run dvc status` → *Data and pipelines are up to date.*; `uv run dvc status -c -r dagshub` → *Cache and remote 'dagshub' are in sync.* — `pyproject.toml` e `uv.lock` não são dependências de nenhum estágio, então **nenhum artefato mudou** |
+| Documentos de uso | `README.md` e o plano da fase 3 passaram a instruir `uv sync --dev --locked --extra observability` antes de `uv run streamlit` / `uv run mlflow` |
 
 ## 1.2 — Aquisição e auditoria do dataset
 
@@ -764,12 +781,11 @@ precisam andar juntos).
 5. **Revalidação independente de 1.4, 1.5 e 1.6 (caminho local)** — **concluída em 2026-10-26**:
    §1.4.1, §1.5.1 e §1.6.2, executadas em clone isolado. As sete entregas da fase 1 têm agora
    registro de aceite com prova de execução, e não apenas leitura de código.
-6. **Dependências de fases futuras ainda declaradas como runtime** — **pendente de decisão**:
-   `ucimlrepo`, `evidently`, `mlflow` e `streamlit` seguem em `[project.dependencies]`, sem uso no
-   código da fase 1 (achado da revalidação da 1.1, §1.1.1). O plano pede a reavaliação: movê-las
-   para grupos opcionais por fase reduz a superfície do ambiente e separa "instalado" de
-   "implementado". Impacto: `uv.lock` muda e as fases 3 e 4 passam a instalar os extras
-   correspondentes; nenhum artefato DVC é afetado. Requer decisão do executor do plano.
+6. **Dependências de fases futuras ainda declaradas como runtime** — **concluída em 2026-10-26**:
+   `ucimlrepo`, `evidently`, `mlflow` e `streamlit` foram movidas para os grupos opcionais
+   `provenance`, `drift` e `observability` (achado e correção em §1.1.1). O ambiente padrão passou
+   de 244 para 170 pacotes; os extras são instaláveis a partir do lock travado; nenhum artefato DVC
+   foi afetado.
 
 ## Limitações conhecidas desta execução
 

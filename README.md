@@ -210,9 +210,11 @@ supervisionada restrita ao treino; a descrição do dataset está em
 [`docs/DATASET.md`](docs/DATASET.md).
 
 O dashboard inicial já pode ser aberto; a integração de observabilidade e os dados de produção
-simulados serão concluídos nas etapas seguintes:
+simulados serão concluídos nas etapas seguintes. `streamlit` e `mlflow` são **extras** e não são
+instalados no ambiente padrão — instale o extra da fase 3 antes de usá-los:
 
 ```bash
+uv sync --dev --locked --extra observability
 uv run streamlit run dashboard/app.py
 ```
 
@@ -220,6 +222,7 @@ uv run streamlit run dashboard/app.py
 
 ```bash
 # Ativar o MLflow local quando a Etapa 3 estiver implementada
+# (requer o extra observability, instalado acima)
 uv run mlflow ui --backend-store-uri sqlite:///mlflow.db
 
 # Copiar configurações locais sem versionar segredos

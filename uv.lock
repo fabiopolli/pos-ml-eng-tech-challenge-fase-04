@@ -3303,10 +3303,8 @@ name = "pos-ml-eng-tech-challenge-fase-04"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "evidently" },
     { name = "joblib" },
     { name = "matplotlib" },
-    { name = "mlflow" },
     { name = "numpy" },
     { name = "pandas" },
     { name = "pandera", extra = ["pandas"] },
@@ -3314,9 +3312,19 @@ dependencies = [
     { name = "scikit-learn" },
     { name = "scipy" },
     { name = "seaborn" },
-    { name = "streamlit" },
-    { name = "ucimlrepo" },
     { name = "xlrd" },
+]
+
+[package.optional-dependencies]
+drift = [
+    { name = "evidently" },
+]
+observability = [
+    { name = "mlflow" },
+    { name = "streamlit" },
+]
+provenance = [
+    { name = "ucimlrepo" },
 ]
 
 [package.dev-dependencies]
@@ -3331,10 +3339,10 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "evidently", specifier = ">=0.7,<1" },
+    { name = "evidently", marker = "extra == 'drift'", specifier = ">=0.7,<1" },
     { name = "joblib", specifier = ">=1.4,<2" },
     { name = "matplotlib", specifier = ">=3.9,<4" },
-    { name = "mlflow", specifier = ">=3,<4" },
+    { name = "mlflow", marker = "extra == 'observability'", specifier = ">=3,<4" },
     { name = "numpy", specifier = ">=2,<3" },
     { name = "pandas", specifier = ">=2.2,<3" },
     { name = "pandera", extras = ["pandas"], specifier = ">=0.26,<1" },
@@ -3342,10 +3350,11 @@ requires-dist = [
     { name = "scikit-learn", specifier = ">=1.5,<2" },
     { name = "scipy", specifier = ">=1.13,<2" },
     { name = "seaborn", specifier = ">=0.13,<1" },
-    { name = "streamlit", specifier = ">=1.40,<2" },
-    { name = "ucimlrepo", specifier = ">=0.0.7,<1" },
+    { name = "streamlit", marker = "extra == 'observability'", specifier = ">=1.40,<2" },
+    { name = "ucimlrepo", marker = "extra == 'provenance'", specifier = ">=0.0.7,<1" },
     { name = "xlrd", specifier = ">=2,<3" },
 ]
+provides-extras = ["drift", "observability", "provenance"]
 
 [package.metadata.requires-dev]
 dev = [

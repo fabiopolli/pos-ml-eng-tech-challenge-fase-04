@@ -216,6 +216,13 @@ isolada sem vínculo a execução não comprova o monitoramento.
 
 ## 5. Operação local e verificações
 
+`mlflow` e `streamlit` são **extras** (`observability`) e não são instalados no ambiente padrão.
+Antes de usar os comandos abaixo:
+
+```bash
+uv sync --dev --locked --extra observability
+```
+
 Comandos de visualização existentes, a usar após configurar a mesma URI na aplicação:
 
 ```bash

@@ -9,10 +9,8 @@ description = "Credit scoring com contratos de dados, deteccao de drift e observ
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "evidently>=0.7,<1",
     "joblib>=1.4,<2",
     "matplotlib>=3.9,<4",
-    "mlflow>=3,<4",
     "numpy>=2,<3",
     "pandas>=2.2,<3",
     "pandera[pandas]>=0.26,<1",
@@ -20,10 +18,21 @@ dependencies = [
     "scikit-learn>=1.5,<2",
     "scipy>=1.13,<2",
     "seaborn>=0.13,<1",
-    "streamlit>=1.40,<2",
-    "ucimlrepo>=0.0.7,<1",
     "xlrd>=2,<3",
 ]
+
+# Dependencias de fases futuras: declaradas, porem NAO instaladas por padrao.
+# A reavaliacao pedida pela acao 2 da 1.1a separou "instalado" de
+# "implementado": o ambiente padrao carrega apenas o que o codigo da fase
+# usa, e cada fase instala o seu extra quando precisar.
+#
+#   uv sync --dev --locked --extra drift          # fase 2 (evidently)
+#   uv sync --dev --locked --extra observability  # fase 3 (mlflow, streamlit)
+#   uv sync --dev --locked --extra provenance     # reverificar a fonte na UCI
+[project.optional-dependencies]
+drift = ["evidently>=0.7,<1"]
+observability = ["mlflow>=3,<4", "streamlit>=1.40,<2"]
+provenance = ["ucimlrepo>=0.0.7,<1"]
 
 [project.scripts]
 credit-monitoring-acquire = "credit_monitoring.data.acquire:main"
