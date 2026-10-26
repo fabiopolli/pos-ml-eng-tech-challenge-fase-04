@@ -273,3 +273,16 @@ e pelo gate.
    pendência que a fase 2 deve tratar antes do aceite final.
 5. **Publicação da branch** — as alterações estão em commits locais da branch `fase-1-bill`;
    o `git push` não foi executado (escrita externa depende de autorização).
+
+## Limitações conhecidas desta execução
+
+- **A CI não valida o `dvc.lock`.** O workflow executa `uv sync --dev --locked`, formatação,
+  lint, testes e `uv build`, mas não `dvc repro` nem `dvc status`. A coerência do lock foi
+  verificada localmente nesta execução. Acrescentar essa verificação à CI exigiria decidir se as
+  figuras (saídas DVC) são byte-idênticas entre plataformas — verificação não feita aqui.
+  A versão do `uv` na CI foi alinhada em `0.12.18`, a mesma que gravou o `uv.lock`.
+- **Nenhum modelo foi avaliado em outro hardware.** As métricas de recursos valem para a
+  máquina local registrada em `reports/run_resources.json`.
+- **Ressalva de comparabilidade estatística:** o dataset é de Taiwan (2005) e o modelo é
+  acadêmico; não há base para alegar desempenho em população brasileira atual nem para conceder
+  crédito real.
