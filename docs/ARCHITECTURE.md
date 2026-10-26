@@ -34,13 +34,20 @@ o remote planejado; ainda não está configurado em `.dvc/config` neste checkout
 
 1. Aquisição do UCI 350 para `data/raw`.
 2. Normalização do esquema e preparação em `data/processed`.
-3. Divisão estratificada 70/15/15 e persistência da referência.
+3. Divisão estratificada 70/15/15, seed 42, IDs disjuntos e referência = treino sem alterações.
 4. Validação Pandera antes de treino e inferência.
-5. Comparação justa entre Regressão Logística e Random Forest.
-6. Serialização do modelo selecionado em `models` e registro no MLflow.
-7. Geração reproduzível de lote de produção com drift em duas features.
-8. Comparação reference versus production com Evidently e testes estatísticos.
-9. Consolidação de métricas e alertas no Streamlit.
+5. Ajuste no treino, comparação na validação, congelamento das decisões e teste do escolhido.
+6. Serialização em `models`, versionamento DVC/DagsHub e rastreamento local no MLflow na fase 3.
+7. Cópia das features da validação para produção original, mais cópia modificada em duas features;
+   sem reutilizar o teste ou compartilhar IDs com a referência. A validação já foi usada na seleção.
+8. Contrato antes da inferência e comparação da referência com controle/original e modificada,
+   com métodos, intensidades e limiares fixados antes do aceite.
+9. Consolidação de métricas, consumo local de recursos e alertas no Streamlit, por execução.
+
+Este fluxo é requisito de planejamento: o EDA atual inclui relações com o alvo no bruto completo,
+`train` avalia o teste a cada execução, Pandera ainda não está integrado e os estágios de produção,
+drift e observabilidade ainda precisam ser implementados. A revisão deve registrar qualquer uso
+prévio do teste antes de alegar avaliação intocada; não basta mudar a seed e omitir a exposição.
 
 ## Componentes previstos
 

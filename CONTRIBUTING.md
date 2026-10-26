@@ -7,7 +7,9 @@
 5. Abra PR com objetivo, validações executadas, evidências e impacto no checklist.
 6. Solicite revisão de outro integrante.
 
-Não envie datasets, informações pessoais, segredos, ambientes virtuais, bancos do MLflow,
-modelos binários ou relatórios gerados com dados potencialmente sensíveis. Não faça
-force-push na `main`.
+Não envie datasets ou modelos binários diretamente ao Git: use DVC/DagsHub para objetos
+autorizados e versione ponteiros/metadados no Git. Não envie informações pessoais, segredos,
+ambientes virtuais, bancos do MLflow ou relatórios locais sensíveis. Não faça force-push na `main`.
 
+Alterações exclusivamente documentais devem verificar links, consistência com o plano/enunciado
+e `git diff --check`; testes/lint de código são necessários quando a mudança afeta execução.

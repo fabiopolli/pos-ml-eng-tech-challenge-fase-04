@@ -11,6 +11,12 @@ O repositório já rastreia o CSV bruto e declara os datasets preparados e model
 No estado atual, `.dvc/config` ainda não define um remote. A integração só estará ativa depois que
 o projeto GitHub for conectado/importado no DagsHub e as credenciais forem configuradas localmente.
 
+O endpoint S3 abaixo exige suporte S3 no DVC. A dependência atual `dvc>=3,<4` não declara esse
+extra e o lockfile não inclui `dvc-s3`; antes de usar o guia, a entrega 1.1 deve adicionar
+`dvc[s3]>=3,<4` ao grupo de desenvolvimento e atualizar/testar o lockfile. Com uv disponível,
+o comando de manutenção é `uv add --dev 'dvc[s3]>=3,<4'`. Depois dessa alteração versionada,
+cada integrante instala o mesmo ambiente com `uv sync --dev --locked`.
+
 ## Configuração inicial (por integrante)
 
 1. Conectar o repositório GitHub existente ao DagsHub seguindo o
@@ -30,6 +36,7 @@ o projeto GitHub for conectado/importado no DagsHub e as credenciais forem confi
 
    ```bash
    uv run dvc remote modify dagshub url s3://dvc
+   uv run dvc remote modify dagshub endpointurl "https://dagshub.com/${DAGSHUB_OWNER}/${DAGSHUB_REPO}.s3"
    uv run dvc remote default dagshub
    ```
 
@@ -51,11 +58,18 @@ o projeto GitHub for conectado/importado no DagsHub e as credenciais forem confi
 
 ## Sincronizar dados e modelos
 
-Após adicionar/atualizar arquivos rastreados pelo DVC e commitar seus ponteiros/`dvc.lock` no Git:
+Após adicionar/atualizar os objetos DVC e commitar localmente seus ponteiros/`dvc.lock`, enviar os
+objetos antes de publicar o commit Git correspondente. Assim o remoto Git não anuncia uma versão
+irrecuperável por falta dos objetos:
 
 ```bash
 uv run dvc push -r dagshub
 ```
+
+Só depois do sucesso do envio de objetos publicar o commit no GitHub e conferir sua sincronização
+com o repositório conectado no DagsHub. Um `git push` não envia o cache DVC automaticamente.
+O `dvc push` sem alvos cobre também outras saídas em cache declaradas em `dvc.yaml` (como figuras);
+conferir o conjunto compartilhado, não apenas o CSV e o modelo.
 
 Em um checkout autorizado, recuperar os objetos necessários para o commit atual:
 
@@ -78,13 +92,19 @@ commit com objetos de outra versão.
 - Antes da primeira sincronização, confirmar que o repositório DagsHub existe, o remote aponta para
   ele, os objetos DVC selecionados estão autorizados e o acesso funciona.
 - Verificar configuração com `uv run dvc remote list`, integridade local com `uv run dvc status` e
-  disponibilidade do cache remoto com `uv run dvc status -c`.
+  disponibilidade do cache remoto com `uv run dvc status -c -r dagshub`.
+- Demonstrar recuperação em checkout e cache DVC separados, sem apagar o cache de trabalho;
+  recuperar a mesma versão e conferir hashes. `dvc pull` em um cache já preenchido não comprova
+  recuperação remota.
+- Retenção abrange objetos remotos e caches locais: apagar ponteiros Git não remove o conteúdo
+  armazenado; não executar coleta de lixo ou exclusão de versões como parte deste guia.
 
 ## Referências
 
 - [DagsHub — integração DVC e Storage](https://dagshub.com/docs/integration_guide/dvc/)
 - [DagsHub — conectar repositório existente](https://dagshub.com/docs/quick_start/connect_existing_project/)
 - [DagsHub — versionar dados](https://dagshub.com/docs/quick_start/version_data/)
+- [DVC — armazenamento S3 e servidores compatíveis](https://dvc.org/doc/user-guide/data-management/remote-storage/amazon-s3)
 
 Documentação consultada em 2026-10-26. Valores de remote e credenciais são específicos da conta
 e do repositório e devem ser copiados da interface do DagsHub.

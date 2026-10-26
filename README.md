@@ -26,9 +26,10 @@ de colaboração.
 
 ## Objetivo
 
-Demonstrar como uma fintech pode detectar degradação silenciosa em um modelo de risco de
-crédito. O projeto usa o dataset público **UCI Default of Credit Card Clients (ID 350)** e
-separa explicitamente dados de referência dos lotes simulados de produção.
+Demonstrar validação de dados, detecção de alterações de distribuição e monitoramento de um
+modelo de risco de crédito em um cenário hipotético de fintech. O projeto usa o dataset público
+**UCI Default of Credit Card Clients (ID 350)** e separa dados de referência dos lotes simulados
+de produção; drift sintético não comprova perda real de desempenho.
 
 O plano detalhado, com 28 entregas distribuídas em quatro semanas, está em
 [`docs/plans/plano-de-trabalho-TC4.md`](docs/plans/plano-de-trabalho-TC4.md). O enunciado oficial
@@ -59,8 +60,10 @@ fica em [`configs/project.yaml`](configs/project.yaml).
 - **Seleção:** ROC-AUC como métrica principal; precision, recall, F1, accuracy e matriz de
   confusão como evidências complementares.
 
-O conjunto de teste permanece isolado até a avaliação final. Toda transformação aprendida deve
-ser ajustada apenas no treino para evitar vazamento de dados.
+O protocolo planejado reserva o teste para avaliar apenas o modelo escolhido após congelar as
+decisões. Toda transformação aprendida deve ser ajustada no treino. Há limitações a revisar:
+o EDA atual calcula correlações com o alvo no bruto completo e cada execução de `train` avalia
+o teste; não tratar reexecuções usadas para ajustar decisões como avaliações finais intocadas.
 
 ## Stack definida
 
@@ -84,17 +87,16 @@ credenciais em arquivos versionados.
 
 ```text
 UCI 350
-  -> aquisição e preparação
-  -> datasets e modelo versionados por DVC
-  -> DagsHub Storage (remote de dados/modelos)
-  -> contrato Pandera
-  -> treino e seleção do modelo
-  -> dataset de referência
-  -> simulação de lote de produção
-  -> contrato + inferência
-  -> Evidently/testes estatísticos
-  -> MLflow + relatórios
-  -> dashboard Streamlit
+  -> auditoria estrutural + preparação + split 70/15/15
+  -> contrato Pandera antes do treino
+  -> treino + seleção na validação + avaliação do escolhido no teste
+  -> modelo congelado + referência = treino
+  -> produção original = features da validação + cópia com drift
+  -> contrato + inferência + Evidently (controle e lote alterado)
+  -> MLflow local + relatórios -> dashboard Streamlit
+
+Datasets/modelo <-> cache DVC <-> DagsHub Storage
+Código, parâmetros, ponteiros e dvc.lock -> GitHub
 ```
 
 As decisões e fronteiras entre componentes estão em [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
@@ -111,17 +113,27 @@ contrato inicial exige:
 - `AGE` entre 18 e 100 anos;
 - ausência de nulos nas features obrigatórias.
 
+O contrato de inferência não exige alvo. ID e atributos de governança ficam disponíveis ao
+contrato, mas não entram como preditores. A preparação histórica documenta remoções; um lote
+operacional inválido é rejeitado inteiro antes do modelo, sem limpeza silenciosa.
+
 ### Cenário de drift
 
-O lote de produção será derivado de um conjunto independente e terá mudanças reproduzíveis em
-`LIMIT_BAL` e `PAY_AMT1`, respeitando o contrato. Evidently e testes como KS/PSI compararão
-referência e produção. Alterar features mantendo rótulos originais demonstra **Data Drift**;
-isso não será apresentado como prova automática de Concept Drift ou perda real de performance.
+A referência é a cópia do treino. Após congelar a seleção, as features da validação originam
+o lote de produção original e uma cópia com mudanças em `LIMIT_BAL` e `PAY_AMT1`. Esses lotes
+não compartilham IDs com a referência e não usam o teste; a validação reutilizada não constitui
+novo holdout de desempenho. Comparar referência com original (controle) e modificada sob
+métodos/limiares registrados antes do aceite, respeitando o contrato.
+
+Alterar features mantendo rótulos originais demonstra **Data Drift**; isso não prova Concept
+Drift ou perda real de performance. O enunciado cita Concept Drift no contexto, mas não o detalha
+na rubrica: a interpretação deve ser confirmada com a docência, conforme a pendência no plano.
 
 ### Sinais operacionais mínimos
 
 - status e duração da última execução;
 - registros processados e rejeitados;
+- contagem de falhas/alertas, tempo de CPU e pico de memória do processo, com unidades;
 - métricas e versão do modelo selecionado;
 - quantidade de features com drift e resultados estatísticos;
 - distribuição das probabilidades previstas;
@@ -147,7 +159,7 @@ tests/                   testes automatizados
 Requer Python 3.12 e [`uv`](https://docs.astral.sh/uv/).
 
 ```bash
-uv sync --dev
+uv sync --dev --locked
 uv run pytest
 uv run ruff check .
 uv run ruff format --check .
@@ -197,7 +209,7 @@ O acompanhamento operacional está em [`docs/CHECKLIST.md`](docs/CHECKLIST.md).
 
 | Entrega | Estado | Evidência atual |
 |---|---|---|
-| Fundação do repositório | Concluída | Estrutura, dependências, CI, testes e documentação inicial |
+| Fundação do repositório e remote | Em andamento | Estrutura/CI presentes; DagsHub e dependências S3 pendentes |
 | Aquisição e EDA | Em revisão | `notebooks/01_eda.ipynb`, estágio `eda` do `dvc.yaml` |
 | Modelos e Data Contract | Em andamento | Modelos (LR e RF) em revisão; contrato Pandera pendente |
 | Simulação e relatório de drift | Pendente | Cenário inicial documentado |
