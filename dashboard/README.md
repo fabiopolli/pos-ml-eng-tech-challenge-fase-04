@@ -53,6 +53,33 @@ operacional.
    cenario mostra o resultado esperado, o observado e o diagnostivo por
    regra/coluna. Um lote invalido e recusado por inteiro e **nao chama nenhum
    modelo**.
+5. **Data Drift — cenário 1.0.2** — leitura do snapshot agregado congelado em
+   `reports/drift/results-v1.0.2.json` e
+   `reports/drift/prediction_summary-v1.0.2.json`. A comparação, tabela PSI das
+   19 features, bins persistidos de `LIMIT_BAL`/`PAY_AMT1` e quantis dos scores
+   são independentes dos modelos e lotes selecionados nas outras abas. O HTML
+   versionado v6 fica disponível para download quando está materializado.
+
+### Leitura e limites de Data Drift
+
+- A aba não executa inferência, detector PSI, treino, avaliação nem criação de
+  alertas. Ela valida e apresenta apenas os dois JSONs agregados do cenário
+  `phase-2-1.0.2`, protocolo `1.0.2`, contrato `1.0.0` e o SHA do modelo M2.
+- O seletor oferece somente as três comparações armazenadas. A tabela mostra
+  score PSI, limiar, booleano original do detector e denominadores para todas
+  as 19 features; ordenação visual não oculta features sem alerta.
+- Os gráficos reproduzem os labels, bordas e proporções já persistidos, com a
+  categoria zero separada e valores monetários em NT$. Os resumos de scores são
+  agregados e não permitem reconstruir histogramas ou linhas individuais.
+- Data Drift descreve mudança na distribuição de entradas. Não demonstra
+  Concept Drift, degradação, causalidade ou desempenho; as probabilidades são
+  previsões, não inadimplência observada. A validação usada para produção já
+  participou da seleção do modelo.
+- Artefato ausente, versão não suportada ou incoerência de hashes/contagens
+  deixa a aba indisponível com motivo controlado. A ausência do HTML v6 não
+  bloqueia os resumos JSON nem dispara geração do relatório.
+- Nenhuma linha, ID, alvo ou dado do conjunto de teste é lido ou exportado por
+  esta aba. Uploads de inferência continuam sem diagnóstico automático de drift.
 
 ## Estados e limites
 
@@ -71,6 +98,7 @@ operacional.
 
 ```bash
 uv run --extra model_lab pytest tests/test_app_dev.py
+uv run --extra model_lab pytest tests/test_drift_snapshot.py
 ```
 
 Os testes de aplicacao usam `streamlit.testing.v1.AppTest` e fixtures locais; nao

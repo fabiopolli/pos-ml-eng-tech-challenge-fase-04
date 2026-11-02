@@ -32,7 +32,7 @@ def _module():
     return module
 
 
-def test_the_application_starts_and_exposes_the_four_tabs():
+def test_the_application_starts_and_exposes_the_tabs():
     at = _app().run()
 
     assert not at.exception
@@ -43,6 +43,82 @@ def test_the_application_starts_and_exposes_the_four_tabs():
         "Predicao",
     ]
     assert "Cenarios de contrato" in labels
+    assert "Data Drift — cenário 1.0.2" in labels
+
+
+def test_the_data_drift_tab_keeps_frozen_comparisons_independent(tmp_path, monkeypatch):
+    from test_drift_snapshot import _write_snapshot
+
+    import credit_monitoring.paths as paths
+    from credit_monitoring.monitoring.drift_snapshot import COMPARISON_LABELS, FEATURES
+
+    reports_dir = tmp_path / "reports"
+    _write_snapshot(reports_dir)
+    (reports_dir / "drift" / "phase-2-drift-v1.0.2-ptbr-v6.html").write_text(
+        "<html><body>Relatório agregado de teste</body></html>", encoding="utf-8"
+    )
+    monkeypatch.setattr(paths, "MODELS_DIR", tmp_path / "missing-models")
+    monkeypatch.setattr(paths, "REPORTS_DIR", reports_dir)
+
+    at = _app().run()
+    assert not at.exception
+    downloads = at.get("download_button")
+    assert len(downloads) == 1
+    assert downloads[0].label == "Baixar relatório completo de Data Drift (v6)"
+    snapshot_caption = next(item.value for item in at.caption if "phase-2-1.0.2" in item.value)
+    assert "a5a4a740902fab9efa5138f98917a8a7f447c5af7f7d97b707290c205c1e0464" in (snapshot_caption)
+    drift_table = next(item.value for item in at.dataframe if item.value.shape == (19, 6))
+    assert set(drift_table["Feature"]) == set(FEATURES)
+    assert not drift_table["Alerta (detector)"].any()
+    assert (
+        next(item.value for item in at.metric if item.label == "Alteração na média prevista")
+        == "-0.322 p.p."
+    )
+    assert (
+        next(item.value for item in at.metric if item.label == "Alteração nas previsões classe 1")
+        == "-7"
+    )
+
+    comparison = next(widget for widget in at.selectbox if widget.key == "drift_comparison")
+    comparison.select(COMPARISON_LABELS["reference_vs_original"])
+    at.run()
+    assert not at.exception
+    assert any("0 de 19" in element.value for element in at.info)
+
+    comparison = next(widget for widget in at.selectbox if widget.key == "drift_comparison")
+    comparison.select(COMPARISON_LABELS["reference_vs_modified"])
+    at.run()
+    assert not at.exception
+    assert any("2 de 19" in element.value for element in at.warning)
+    drift_table = next(item.value for item in at.dataframe if item.value.shape == (19, 6))
+    assert set(drift_table.loc[drift_table["Alerta (detector)"], "Feature"]) == {
+        "LIMIT_BAL",
+        "PAY_AMT1",
+    }
+
+    comparison = next(widget for widget in at.selectbox if widget.key == "drift_comparison")
+    comparison.select(COMPARISON_LABELS["original_vs_modified"])
+    at.run()
+    assert not at.exception
+    assert any("2 de 19" in element.value for element in at.warning)
+    drift_table = next(item.value for item in at.dataframe if item.value.shape == (19, 6))
+    assert set(drift_table.loc[drift_table["Alerta (detector)"], "Feature"]) == {
+        "LIMIT_BAL",
+        "PAY_AMT1",
+    }
+
+
+def test_the_data_drift_tab_reports_missing_artifacts_without_raw_errors(tmp_path, monkeypatch):
+    import credit_monitoring.paths as paths
+
+    monkeypatch.setattr(paths, "MODELS_DIR", tmp_path / "missing-models")
+    monkeypatch.setattr(paths, "REPORTS_DIR", tmp_path / "missing-reports")
+    at = _app().run()
+
+    assert not at.exception
+    assert any("Snapshot de Data Drift indisponível" in item.value for item in at.error)
+    assert str(tmp_path) not in " ".join(item.value for item in at.error)
+    assert any("Relatório HTML v6 indisponível" in item.value for item in at.info)
 
 
 def test_the_application_never_fits_or_evaluates_a_model(monkeypatch):

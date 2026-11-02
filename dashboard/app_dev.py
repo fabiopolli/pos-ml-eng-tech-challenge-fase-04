@@ -52,6 +52,14 @@ from credit_monitoring.models.inference import (  # noqa: E402
     divergence_summary,
     load_model,
 )
+from credit_monitoring.monitoring.drift_snapshot import (  # noqa: E402
+    COMPARISON_IDS,
+    COMPARISON_LABELS,
+    DriftSnapshot,
+    DriftSnapshotError,
+    FeatureSnapshot,
+    load_drift_snapshot,
+)
 from credit_monitoring.paths import MODELS_DIR, REPORTS_DIR  # noqa: E402
 
 st.set_page_config(
@@ -670,6 +678,261 @@ def render_contract(catalog: lab.Catalog, selected: list[str]) -> None:
                 st.json(violation.to_dict())
 
 
+def _drift_signature(reports_dir: Path) -> tuple[tuple[str, int, int] | None, ...]:
+    """Cache key for the two fixed drift snapshots; changes invalidate the UI cache."""
+    signature: list[tuple[str, int, int] | None] = []
+    for filename in ("results-v1.0.2.json", "prediction_summary-v1.0.2.json"):
+        path = reports_dir / "drift" / filename
+        try:
+            stat = path.stat()
+        except OSError:
+            signature.append(None)
+        else:
+            signature.append((str(path), stat.st_mtime_ns, stat.st_size))
+    return tuple(signature)
+
+
+@st.cache_data(show_spinner=False)
+def _cached_drift_snapshot(reports_dir: str, signature: tuple) -> DriftSnapshot:
+    """Read the aggregate snapshot once per artifact signature."""
+    del signature  # Part of Streamlit's cache key; the loader reads only fixed filenames.
+    return load_drift_snapshot(Path(reports_dir))
+
+
+def drift_bins_figure(feature: FeatureSnapshot, comparison_id: str) -> plt.Figure:
+    """Plot the persisted proportions; this function does not derive bins or scores."""
+    if comparison_id == "reference_vs_original":
+        left_label, right_label = "Referência", "Original (controle)"
+    elif comparison_id == "reference_vs_modified":
+        left_label, right_label = "Referência", "Modificado"
+    else:
+        left_label, right_label = "Original", "Modificado"
+
+    positions = list(range(len(feature.bin_labels)))
+    width = 0.38
+    figure, axis = plt.subplots(figsize=(11, 4))
+    axis.bar(
+        [position - width / 2 for position in positions],
+        [value * 100 for value in feature.reference_proportions],
+        width,
+        label=f"{left_label} (n={feature.reference_count:,})",
+    )
+    axis.bar(
+        [position + width / 2 for position in positions],
+        [value * 100 for value in feature.current_proportions],
+        width,
+        label=f"{right_label} (n={feature.current_count:,})",
+    )
+    axis.set_xticks(positions, feature.bin_labels, rotation=35, ha="right")
+    axis.set_ylabel("Proporção (%)")
+    axis.set_title(f"{feature.feature} — proporções nos bins persistidos")
+    axis.legend()
+    axis.grid(axis="y", alpha=0.25)
+    figure.tight_layout()
+    return figure
+
+
+def prediction_quantiles_figure(snapshot: DriftSnapshot) -> plt.Figure:
+    """Show the frozen quantiles, without reconstructing row-level distributions."""
+    labels = ("p05", "p25", "Mediana", "p75", "p95")
+    fields = ("p05", "p25", "median", "p75", "p95")
+    positions = list(range(len(labels)))
+    figure, axis = plt.subplots(figsize=(8, 3.5))
+    axis.plot(
+        positions,
+        [getattr(snapshot.original, field) for field in fields],
+        marker="o",
+        label="Original",
+    )
+    axis.plot(
+        positions,
+        [getattr(snapshot.modified, field) for field in fields],
+        marker="o",
+        label="Modificado",
+    )
+    axis.set_xticks(positions, labels)
+    axis.set_ylabel("Score previsto (classe 1)")
+    axis.set_ylim(0, 1)
+    axis.legend()
+    axis.grid(alpha=0.25)
+    figure.tight_layout()
+    return figure
+
+
+def render_drift(reports_dir: Path) -> None:
+    """Display the versioned Data Drift evidence, independent of model selection/inference."""
+    st.subheader("Data Drift — cenário 1.0.2")
+    try:
+        snapshot = _cached_drift_snapshot(str(reports_dir), _drift_signature(reports_dir))
+    except DriftSnapshotError as error:
+        st.error(f"Snapshot de Data Drift indisponível: {error}")
+        st.caption(
+            "A tela lê somente os dois JSONs versionados de 1.0.2. Confira a materialização "
+            "dos artefatos no diretório local de relatórios; nenhum cálculo será executado aqui."
+        )
+        _render_drift_report_download(reports_dir)
+        return
+    except Exception:
+        # Never expose raw exceptions, local paths or malformed artifact contents in the UI.
+        st.error(
+            "Snapshot de Data Drift indisponível: os artefatos não passaram pela leitura segura."
+        )
+        _render_drift_report_download(reports_dir)
+        return
+
+    comparison_options = {
+        comparison_id: COMPARISON_LABELS[comparison_id] for comparison_id in COMPARISON_IDS
+    }
+    selected_label = st.selectbox(
+        "Comparação congelada",
+        options=list(comparison_options.values()),
+        key="drift_comparison",
+    )
+    selected_id = next(key for key, label in comparison_options.items() if label == selected_label)
+    comparison = next(item for item in snapshot.comparisons if item.comparison_id == selected_id)
+
+    st.caption(
+        f"Cenário `{snapshot.scenario_id}` · protocolo {snapshot.protocol_version} · "
+        f"contrato {snapshot.contract_version} · comparação: {selected_label}. "
+        f"Conjuntos: {comparison.reference_rows:,} × {comparison.current_rows:,} linhas. "
+        f"Modelo congelado SHA-256 `{snapshot.model_sha256}` · limiar de classificação "
+        f"{snapshot.threshold:.1f} · fonte: `results-v1.0.2.json` e "
+        "`prediction_summary-v1.0.2.json`."
+    )
+    if comparison.global_alert:
+        st.warning(
+            f"Alerta informativo de Data Drift: {comparison.drifted_feature_count} de "
+            f"{len(comparison.features)} features ultrapassam o limiar nesta comparação. "
+            "Isto não altera o estado do modelo ou de uma execução."
+        )
+    else:
+        st.info(
+            f"Sem features sinalizadas nesta comparação ({comparison.drifted_feature_count} de "
+            f"{len(comparison.features)}). Isto é apenas o resultado do cenário selecionado, "
+            "não um status operacional."
+        )
+    st.info(
+        "Data Drift indica mudança na distribuição de entradas; não demonstra Concept Drift "
+        "nem degradação de desempenho. A produção simulada deriva da validação, que já participou "
+        "da seleção do modelo."
+    )
+
+    summary_columns = st.columns(4)
+    summary_columns[0].metric("Features sinalizadas", f"{comparison.drifted_feature_count} / 19")
+    summary_columns[1].metric("Método", comparison.method)
+    summary_columns[2].metric("Conjunto à esquerda", f"{comparison.reference_rows:,} linhas")
+    summary_columns[3].metric("Conjunto à direita", f"{comparison.current_rows:,} linhas")
+
+    st.markdown(
+        "**Resultados por feature — PSI não é p-value e não informa a direção da mudança.**"
+    )
+    rows = [
+        {
+            "Feature": item.feature,
+            "PSI": item.score,
+            "Limiar": item.threshold,
+            "Alerta (detector)": item.drift,
+            "Linhas à esquerda": item.reference_count,
+            "Linhas à direita": item.current_count,
+        }
+        for item in comparison.features
+    ]
+    table = pd.DataFrame(rows).sort_values("Alerta (detector)", ascending=False, kind="stable")
+    show_dataframe(table)
+
+    st.markdown("**Distribuições agregadas nos bins persistidos**")
+    st.caption(
+        "Os gráficos usam diretamente os labels, proporções e bordas gravados no JSON; "
+        "não recalculam bins nem PSI. A categoria `zero` foi separada pelo protocolo."
+    )
+    selected_features = {item.feature: item for item in comparison.features}
+    for feature_name in ("LIMIT_BAL", "PAY_AMT1"):
+        feature = selected_features[feature_name]
+        with st.expander(f"{feature_name} — score PSI {feature.score:.6f}", expanded=True):
+            st.pyplot(drift_bins_figure(feature, selected_id))
+            currency = "NT$ " if feature_name in {"LIMIT_BAL", "PAY_AMT1"} else ""
+            if feature.bin_edges:
+                edge_lines = [
+                    ", ".join(
+                        f"{currency}{edge:,.2f}" for edge in feature.bin_edges[index : index + 3]
+                    )
+                    for index in range(0, len(feature.bin_edges), 3)
+                ]
+                st.code(
+                    "Bordas registradas no artefato:\n" + "\n".join(edge_lines),
+                    language=None,
+                )
+            st.caption(
+                f"Denominadores: {feature.reference_count:,} à esquerda e "
+                f"{feature.current_count:,} à direita. PSI resume diferença de distribuição; "
+                "não indica se os valores aumentaram ou diminuíram."
+            )
+
+    st.markdown("**Resumos congelados dos scores previstos**")
+    st.caption(
+        f"Modelo SHA-256 `{snapshot.model_sha256}` · limiar {snapshot.threshold:.1f}. "
+        "São previsões agregadas, não desfechos observados nem métricas de desempenho."
+    )
+    score_rows = []
+    for label, summary in (("Original", snapshot.original), ("Modificado", snapshot.modified)):
+        score_rows.append(
+            {
+                "Lote": label,
+                "Linhas": summary.rows,
+                "Média": summary.mean,
+                "Mediana": summary.median,
+                "p05": summary.p05,
+                "p25": summary.p25,
+                "p75": summary.p75,
+                "p95": summary.p95,
+                "Desvio-padrão populacional": summary.std_population,
+                "Previsões classe 1": summary.predicted_positives,
+            }
+        )
+    show_dataframe(pd.DataFrame(score_rows))
+    mean_delta_pp = (snapshot.modified.mean - snapshot.original.mean) * 100
+    positive_delta = snapshot.modified.predicted_positives - snapshot.original.predicted_positives
+    delta_columns = st.columns(2)
+    delta_columns[0].metric(
+        "Alteração na média prevista",
+        f"{mean_delta_pp:+.3f} p.p.",
+        help="Diferença entre as médias congeladas do modificado e do original.",
+    )
+    delta_columns[1].metric(
+        "Alteração nas previsões classe 1",
+        f"{positive_delta:+,}",
+        help="Diferença na contagem de scores acima/iguais ao limiar de classificação.",
+    )
+    st.pyplot(prediction_quantiles_figure(snapshot))
+    st.caption(
+        "As diferenças descrevem alterações nas previsões do modelo. Não são diferenças em "
+        "inadimplência observada, acurácia, calibração ou desempenho."
+    )
+    _render_drift_report_download(reports_dir)
+
+
+def _render_drift_report_download(reports_dir: Path) -> None:
+    """Offer only the fixed, versioned HTML report if it is locally readable."""
+    report_path = reports_dir / "drift" / "phase-2-drift-v1.0.2-ptbr-v6.html"
+    if not report_path.is_file():
+        st.info(
+            "Relatório HTML v6 indisponível neste checkout; os resumos JSON "
+            "continuam independentes."
+        )
+        return
+    try:
+        report_bytes = report_path.read_bytes()
+    except OSError:
+        st.info("Relatório HTML v6 presente, mas indisponível para leitura neste checkout.")
+        return
+    st.download_button(
+        "Baixar relatório completo de Data Drift (v6)",
+        data=report_bytes,
+        file_name="phase-2-drift-v1.0.2-ptbr-v6.html",
+        mime="text/html",
+    )
+
+
 def main() -> None:
     """Entry point of the laboratory."""
     st.title("Laboratorio de modelos - Credit Scoring")
@@ -685,7 +948,13 @@ def main() -> None:
 
     selected = render_sidebar(catalog)
     tabs = st.tabs(
-        ["Artefatos e prontidao", "Comparacao dos modelos", "Predicao", "Cenarios de contrato"]
+        [
+            "Artefatos e prontidao",
+            "Comparacao dos modelos",
+            "Predicao",
+            "Cenarios de contrato",
+            "Data Drift — cenário 1.0.2",
+        ]
     )
     with tabs[0]:
         render_artifacts(catalog)
@@ -695,6 +964,8 @@ def main() -> None:
         render_prediction(catalog, selected)
     with tabs[3]:
         render_contract(catalog, selected)
+    with tabs[4]:
+        render_drift(reports_dir)
 
 
 if __name__ == "__main__":

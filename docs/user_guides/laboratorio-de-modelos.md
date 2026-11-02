@@ -87,6 +87,8 @@ uv run --extra model_lab streamlit run dashboard/app_dev.py --server.address 127
 2. **Comparacao dos modelos** — a rodada única de validação, lado a lado.
 3. **Predicao** — registro individual e lote CSV.
 4. **Cenarios de contrato** — predefinições sintéticas de lote válido e inválido.
+5. **Data Drift — cenário 1.0.2** — leitura de um cenário agregado e versionado, sem relação
+   com a seleção de modelos ou os uploads nas outras abas.
 
 ---
 
@@ -371,10 +373,63 @@ operacional ótimo.
 
 ---
 
-## 12. Verificação e manutenção
+## 12. Aba "Data Drift — cenário 1.0.2"
+
+Esta aba apresenta somente os artefatos agregados já congelados pelo pipeline M2:
+
+- `reports/drift/results-v1.0.2.json` — resultados PSI, booleanos de alerta, contagens e bins;
+- `reports/drift/prediction_summary-v1.0.2.json` — estatísticas de scores, hash do modelo/lotes e
+  contagens agregadas;
+- `reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html` — download opcional do relatório completo.
+
+O carregamento valida versões, identidade do cenário/modelo, hashes, três comparações, as 19
+features, contagens, proporções, bins e coerência entre scores, limiares e alertas. Se qualquer
+artefato estiver ausente ou incompatível, a aba informa indisponibilidade e não apresenta zeros
+como se fossem resultados. A ausência do HTML não impede a consulta dos JSONs. Nenhum dado é
+baixado ou reconstruído automaticamente.
+
+### Comparações e tabela
+
+O seletor contém apenas as comparações presentes no snapshot:
+
+1. **Referência × original (controle)** — 21.000 linhas contra o controle de 4.500;
+2. **Referência × modificado** — 21.000 linhas contra o cenário modificado de 4.500;
+3. **Original × modificado** — 4.500 linhas contra 4.500.
+
+A tabela exibe score PSI, limiar congelado, alerta booleano produzido pelo detector e tamanhos
+dos conjuntos para todas as 19 features. PSI é uma medida de diferença de distribuição, **não é
+p-value**, não usa `alpha` e não revela a direção da mudança.
+
+### Gráficos e scores
+
+Para `LIMIT_BAL` e `PAY_AMT1`, os gráficos usam os labels, bordas, proporções e contagens gravados
+no JSON. A categoria zero é separada e os valores monetários são NT$. Para a comparação
+Original × modificado, os dois conjuntos do gráfico são explicitamente original e modificado.
+
+O quadro de scores mostra média, mediana, p05, p25, p75, p95, desvio-padrão populacional, linhas
+e previsões classe 1 dos dois lotes, além de um gráfico de quantis. Os deltas são diferenças nas
+**previsões**: não são diferença em inadimplência observada, acurácia ou desempenho. Nenhum
+histograma é reconstruído a partir das estatísticas agregadas.
+
+### Limites de interpretação
+
+- Data Drift indica mudança na distribuição de entradas; não demonstra Concept Drift, degradação
+  de desempenho, causalidade ou necessidade de retreino.
+- As probabilidades são scores do modelo congelado, não frequências observadas de inadimplência.
+- A produção simulada deriva da validação, que já participou da seleção do modelo; não é um novo
+  holdout.
+- A aba não chama o detector, não executa inferência, não lê teste e não cria alertas. Os resultados
+  ficam associados ao SHA fixo do modelo M2, independentemente do seletor e dos uploads.
+- Nenhuma linha, ID, alvo ou dado individual é renderizado ou exportado; uploads não são
+  automaticamente comparados à referência.
+
+---
+
+## 13. Verificação e manutenção
 
 ```bash
 uv run --extra model_lab pytest tests/test_app_dev.py   # testes da aplicação
+uv run --extra model_lab pytest tests/test_drift_snapshot.py  # contrato do snapshot agregado
 uv run --extra model_lab pytest -q                        # suíte completa
 uv run python scripts/gerar_lotes_teste.py                # regenera data/test/
 ```
@@ -385,7 +440,7 @@ da suíte continua valendo. O CI executa esse arquivo com o extra.
 
 ---
 
-## 13. Referências
+## 14. Referências
 
 - Recorte **1.6-O6** do plano: [`docs/plans/1.6-otimizacao-modelos.md`](../plans/1.6-otimizacao-modelos.md) (§5.1)
 - Evidência da campanha e da inspeção visual: [`docs/evidence/1.6-otimizacao-modelos.md`](../evidence/1.6-otimizacao-modelos.md)
