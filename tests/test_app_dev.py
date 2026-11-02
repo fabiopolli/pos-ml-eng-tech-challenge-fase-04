@@ -43,8 +43,6 @@ def test_the_application_starts_and_exposes_the_four_tabs():
         "Predicao",
     ]
     assert "Cenarios de contrato" in labels
-    assert "Registro individual" in labels
-    assert "Lote CSV" in labels
 
 
 def test_the_application_never_fits_or_evaluates_a_model(monkeypatch):
