@@ -54,6 +54,9 @@ package-dir = {"" = "src"}
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+"credit_monitoring.monitoring" = ["drift_report_template.html"]
+
 [dependency-groups]
 dev = [
     "dvc[s3]>=3,<4",

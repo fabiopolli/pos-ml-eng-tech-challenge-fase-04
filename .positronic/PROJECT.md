@@ -58,8 +58,9 @@ Streamlit, Pytest/Ruff e GitHub Actions. `dvc[s3]` está travado e o remote Dags
 `uv run dvc status` indicou o workbook da UCI ausente/não materializado, embora referência,
 validação e modelo estejam presentes e com hashes conferidos. Consultar `docs/DAGSHUB.md` para
 recuperação. Treino e visualização são locais; rede é necessária para sincronizar objetos, não para
-treino com cache disponível. As saídas DVC da fase 2 estão no cache local e ainda não foram
-publicadas no remote. Não há orçamento/cota aprovados.
+treino com cache disponível. As saídas analíticas DVC `1.0.2` foram publicadas e recuperadas em
+cache isolado; o relatório acadêmico ampliado em pt-BR (v6) permanece apenas no cache local até
+sincronização autorizada. Não há orçamento/cota aprovados.
 
 ## Risks and governance
 

@@ -201,12 +201,28 @@ stages:
       - data/production/v1.0.2/manifest.json
       - reports/drift/prediction_summary-v1.0.2.json
       - models/credit_model_metadata.json
+      - data/processed/preparation_report.json
+      - reports/eda/eda_summary.json
+      - reports/metrics.json
+      - reports/test_metrics.json
+      - reports/optimization/opt-20261026-01/tuning/manifest.json
+      - reports/optimization/opt-20261026-01/selection/comparison.json
+      - configs/optimization.yaml
+      - docs/DATASET.md
+      - src/credit_monitoring/models/train.py
+      - src/credit_monitoring/models/tune.py
       - src/credit_monitoring/monitoring/drift.py
+      - src/credit_monitoring/monitoring/report_context.py
+      - src/credit_monitoring/monitoring/drift_report_template.html
       - src/credit_monitoring/config.py
       - src/credit_monitoring/contracts
       - src/credit_monitoring/data/loading.py
     params:
       - configs/project.yaml:
+          - dataset.acquisition.doi
+          - dataset.acquisition.license
+          - dataset.split
+          - dataset.target_column_raw
           - dataset.canonical_target
           - dataset.financial_features
           - dataset.governance_features
@@ -215,4 +231,4 @@ stages:
     outs:
       - reports/drift/results-v1.0.2.json:
           cache: false
-      - reports/drift/phase-2-drift-v1.0.2-final.html
+      - reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html

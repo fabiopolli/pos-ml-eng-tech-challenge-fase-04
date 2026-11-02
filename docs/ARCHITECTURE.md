@@ -30,7 +30,7 @@ data/default of credit card clients.xls (objeto DVC) -> acquire -> eda -> prepar
 | `evaluate` | modelo congelado + `data/processed/test.csv` | `reports/test_metrics.json` |
 | `simulate_production` | validação + referência + metadados congelados | `data/production/v1.0.2/{original,modified}.csv`, `manifest.json` |
 | `score_production` | lotes de produção + modelo congelado + contrato | `data/production/v1.0.2/predictions/`, `reports/drift/prediction_summary-v1.0.2.json` |
-| `detect_drift` | referência + lotes + predições + protocolo | `reports/drift/results-v1.0.2.json`, `reports/drift/phase-2-drift-v1.0.2.html` |
+| `detect_drift` | referência + lotes + predições + auditoria/modelagem + template HTML | `reports/drift/results-v1.0.2.json`, `reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html` |
 
 Fronteiras que o DAG impõe:
 
@@ -55,7 +55,11 @@ Fronteiras que o DAG impõe:
   apenas para associação e passa somente as 19 features financeiras ao modelo.
 - `detect_drift` calcula PSI com bins ajustados só na referência da comparação, gera resultados para
   referência×controle, referência×modificada e controle×modificada, e produz resumo HTML/JSON.
-  O detector canônico é customizado; o HTML é renderizado pelo Evidently sem IDs/alvo.
+  O detector canônico é customizado; o template HTML em português usa o Evidently para conferir
+  contagem de linhas e integra perfil do dataset, estratégia/seleção do modelo, avaliações e
+  impacto agregado nos scores. `detect_drift` depende dos relatórios de treino/teste, auditoria,
+  preparação, seleção e template para manter as conclusões rastreáveis. Não inclui linhas/IDs de
+  clientes nem alvo de produção.
 
 Cada saída tem um único dono: `models/credit_model.joblib` pertence a `train`, e os
 artefatos da campanha ficam isolados em `models/optimization/<experiment_id>/`. O relatório

@@ -967,6 +967,14 @@ stages:
   detect_drift:
     cmd: python -m credit_monitoring.monitoring.drift
     deps:
+    - path: configs/optimization.yaml
+      hash: md5
+      md5: fd6c2b9865f9d83c5feff56c0e58c624
+      size: 2771
+    - path: data/processed/preparation_report.json
+      hash: md5
+      md5: eb6a97bc8ca57907d200bfbbef44090e
+      size: 1814
     - path: data/production/v1.0.2/manifest.json
       hash: md5
       md5: 44332b723661f65e95dd6ddc143b4077
@@ -983,6 +991,10 @@ stages:
       hash: md5
       md5: dd57d28df2ec5b23960b1bbda5e36d00
       size: 2007586
+    - path: docs/DATASET.md
+      hash: md5
+      md5: a42f2e40e31e8c65ece26565083ae7e1
+      size: 6148
     - path: models/credit_model_metadata.json
       hash: md5
       md5: b568597e176da6cfb941b08898c0184f
@@ -991,6 +1003,26 @@ stages:
       hash: md5
       md5: ea75f1b45f2a0dba6790625b7b559576
       size: 2210
+    - path: reports/eda/eda_summary.json
+      hash: md5
+      md5: 4f082c7d106a4bd472c7cb98f6d41ad3
+      size: 1132
+    - path: reports/metrics.json
+      hash: md5
+      md5: 89d53a4a537d6117db45e8ba9b5116d4
+      size: 7073
+    - path: reports/optimization/opt-20261026-01/selection/comparison.json
+      hash: md5
+      md5: 2f9d66be926e5185bd932f6aff2da9fb
+      size: 8715
+    - path: reports/optimization/opt-20261026-01/tuning/manifest.json
+      hash: md5
+      md5: 212431ea1ca341dc61aaae4f8043957b
+      size: 9651
+    - path: reports/test_metrics.json
+      hash: md5
+      md5: 0130eb8f7b655ecbc739a3adcc91b8f6
+      size: 1272
     - path: src/credit_monitoring/config.py
       hash: md5
       md5: dcc6b47dd5862af2c46c60615575c10d
@@ -1004,12 +1036,30 @@ stages:
       hash: md5
       md5: ce9a861d2f64ba6a27993955cf967cf2
       size: 1202
+    - path: src/credit_monitoring/models/train.py
+      hash: md5
+      md5: 2d1811d9b7e0946e8983d98b357bc88e
+      size: 32435
+    - path: src/credit_monitoring/models/tune.py
+      hash: md5
+      md5: 59da4a6b23dd3e1c744990c325158049
+      size: 32461
     - path: src/credit_monitoring/monitoring/drift.py
       hash: md5
-      md5: fe0750bb0cc51049061381576e976c8d
-      size: 19525
+      md5: ea6ef9f1304863d49b15e2f79f2a2bdb
+      size: 31617
+    - path: src/credit_monitoring/monitoring/drift_report_template.html
+      hash: md5
+      md5: c7276f237d4e5d6f487edfc6113f855f
+      size: 19261
+    - path: src/credit_monitoring/monitoring/report_context.py
+      hash: md5
+      md5: 9c62c646e7c435cdc172dc754cf2b8cb
+      size: 24142
     params:
       configs/project.yaml:
+        dataset.acquisition.doi: 10.24432/C55S3H
+        dataset.acquisition.license: CC BY 4.0
         dataset.canonical_target: default_payment_next_month
         dataset.financial_features:
         - LIMIT_BAL
@@ -1037,6 +1087,11 @@ stages:
         - MARRIAGE
         - AGE
         dataset.id_column: ID
+        dataset.split:
+          train: 0.7
+          validation: 0.15
+          test: 0.15
+        dataset.target_column_raw: default payment next month
         drift:
           features_to_shift:
           - LIMIT_BAL
@@ -1064,10 +1119,10 @@ stages:
             persisted_probability_rounding: half_to_even
           unused_p_value_alpha: 0.05
     outs:
-    - path: reports/drift/phase-2-drift-v1.0.2-final.html
+    - path: reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html
       hash: md5
-      md5: 99466be5cea8346a576250e3ad79fc35
-      size: 3663846
+      md5: 66e4ad3719b372e3c5461731a7c49e4e
+      size: 65692
     - path: reports/drift/results-v1.0.2.json
       hash: md5
       md5: c0b6be22ac92bc963396368f1eabd5cb

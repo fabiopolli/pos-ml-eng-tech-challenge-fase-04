@@ -129,6 +129,56 @@ permanece igual ao relatado para v1.0.1: controle sem alertas; `LIMIT_BAL` e `PA
 0,20 somente em referência×modificada e original×modificada. O resumo DVC não contém caminhos locais
 nem tempo variável; o HTML renderizado inclui precisão/rounding, proveniência e todas as comparações.
 
+## Revisão de apresentação HTML — pt-BR
+
+Após inspeção visual do relatório anterior, foi criada uma revisão de apresentação sem alterar o
+protocolo, as entradas, os resultados PSI, as predições ou o JSON canônico. O relatório agora usa
+template responsivo em português brasileiro, começa por uma síntese do resultado, explica as três
+comparações e o significado/limiar do PSI, identifica as transformações sintéticas, mostra uma
+escala visual por variável, inclui a fórmula PSI e o contexto de unidade (NT$), e deixa hashes/versões
+em uma seção técnica expansível. O contexto da contagem de linhas continua verificado pela métrica
+`RowCount` do Evidently; o detector continua sendo o PSI customizado definido no protocolo.
+
+| Artefato | SHA-256 | Estado |
+|---|---|---|
+| `reports/drift/phase-2-drift-v1.0.2-ptbr-v3.html` | `37cfdbf84d4f20bf6d7f51a4d21a5bfc7d588fcd7bc12cf01e5692398ed6b44c` | Gerado e inspecionado localmente; saída do estágio DVC `detect_drift` |
+
+O HTML tem 53.087 bytes e `lang="pt-BR"`; não contém registros individuais, IDs de clientes ou alvo. A
+renderização Chromium headless foi inspecionada visualmente: hierarquia, cartões-resumo, texto e
+transformações aparecem corretamente. As três comparações continuam com os mesmos resultados
+canônicos. A nova saída está no cache DVC local; ela ainda não foi enviada ao remote.
+
+## Ampliação acadêmica do relatório — pt-BR v6
+
+A revisão v6 acrescenta três camadas ligadas por fontes e hashes, sem alterar o protocolo, os lotes,
+as predições ou os resultados PSI/JSON:
+
+- **Dataset:** UCI 350, 30.000 linhas/25 colunas, alvo `default payment next month`, prevalência
+  22,12%, split estratificado 21.000/4.500/4.500 (seed 42), 19 entradas financeiras; ID e quatro
+  atributos de governança fora do modelo. A licença, DOI, período e NT$ são apresentados.
+- **Treinamento e seleção:** LR e RF, CV estratificada de 5 folds somente no treino; 12 combinações
+  de LR e 24 amostras de configurações de RF. O maior ROC-AUC médio de CV foi do RF finalista
+  (0,784416; 600 árvores, profundidade 12, `max_features=0.5`, folha mínima 40). Na validação seu
+  ganho sobre o RF vigente foi 0,001141, com IC pareado de 95% [−0,002859; +0,004968], que inclui
+  zero. Parâmetros e métricas do finalista são exibidos, mas os critérios predefinidos não foram
+  cumpridos; o RF vigente continuou selecionado. Métricas de validação e teste são separadas.
+- **Efeito observado:** controle sem PSI acima de 0,20; referência×modificada sinalizou
+  `LIMIT_BAL` (0,752498) e `PAY_AMT1` (0,464748). No mesmo lote de 4.500 registros, a média do score
+  de default estimado mudou de 42,31% para 41,99% (−0,32 p.p.) e as previsões classe 1 passaram de
+  1.161 para 1.154. São alterações nas saídas previstas; os rótulos removidos não permitem medir
+  desempenho após drift nem concluir melhora/piora. A seção também explicita que excluir demografia
+  não prova ausência de viés.
+
+| Artefato | SHA-256 | Estado |
+|---|---|---|
+| `reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html` | `d47a792b1dfb7d94ee4469ada01298d2bf0e0809e7beda2c4641ae4cf284a451` | Gerado e renderizado localmente; saída DVC `detect_drift` |
+
+O v6 tem 65.692 bytes. O relatório incorpora hashes de auditoria/preparação, seleção/avaliação e
+campanha de treinamento; o estágio DVC declara esses arquivos e os módulos de treino/busca como
+dependências. A avaliação de teste continua explicitando a exposição histórica do EDA, portanto
+não é descrita como holdout intocado. A nova saída HTML permanece no cache DVC local e ainda não
+foi enviada ao remote.
+
 ## Comandos e verificações
 
 ### Reexecução e privacidade do resumo v1.0.2
@@ -151,9 +201,14 @@ precisão fixa; não inclui caminhos locais nem duração variável.
 | Reexecução `score_production` v1.0.2 | exit 0; os mesmos dois hashes de predição após persistir com 12 casas |
 | `uv run dvc status` | somente `acquire` ausente/alterado pelo workbook não materializado; novos estágios sem divergência |
 | Chromium headless / inspeção do HTML v1.0.2 | exit 0; comparações, proveniência, precisão e limitações presentes |
-| `uv run pytest -q` | exit 0; **156 passed**, 6 warnings de depreciação do seaborn/Matplotlib |
+| `uv run dvc repro --single-item detect_drift` após revisão de template | exit 0; resultados iguais e novo HTML pt-BR produzido |
+| `uv run dvc repro --force --single-item detect_drift` (v6) | exit 0; contexto de dataset/treinamento validado e HTML v6 produzido; resultados PSI/JSON iguais |
+| `uv run dvc status detect_drift` | exit 0; saída local reproduzida e atual |
+| `uv run dvc status -c -r dagshub detect_drift` | somente o novo HTML v6 ainda não existe no remote; demais entradas analíticas estão sincronizadas |
+| `uv run pytest -q` | exit 0; **159 passed**, 6 warnings de depreciação do seaborn/Matplotlib |
 | `uv run ruff check .` | exit 0; All checks passed |
-| `uv run ruff format --check .` | exit 0; 80 files already formatted |
+| `uv run ruff format --check .` | exit 0; 82 files already formatted |
+| `uv lock --check` | exit 0; lock de dependências consistente |
 | `git diff --check` | exit 0; sem whitespace inválido |
 
 ### Pendências e próximos passos

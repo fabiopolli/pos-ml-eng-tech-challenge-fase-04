@@ -171,7 +171,7 @@ uv run dvc repro --single-item detect_drift
 
 As CLIs também estão disponíveis como `credit-monitoring-simulate`,
 `credit-monitoring-score-production` e `credit-monitoring-drift`; use `--help` para caminhos
-alternativos. O relatório local é `reports/drift/phase-2-drift-v1.0.2-final.html`; os resultados
+alternativos. O relatório em português é `reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html`; os resultados
 estruturados agregados ficam em `reports/drift/results-v1.0.2.json`. O relatório declara que Concept
 Drift não foi demonstrado; a docência avaliará o plano após a entrega.
 

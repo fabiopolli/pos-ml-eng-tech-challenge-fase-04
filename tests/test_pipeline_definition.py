@@ -136,8 +136,19 @@ def test_phase2_drift_consumes_both_batches_predictions_and_reference():
     assert "data/production/v1.0.2/original.csv" in detection["deps"]
     assert "data/production/v1.0.2/modified.csv" in detection["deps"]
     assert "reports/drift/prediction_summary-v1.0.2.json" in detection["deps"]
+    assert "reports/metrics.json" in detection["deps"]
+    assert "reports/test_metrics.json" in detection["deps"]
+    assert "reports/eda/eda_summary.json" in detection["deps"]
+    assert "data/processed/preparation_report.json" in detection["deps"]
+    assert "reports/optimization/opt-20261026-01/tuning/manifest.json" in detection["deps"]
+    assert "reports/optimization/opt-20261026-01/selection/comparison.json" in detection["deps"]
+    assert "configs/optimization.yaml" in detection["deps"]
+    assert "src/credit_monitoring/models/train.py" in detection["deps"]
+    assert "src/credit_monitoring/models/tune.py" in detection["deps"]
+    assert "src/credit_monitoring/monitoring/report_context.py" in detection["deps"]
+    assert "src/credit_monitoring/monitoring/drift_report_template.html" in detection["deps"]
     assert "reports/drift/results-v1.0.2.json" in _out_paths(detection)
-    assert "reports/drift/phase-2-drift-v1.0.2-final.html" in _out_paths(detection)
+    assert "reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html" in _out_paths(detection)
 
 
 def test_no_file_is_tracked_as_the_output_of_two_stages():
