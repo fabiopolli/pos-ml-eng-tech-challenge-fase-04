@@ -1,12 +1,47 @@
 # Fase 2 — Simulação e Detecção de Drift
 
-> Plano de execução, revisado em 2026-10-26. Expande os IDs 2.1–2.7; não atesta implementação.
+> Plano de execução, revisado em 2026-11-02 contra `main` (`f3ba213`). Expande os IDs 2.1–2.7;
+> não atesta implementação da fase 2.
 
 - **Plano geral:** [escopo, protocolo e aceites](plano-de-trabalho-TC4.md).
 - **Entrada:** [fase 1](fase-1-validacao-dados-contratos.md), marco M1.
 - **Próxima fase:** [Observabilidade](fase-3-observabilidade-pipelines-modelos.md).
 - **Referências:** [arquitetura](../ARCHITECTURE.md), [checklist](../CHECKLIST.md) e
 [convenção de produção](../../data/production/README.md).
+
+### Estado de partida verificado em 2026-11-02
+
+- **M1 está concluído**, não pendente: os aceites 1.1–1.7, incluindo recuperação DVC em checkout/cache
+  separado, estão registrados em [`docs/evidence/fase-1.md`](../evidence/fase-1.md). A extensão 1.6
+  (campanha de otimização e laboratório) também foi executada; ver
+  [`docs/evidence/1.6-otimizacao-modelos.md`](../evidence/1.6-otimizacao-modelos.md) e o checklist.
+- Neste checkout, `data/reference/reference.csv`, `data/processed/validation.csv`, o modelo e seus
+  metadados estão presentes. Os hashes observados foram, respectivamente, referência/treino
+  `9ebd48b6d31c67f46cc28aff0bde36b48f62936aff0011007b7cb78d26108c26`, validação
+  `e910967511f31406edbc3c9fe0528571d079c45da10116dba4e53e379d285106` e modelo
+  `a5a4a740902fab9efa5138f98917a8a7f447c5af7f7d97b707290c205c1e0464`; o hash do modelo confere
+  com os metadados. São os hashes de M1, não novos artefatos produzidos nesta revisão.
+- `uv run dvc dag` confirma que a DAG existente termina em `evaluate` e ainda não contém a fase 2.
+  `uv run dvc status` marca `acquire` como alterado porque o workbook
+  `data/default of credit card clients.xls` (entrada e saída declarada pelo ponteiro DVC) não está
+  materializado neste checkout. Isso deixa a DAG completa não reproduzível neste momento, mas não
+  invalida os arquivos de referência, validação e modelo acima, cujos hashes foram conferidos; não
+  repetir a recuperação remota sem necessidade.
+- O contrato de inferência Pandera (`CONTRACT_VERSION = 1.0.0`), o limiar congelado (`0.5`), as 19
+  features e o serviço compartilhado `credit_monitoring.models.inference` já existem. Reutilizar
+  `load_model`/`infer_batch`; a orquestração de cenários, persistência e associação explícita dos
+  resultados aos IDs ainda precisam ser implementadas nesta fase.
+- O extra opcional `drift` já declara `evidently>=0.7,<1`; isso não significa que Evidently esteja
+  instalado no ambiente padrão ou integrado ao código. `configs/project.yaml` contém somente
+  `features_to_shift: [LIMIT_BAL, PAY_AMT1]` e `alpha: 0.05`; não define método, intensidade ou
+  decisão estatística. `alpha` não é limiar PSI.
+- `data/production/` contém apenas um README. Não há lotes, manifesto, CLI, módulos de monitoramento,
+  resultados, relatórios ou estágios DVC da fase 2. Os arquivos em `data/test/` são fixtures de teste,
+  não dados de produção da fase 2.
+- O contrato atual aceita lote vazio. A camada da fase 2 deve rejeitar explicitamente entrada vazia
+  para inferência/relatório de aceite, sem alterar o contrato compartilhado silenciosamente.
+
+Este retrato descreve a base observada, não o aceite de qualquer pacote 2.x.
 
 ## 1. Resultado e pergunta experimental
 
@@ -27,9 +62,13 @@ Preservar resultado negativo e revisar o desenho com histórico; não ajustar pa
 
 ## 2. Entrada e ordem de execução
 
-Conferir M1, SHA/lock, hashes da referência/validação/modelo, versão do contrato, features e
-limiar. Confirmar que a seleção terminou e que os IDs de validação não pertencem ao treino.
-Na ausência de M1, desenvolver apenas funções/testes locais com fixtures; isso não completa M2.
+Usar a evidência existente de M1 como entrada; conferir SHA/lock e hashes da referência,
+validação/modelo no ambiente da execução (no checkout desta revisão, ver hashes acima), além da
+versão do contrato, features e limiar congelados.
+Confirmar que os IDs da validação não se sobrepõem aos do treino. Se algum artefato não estiver
+disponível ou divergir, bloquear apenas o caminho de aceite dependente e registrar a causa; fixtures
+permitem desenvolvimento local, mas não completam M2. Não repetir a recuperação remota já provada
+sem necessidade.
 
 ```text
 M1 → 2.1 → 2.2 → 2.3 → 2.4 ──┐
@@ -65,10 +104,12 @@ de Concept Drift; esse recorte exige revisão do plano antes de execução de ac
 | Resultados de drift | Registro estruturado por comparação/feature e resumo; sem rótulos exigidos |
 | `reports/drift/` | HTML Evidently e interpretação agregada do controle e do cenário alterado |
 
-Os nomes de arquivos novos são propostas, não comandos/artefatos já disponíveis. Implementar em
-`src/credit_monitoring/data/` (simulação), `models/` (inferência) e `monitoring/` (drift), usando
-uma configuração versionada. Metadados podem acompanhar as saídas DVC. Arquivos DVC novos não
-devem disputar propriedade com saídas de estágios existentes.
+Os nomes de arquivos novos são propostas, não comandos/artefatos já disponíveis. A convenção
+`data/production/` e a separação de diretórios já existem; os lotes ainda não. Implementar em
+`src/credit_monitoring/data/` (simulação), `src/credit_monitoring/models/inference.py` (reutilizar o
+serviço existente, acrescentando orquestração apenas se necessário) e `src/credit_monitoring/monitoring/`
+(novo módulo), usando configuração versionada. Metadados podem acompanhar as saídas DVC. Arquivos
+DVC novos não devem disputar propriedade com saídas dos estágios existentes.
 
 Fixar schema de resultados para consumo da fase 3: `scenario_id`, hashes, versão do protocolo,
 feature, método, estatística/efeito, limiar, indicador de drift e contagens. Se houver p-value,
@@ -144,8 +185,12 @@ igualdade em tudo que não era alvo da intervenção; fonte continua inalterada 
 **Dependências:** 2.3 e modelo/contrato de M1.
 
 **Ações do agente:**
-1. Carregar modelo confiável pelo hash esperado; validar lote completo antes da predição.
-2. Selecionar exatamente as 19 features na ordem registrada, mantendo ID só para alinhamento.
+1. Reutilizar `models.inference.load_model` com o `model_sha256` dos metadados congelados e
+   `infer_batch`, que já valida o lote completo antes da predição. Rejeitar lote vazio nesta camada;
+   o contrato compartilhado hoje o aceita.
+2. O serviço já seleciona as 19 features na ordem de configuração. Manter ID apenas para
+   alinhamento e persistir associação um-para-um entre cada ID e sua probabilidade/classe; o retorno
+   atual de `infer_batch` contém arrays posicionais, não IDs.
 3. Emitir probabilidades/classes pelo limiar congelado e metadados por cenário. Não usar alvo
    ou demografia para gerar previsões e não calcular suposta acurácia usando rótulos antigos
    associados a features artificialmente alteradas.
@@ -168,7 +213,9 @@ Resultados não podem ser confundidos com predições de uma execução anterior
 3. Tornar método, bins, limiares e regra global explícitos; não depender de escolha automática
    não registrada. Integrar o método decidido em 2.2 e exportar resultado estruturado estável.
 4. Manter análise de distribuição das probabilidades separada da contagem das 19 features.
-5. Associar cada relatório à comparação, versão do protocolo, bibliotecas e hashes reais.
+5. Associar cada relatório à comparação, versão do protocolo, bibliotecas e hashes reais. O extra
+   `drift` já está declarado, mas a versão travada e a API concreta ainda precisam ser verificadas
+   no ambiente instalado antes de implementar o adaptador.
 
 **Verificação/aceite:** fixture idêntica tem efeito nulo conforme tolerância declarada;
 fixture com mudança conhecida sinaliza; coluna fora do schema e entrada vazia não geram
@@ -214,7 +261,9 @@ com base apenas nas features alteradas. Resultados negativos não são omitidos.
 
 ## 5. Verificação e execução reproduzível
 
-Implementar CLI dos novos módulos antes de publicar comandos de simulação, inferência e drift.
+Implementar CLI dos novos módulos antes de publicar comandos de simulação, inferência e drift; a CLI
+existente de validação (`credit-monitoring-validate`) é apenas para o contrato, não executa o fluxo
+de produção da fase 2.
 Documentar argumentos, entrada/saída, retorno em falha e como executar um cenário específico.
 Evitar um único comando que refaça treino/avaliação final para produzir um relatório.
 
@@ -238,5 +287,8 @@ Transferir à fase 3: lotes e manifesto, modelo/contrato imutáveis, predições
 comparação, configuração de alertas e comandos válidos, inclusive como rejeitar um lote inválido.
 Recomenda-se registro textual `docs/evidence/fase-2.md`, com seções 2.1–2.7 e histórico experimental.
 
-**Primeira ação do agente:** validar o pacote M1 e os hashes de entrada em 2.1; abrir a decisão
-de protocolo/cobertura em 2.2 antes de rodar qualquer comparação de aceite.
+**Primeira ação do agente:** iniciar 2.1 verificando no ambiente de execução os artefatos de M1 e
+seus hashes contra [`docs/evidence/fase-1.md`](../evidence/fase-1.md) e os metadados congelados.
+Em seguida, antes de qualquer comparação exploratória ou de aceite, fixar em 2.2 o protocolo
+estatístico e registrar a pergunta pendente de cobertura de Concept Drift. M1 já foi aceito; não
+reexecutar treino, teste final ou sincronização DVC como pré-requisito automático.
