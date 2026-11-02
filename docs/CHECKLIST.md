@@ -33,13 +33,13 @@ evidência em [`docs/evidence/1.6-otimizacao-modelos.md`](evidence/1.6-otimizaca
 
 ## Semana 2 - Simulação e detecção de drift
 
-- [ ] **2.1** Referência = treino; produção original = features da validação após seleção; IDs disjuntos entre referência/produção, sem usar o teste.
-- [ ] **2.2** Cenário, transformações, métodos/limiares pré-definidos e decisão de cobertura de Concept Drift documentados.
-- [ ] **2.3** Simulação reproduzível; cópias original/modificada com mesmos IDs e tamanho, parâmetros/hashes versionados em DVC.
-- [ ] **2.4** Contrato e inferência no lote de produção.
-- [ ] **2.5** Integração com Evidently.
-- [ ] **2.6** Comparações referência/original e referência/modificada; métodos, magnitude e múltiplos testes documentados, sem confundir p-value com PSI.
-- [ ] **2.7** HTML Evidently com duas features alteradas detectadas, controle, estatísticas, limiares, versões e interpretação sem alegar perda real de desempenho.
+- [x] **2.1** Concluído localmente — `data/production/v1.0.2/original.csv` foi derivado da validação sem alvo; referência = treino; 4.500 IDs únicos, sem interseção referência/produção, mesma ordem entre cenários; hashes e proveniência em [`docs/evidence/fase-2.md`](evidence/fase-2.md).
+- [x] **2.2** Concluído — protocolo Data Drift `1.0.2` congelado antes das comparações; máscara de zeros preservada por decisão de Bill. Concept Drift está explicitamente fora da demonstração desta entrega; a docência avaliará o plano após a entrega, sem ser gate.
+- [x] **2.3** Concluído — simulação determinística declarada no DAG/`dvc.lock`; objetos de `1.0.2` enviados e recuperados em cache isolado (7 outputs); hashes verificados.
+- [x] **2.4** Concluído localmente — contrato integral antes da inferência, modelo/hash/limiar congelados, 4.500 predições por cenário e associação um-para-um com IDs; nenhum alvo em produção.
+- [x] **2.5** Concluído localmente — PSI customizado integrado ao HTML Evidently e ao JSON com bins/suavização/limiar explícitos; versão/aplicabilidade registradas em [`docs/evidence/fase-2.md`](evidence/fase-2.md).
+- [x] **2.6** Concluído localmente para Data Drift — 19 features por comparação, controle sem alertas; `LIMIT_BAL` e `PAY_AMT1` sinalizam apenas no cenário modificado e na comparação original×modificado. PSI não é p-value.
+- [x] **2.7** Concluído — HTML Evidently `1.0.2` renderizado/inspecionado; JSON/manifesto/hashes coerentes; detecção passou; outputs enviados e recuperados via DVC. Concept Drift não é demonstrado e será avaliado pela docência após a entrega.
 
 ## Semana 3 - Observabilidade
 
@@ -59,4 +59,4 @@ evidência em [`docs/evidence/1.6-otimizacao-modelos.md`](evidence/1.6-otimizaca
 - [ ] **4.4** Hipóteses causais, limites do experimento e ações de investigação/mitigação.
 - [ ] **4.5** README consolidado com evidências reais.
 - [ ] **4.6** Vídeo STAR de até cinco minutos.
-- [ ] **4.7** Reprodução em checkout/cache separado, acesso dos avaliadores aos objetos/relatórios, histórico e cobertura de todos os requisitos, inclusive decisão sobre Concept Drift.
+- [ ] **4.7** Reprodução em checkout/cache separado, acesso dos avaliadores aos objetos/relatórios, histórico e matriz de cobertura/limitações; a docência avaliará o plano após a entrega.

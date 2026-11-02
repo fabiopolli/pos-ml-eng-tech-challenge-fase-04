@@ -91,6 +91,8 @@ def infer_batch(
     model_sha256: str | None = None,
 ) -> InferenceResult:
     """Validate the batch and score it with one frozen pipeline."""
+    if frame.empty:
+        raise ModelArtifactError("Inference batch must not be empty")
     validated = validate_batch(frame, config, labeled=False)
     inputs = select_model_features(validated, config, features)
     start = time.perf_counter()
@@ -119,6 +121,8 @@ def compare_models(
     The batch is validated once, **before** the first call. When the contract is
     violated the exception propagates and no model is called at all.
     """
+    if frame.empty:
+        raise ModelArtifactError("Inference batch must not be empty")
     validated = validate_batch(frame, config, labeled=False)
     inputs = select_model_features(validated, config, features)
     results: dict[str, InferenceResult] = {}

@@ -15,7 +15,7 @@ def _out_paths(stage: dict) -> list[str]:
     return [next(iter(out)) if isinstance(out, dict) else out for out in stage.get("outs", [])]
 
 
-def test_pipeline_stage_order_is_acquire_eda_prepare_explore_tune_train_evaluate():
+def test_pipeline_contains_m1_then_phase2_stages_in_dependency_order():
     assert list(_stages()) == [
         "acquire",
         "eda",
@@ -24,6 +24,9 @@ def test_pipeline_stage_order_is_acquire_eda_prepare_explore_tune_train_evaluate
         "tune",
         "train",
         "evaluate",
+        "simulate_production",
+        "score_production",
+        "detect_drift",
     ]
 
 
@@ -97,6 +100,44 @@ def test_evaluate_is_a_separate_stage_that_owns_the_test_split():
     # evaluation stage: it is an output of one stage and a dependency of the other.
     assert "models/credit_model.joblib" in _out_paths(stages["train"])
     assert "models/credit_model.joblib" not in _out_paths(stages["evaluate"])
+
+
+def test_phase2_simulation_uses_validation_and_reference_not_test():
+    stages = _stages()
+    simulation = stages["simulate_production"]
+    assert "data/processed/validation.csv" in simulation["deps"]
+    assert "data/reference/reference.csv" in simulation["deps"]
+    assert "data/processed/test.csv" not in simulation["deps"]
+    assert "models/credit_model_metadata.json" in simulation["deps"]
+    assert set(_out_paths(simulation)) == {
+        "data/production/v1.0.2/original.csv",
+        "data/production/v1.0.2/modified.csv",
+        "data/production/v1.0.2/manifest.json",
+    }
+
+
+def test_phase2_scoring_uses_the_frozen_model_and_contract():
+    stages = _stages()
+    scoring = stages["score_production"]
+    assert "models/credit_model.joblib" in scoring["deps"]
+    assert "models/credit_model_metadata.json" in scoring["deps"]
+    assert "src/credit_monitoring/contracts" in scoring["deps"]
+    assert "src/credit_monitoring/data/simulate.py" in scoring["deps"]
+    assert "src/credit_monitoring/data/loading.py" in scoring["deps"]
+    assert "data/processed/test.csv" not in scoring["deps"]
+    assert "data/production/v1.0.2/predictions/original.csv" in _out_paths(scoring)
+    assert "data/production/v1.0.2/predictions/modified.csv" in _out_paths(scoring)
+
+
+def test_phase2_drift_consumes_both_batches_predictions_and_reference():
+    stages = _stages()
+    detection = stages["detect_drift"]
+    assert "data/reference/reference.csv" in detection["deps"]
+    assert "data/production/v1.0.2/original.csv" in detection["deps"]
+    assert "data/production/v1.0.2/modified.csv" in detection["deps"]
+    assert "reports/drift/prediction_summary-v1.0.2.json" in detection["deps"]
+    assert "reports/drift/results-v1.0.2.json" in _out_paths(detection)
+    assert "reports/drift/phase-2-drift-v1.0.2-final.html" in _out_paths(detection)
 
 
 def test_no_file_is_tracked_as_the_output_of_two_stages():

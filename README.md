@@ -7,13 +7,14 @@
 Solução local e reproduzível de **Credit Scoring**, com contratos de qualidade de dados,
 simulação e detecção de drift, rastreamento de experimentos e documentação de governança.
 
-> **Status atual:** Fase 1 (validação de dados e contratos) implementada e verificada localmente
-> na branch `fase-1-bill`: aquisição versionada do bruto, auditoria estrutural, preparação
-> auditada, contrato Pandera integrado antes do treino, dois modelos comparados na validação,
-> modelo congelado e avaliação final em estágio separado. Simulação de drift e observabilidade
-> ainda serão implementadas; nenhum resultado de drift é alegado nesta versão. A recuperação dos
-> objetos no DagsHub continua pendente de autorização — ver
-> [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md).
+> **Status atual:** M1 (fase 1) concluído e revalidado; Data Drift da fase 2 implementado e
+> verificado localmente sob o protocolo `1.0.2`. O controle não gerou alertas; as intervenções
+> detectaram `LIMIT_BAL` e `PAY_AMT1`. Concept Drift não é demonstrado; por decisão do operador, a
+> docência avaliará o plano após a entrega, sem resposta prévia como gate de M2. A publicação/
+> versões `1.0.1` e `1.0.2` foram enviadas e recuperadas em cache isolado. O remote DagsHub está
+> configurado; ver
+> [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md) e
+> [`docs/evidence/fase-2.md`](docs/evidence/fase-2.md).
 
 ## Equipe e frentes de trabalho
 
@@ -90,11 +91,11 @@ sob protocolo congelado — não uma avaliação intocada.
 | Qualidade | Pytest, Ruff e GitHub Actions |
 
 O DVC rastreia dados e artefatos do pipeline; seus ponteiros e metadados ficam no GitHub,
-enquanto os objetos ficam no DagsHub Storage. O remote ainda precisa ser configurado para o
-repositório DagsHub do projeto. Veja [`docs/DAGSHUB.md`](docs/DAGSHUB.md); não coloque tokens ou
-credenciais em arquivos versionados.
+enquanto os objetos publicados ficam no DagsHub Storage. O remote está configurado; os novos
+objetos da fase 2 ainda estão apenas no cache local. Veja [`docs/DAGSHUB.md`](docs/DAGSHUB.md);
+nunca coloque tokens ou credenciais em arquivos versionados.
 
-## Arquitetura planejada
+## Fluxo do pipeline
 
 ```text
 UCI 350 (XLS, objeto DVC)
@@ -105,8 +106,9 @@ UCI 350 (XLS, objeto DVC)
   -> contrato Pandera antes do treino
   -> treino + seleção na validação -> modelo congelado
   -> avaliação do escolhido no teste (estágio separado)
-  -> produção original = features da validação + cópia com drift
-  -> contrato + inferência + Evidently (controle e lote alterado)
+   -> produção original = features da validação + cópia com drift (estágio `simulate_production`)
+   -> contrato + inferência do modelo congelado (`score_production`)
+   -> PSI customizado e relatório Evidently (controle e lote alterado; `detect_drift`)
   -> MLflow local + relatórios -> dashboard Streamlit
   -> laboratório Streamlit de comparação e teste dos modelos (plano 1.6)
 
@@ -151,12 +153,32 @@ Saída `0` (aceito) ou `2` (rejeitado, com o diagnóstico em JSON).
 A referência é a cópia do treino. Após congelar a seleção, as features da validação originam
 o lote de produção original e uma cópia com mudanças em `LIMIT_BAL` e `PAY_AMT1`. Esses lotes
 não compartilham IDs com a referência e não usam o teste; a validação reutilizada não constitui
-novo holdout de desempenho. Comparar referência com original (controle) e modificada sob
-métodos/limiares registrados antes do aceite, respeitando o contrato.
+novo holdout de desempenho. O protocolo aprovado `1.0.2` usa `LIMIT_BAL × 1,5`, `PAY_AMT1 × 0,5`
+com arredondamento `half_to_even` e preservação exata dos zeros. Predições são persistidas com
+`half_to_even` a 12 casas decimais para eliminar variação não material de ponto flutuante. PSI
+customizado usa bins de
+referência, suavização `1e-6`, limiar `0,20` e alerta se PSI for estritamente maior. `alpha=0,05`
+não é aplicado ao PSI. O controle não sinalizou; ambas as features alteradas sinalizaram.
+
+Instalação e execução local dos estágios da fase 2 (os artefatos M1 precisam estar disponíveis):
+
+```bash
+uv sync --dev --locked --extra drift
+uv run dvc repro --single-item simulate_production
+uv run dvc repro --single-item score_production
+uv run dvc repro --single-item detect_drift
+```
+
+As CLIs também estão disponíveis como `credit-monitoring-simulate`,
+`credit-monitoring-score-production` e `credit-monitoring-drift`; use `--help` para caminhos
+alternativos. O relatório local é `reports/drift/phase-2-drift-v1.0.2-final.html`; os resultados
+estruturados agregados ficam em `reports/drift/results-v1.0.2.json`. O relatório declara que Concept
+Drift não foi demonstrado; a docência avaliará o plano após a entrega.
 
 Alterar features mantendo rótulos originais demonstra **Data Drift**; isso não prova Concept
-Drift ou perda real de performance. O enunciado cita Concept Drift no contexto, mas não o detalha
-na rubrica: a interpretação deve ser confirmada com a docência, conforme a pendência no plano.
+Drift ou perda real de performance. O enunciado também cita Concept Drift, que este cenário não
+demonstra. Por decisão do operador, a docência avaliará o plano somente após a entrega; essa
+avaliação não é pré-requisito da implementação Data Drift.
 
 ### Sinais operacionais mínimos
 
@@ -346,8 +368,8 @@ O roteiro completo, com os estados previstos e a distinção frente ao painel da
 evidência de execução e de inspeção visual, em
 [`docs/evidence/1.6-otimizacao-modelos.md`](docs/evidence/1.6-otimizacao-modelos.md) (§11).
 
-O dashboard inicial já pode ser aberto; a integração de observabilidade e os dados de produção
-simulados serão concluídos nas etapas seguintes. `streamlit` e `mlflow` são **extras** e não são
+O dashboard inicial já pode ser aberto; a integração de observabilidade será concluída na fase 3.
+`streamlit` e `mlflow` são **extras** e não são
 instalados no ambiente padrão — instale o extra da fase 3 antes de usá-los:
 
 ```bash
@@ -385,7 +407,7 @@ O acompanhamento operacional está em [`docs/CHECKLIST.md`](docs/CHECKLIST.md).
 | Aquisição, auditoria e preparação | Concluído | Estágios `acquire`/`eda`/`prepare`/`explore`; proveniência com DOI e licença em [`docs/DATASET.md`](docs/DATASET.md); exposição do teste declarada em [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md) |
 | Modelos e Data Contract | Concluído | Contrato Pandera integrado antes do `fit`; seleção na validação e avaliação final em estágios separados; [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md) |
 | Campanha de otimização (plano 1.6) | Concluído | Estágio `tune` (só treino) + rodada única de validação com decisão registrada; laboratório Streamlit de comparação e teste; [`docs/evidence/1.6-otimizacao-modelos.md`](docs/evidence/1.6-otimizacao-modelos.md) |
-| Simulação e relatório de drift | Pendente | Cenário inicial documentado |
+| Simulação e relatório de drift | M2 Data Drift concluído; `1.0.2` enviado e recuperado via DVC | [`docs/evidence/fase-2.md`](docs/evidence/fase-2.md); Concept Drift é limitação declarada, avaliação docente pós-entrega |
 | MLflow e Streamlit | Em preparação | Shell do dashboard criada |
 | Governança e vídeo | Em preparação | Documento-base e roteiro de entregas |
 

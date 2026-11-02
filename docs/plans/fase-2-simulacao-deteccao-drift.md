@@ -43,6 +43,42 @@
 
 Este retrato descreve a base observada, não o aceite de qualquer pacote 2.x.
 
+### Decisão de protocolo 2.2 (Bill Kopp, 2026-11-02)
+
+Bill aprovou a proposta do plano antes das comparações: `LIMIT_BAL × 1,5` e `PAY_AMT1 × 0,5`,
+arredondamento `half_to_even`, zeros de pagamento preservados; PSI customizado em 19 features,
+com até 10 quantis ajustados apenas na referência, zeros em massa separada, bordas repetidas
+colapsadas, extremos abertos, suavização aditiva normalizada `1e-6`, limiar por feature `0,20`,
+regra estrita `PSI > limiar` e alerta global se ao menos uma feature ultrapassar o limiar. As
+constantes de referência usam bins `igual ao valor constante` versus `outros valores`. Seed de
+cenário `42` fica registrada; as transformações são determinísticas e não usam amostragem aleatória.
+`unused_p_value_alpha: 0.05` não participa do PSI. A máscara de zeros foi refinada para protocolo
+`1.0.1` antes da primeira comparação, conforme registro abaixo. Esta entrega demonstra Data Drift; não afirma
+cobertura de Concept Drift. Por decisão de Bill (2026-11-02), a docência avaliará o plano somente
+após a entrega; resposta prévia da docência não é dependência de execução nem gate de M2.
+
+**Revisão do protocolo antes de qualquer resultado (Bill Kopp, 2026-11-02):** o primeiro ensaio
+de simulação falhou antes de gravar saídas ou calcular PSI, porque `half_to_even` converteria dois
+pagamentos positivos (`1`) em zero. Bill escolheu preservar exatamente a máscara de zeros: valores
+`PAY_AMT1` originalmente positivos têm piso `1` depois do arredondamento; zeros originais continuam
+zero. O protocolo foi versionado como `1.0.1` antes da execução de aceite. Nenhuma comparação de
+drift foi observada antes dessa revisão.
+
+**Refinamento de reprodutibilidade (Bill, 2026-11-02):** duas execuções independentes do modelo
+produziram diferenças apenas de ponto flutuante (1.482/4.500 probabilidades distintas, delta máximo
+`3.3306690738754696e-16`; nenhuma probabilidade a `1e-10` do limiar `0.5`). Bill aprovou persistir
+probabilidades com `half_to_even` a 12 casas decimais e calcular a classe a partir desse valor
+persistido. O arredondamento máximo é `5e-13`; as classes observadas não mudam. O protocolo/artefatos passam à versão `1.0.2`,
+preservando os objetos já publicados de `1.0.1`.
+
+Na versão travada Evidently 0.7.23, `DataDriftPreset` delega a um teste estatístico e não aceita
+esta especificação de bins/suavização via o novo `ValueDrift` (o callback customizado falha na
+validação do tipo do campo `method`). A renderização de `DataSummaryPreset` também falhou com
+`KeyError` na API testada. Para preservar o protocolo aprovado, o PSI canônico é uma implementação
+customizada única usada no JSON e nas tabelas HTML; um `Report` Evidently fornece contexto de
+contagem, e o relatório conjunto acrescenta as comparações, probabilidades agregadas e limitações.
+Não se usa o teste nativo de drift do Evidently, nem IDs, alvo ou linhas de clientes no relatório.
+
 ## 1. Resultado e pergunta experimental
 
 Demonstrar que alterações reproduzíveis em `LIMIT_BAL` e `PAY_AMT1`, em um lote válido, são
@@ -79,18 +115,16 @@ M1 → 2.1 → 2.2 → 2.3 → 2.4 ──┐
 não dependem matematicamente das predições, mas o aceite integrado requer contrato/inferência
 e a distribuição das probabilidades. Executar os pacotes sequencialmente por padrão.
 
-### Cobertura de Concept Drift
+### Limite de cobertura: Concept Drift
 
-O contexto do enunciado cita Concept Drift, mas a rubrica detalha Data Drift. Levar à docência
-uma pergunta objetiva: a alteração marginal de duas features atende à demonstração exigida, ou
-é necessário cenário separado de mudança de `P(y|X)`? Registrar resposta, data e consequência
-em 2.2, sem atribuir à docência uma decisão ainda não recebida.
+O contexto do enunciado cita Concept Drift, enquanto este plano implementa Data Drift. Decisão de
+Bill (2026-11-02): retirar a resposta prévia da docência como requisito/gate; a docência avaliará
+o plano após a entrega. Esta fase não implementa nem reivindica cobertura de Concept Drift.
 
-Enquanto isso, implementar Data Drift localmente. Sem resolução da cobertura, não declarar
-cumprimento integral da etapa/enunciado. Se exigido, detalhar recorte de 2.2/2.3 com mecanismo
-gerador, controle, sementes e rótulos explicitamente sintéticos, avaliação independente e
-evidências próprias. Não alterar rótulos reais nem apresentar testes marginais como detector
-de Concept Drift; esse recorte exige revisão do plano antes de execução de aceite.
+Não alterar rótulos reais nem apresentar testes marginais como detector de Concept Drift. Se a
+avaliação pós-entrega solicitar esse escopo adicional, tratá-lo como mudança posterior de plano,
+com mecanismo `P(y|X)` sintético, controle, sementes, rótulos explicitamente sintéticos e evidência
+separada; não é dependência desta execução nem do gate M2 Data Drift.
 
 ## 3. Interfaces e artefatos propostos
 
@@ -135,7 +169,7 @@ alvo indevido ou hash incompatível bloqueiam a construção do cenário de acei
 
 ### 2.2 — Definição do cenário de drift
 
-**Dependências:** 2.1; decisão de cobertura com a docência para aceite integral.
+**Dependências:** 2.1.
 
 **Ações do agente:**
 1. Escrever protocolo versionado antes de observar comparações de aceite: features, direção,
@@ -157,7 +191,8 @@ alvo indevido ou hash incompatível bloqueiam a construção do cenário de acei
 6. Explicitar que `drift.alpha=0.05` não é limiar PSI. Se a equipe optar por KS/p-values, fixar
    família de testes, correção (por exemplo Holm), adequação a empates/discretização e regra
    de agregação; não misturar decisões PSI e p-value sob um único nome `alpha`.
-7. Registrar pergunta/resposta sobre Concept Drift e estimativa de impacto caso haja ampliação.
+7. Registrar que Concept Drift não é demonstrado nesta entrega; qualquer ampliação posterior será
+   estimada separadamente e submetida à avaliação pós-entrega.
 
 **Verificação/aceite:** configuração sem parâmetros estatísticos ambíguos; cenário e protocolo
 possuem versão/hash registrados antes dos resultados. Ensaio exploratório pode motivar nova
@@ -279,9 +314,10 @@ comandos reais e versões. O plano não implica que essas operações já esteja
 ## 6. Gate M2 e transferência
 
 M2 exige M1, contratos/inferência nos lotes, protocolo anterior à execução, detecção das duas
-features, HTML com controle e hashes/versões rastreáveis. Registrar a decisão da docência para
-declarar cobertura integral. Uma implementação parcial pode ser integrada em desenvolvimento
-com limitações explícitas, mas não equivale ao marco aceito.
+features Data Drift, HTML com controle e hashes/versões rastreáveis. A evidência deve declarar que
+Concept Drift não foi demonstrado; a docência avaliará essa cobertura após a entrega, sem bloquear
+M2. Uma implementação parcial pode ser integrada em desenvolvimento com limitações explícitas,
+mas não equivale ao marco aceito.
 
 Transferir à fase 3: lotes e manifesto, modelo/contrato imutáveis, predições, JSON/HTML por
 comparação, configuração de alertas e comandos válidos, inclusive como rejeitar um lote inválido.
@@ -290,5 +326,5 @@ Recomenda-se registro textual `docs/evidence/fase-2.md`, com seções 2.1–2.7 
 **Primeira ação do agente:** iniciar 2.1 verificando no ambiente de execução os artefatos de M1 e
 seus hashes contra [`docs/evidence/fase-1.md`](../evidence/fase-1.md) e os metadados congelados.
 Em seguida, antes de qualquer comparação exploratória ou de aceite, fixar em 2.2 o protocolo
-estatístico e registrar a pergunta pendente de cobertura de Concept Drift. M1 já foi aceito; não
+estatístico e registrar o limite de escopo de Concept Drift para avaliação pós-entrega. M1 já foi aceito; não
 reexecutar treino, teste final ou sincronização DVC como pré-requisito automático.

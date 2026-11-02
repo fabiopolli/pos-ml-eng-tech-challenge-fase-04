@@ -142,3 +142,77 @@ stages:
     outs:
       - reports/test_metrics.json:
           cache: false
+
+  simulate_production:
+    cmd: python -m credit_monitoring.data.simulate
+    deps:
+      - data/processed/validation.csv
+      - data/reference/reference.csv
+      - models/credit_model_metadata.json
+      - src/credit_monitoring/data/simulate.py
+      - src/credit_monitoring/config.py
+      - src/credit_monitoring/contracts
+      - src/credit_monitoring/data/loading.py
+    params:
+      - configs/project.yaml:
+          - dataset.canonical_target
+          - dataset.financial_features
+          - dataset.governance_features
+          - dataset.id_column
+          - drift
+    outs:
+      - data/production/v1.0.2/original.csv
+      - data/production/v1.0.2/modified.csv
+      - data/production/v1.0.2/manifest.json
+
+  score_production:
+    cmd: python -m credit_monitoring.models.score_production
+    deps:
+      - data/production/v1.0.2/original.csv
+      - data/production/v1.0.2/modified.csv
+      - data/production/v1.0.2/manifest.json
+      - models/credit_model.joblib
+      - models/credit_model_metadata.json
+      - src/credit_monitoring/models/score_production.py
+      - src/credit_monitoring/models/inference.py
+      - src/credit_monitoring/models/metrics.py
+      - src/credit_monitoring/config.py
+      - src/credit_monitoring/data/loading.py
+      - src/credit_monitoring/data/simulate.py
+      - src/credit_monitoring/contracts
+    params:
+      - configs/project.yaml:
+          - dataset.financial_features
+          - dataset.canonical_target
+          - contract
+          - modeling
+          - drift.scoring
+    outs:
+      - data/production/v1.0.2/predictions/original.csv
+      - data/production/v1.0.2/predictions/modified.csv
+      - reports/drift/prediction_summary-v1.0.2.json
+
+  detect_drift:
+    cmd: python -m credit_monitoring.monitoring.drift
+    deps:
+      - data/reference/reference.csv
+      - data/production/v1.0.2/original.csv
+      - data/production/v1.0.2/modified.csv
+      - data/production/v1.0.2/manifest.json
+      - reports/drift/prediction_summary-v1.0.2.json
+      - models/credit_model_metadata.json
+      - src/credit_monitoring/monitoring/drift.py
+      - src/credit_monitoring/config.py
+      - src/credit_monitoring/contracts
+      - src/credit_monitoring/data/loading.py
+    params:
+      - configs/project.yaml:
+          - dataset.canonical_target
+          - dataset.financial_features
+          - dataset.governance_features
+          - dataset.id_column
+          - drift
+    outs:
+      - reports/drift/results-v1.0.2.json:
+          cache: false
+      - reports/drift/phase-2-drift-v1.0.2-final.html

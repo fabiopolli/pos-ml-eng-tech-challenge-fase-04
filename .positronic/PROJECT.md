@@ -43,9 +43,11 @@ alocados ao teste; essa exposição está declarada em `docs/evidence/fase-1.md`
 seleciona usando treino e validação e não lê o teste; `evaluate` é um estágio separado, que valida
 e avalia no teste o modelo já congelado. Portanto, não descrever o teste como avaliação intocada.
 O gate M1 (1.1–1.7) está concluído, incluindo a recuperação DVC verificada em checkout/cache
-separado; a extensão 1.6 de otimização e laboratório também está concluída. Produção simulada e
-detecção de drift ainda precisam ser implementadas na fase 2; a observabilidade da fase 3 também
-permanece pendente.
+separado; a extensão 1.6 de otimização e laboratório também está concluída. A fase 2 tem cenário
+Data Drift `1.0.2`, inferência, PSI e relatório HTML implementados e verificados. Os objetos DVC
+das versões `1.0.1` e `1.0.2` foram publicados/recuperados em cache isolado. Concept Drift não é demonstrado
+nesta entrega; por decisão do operador, a docência avaliará o plano após a entrega, sem resposta
+prévia como gate de M2. A observabilidade da fase 3 ainda precisa ser concluída.
 
 ## Methods and resources
 
@@ -56,7 +58,8 @@ Streamlit, Pytest/Ruff e GitHub Actions. `dvc[s3]` está travado e o remote Dags
 `uv run dvc status` indicou o workbook da UCI ausente/não materializado, embora referência,
 validação e modelo estejam presentes e com hashes conferidos. Consultar `docs/DAGSHUB.md` para
 recuperação. Treino e visualização são locais; rede é necessária para sincronizar objetos, não para
-treino com cache disponível. Não há orçamento/cota aprovados.
+treino com cache disponível. As saídas DVC da fase 2 estão no cache local e ainda não foram
+publicadas no remote. Não há orçamento/cota aprovados.
 
 ## Risks and governance
 
@@ -87,11 +90,10 @@ sincronizar dados.
 
 ## Open questions
 
-- Confirmar com a docência a cobertura de Concept Drift, citado no contexto do PDF e não
-  detalhado na rubrica. Se necessário, planejar cenário separado com mudança explícita de
-  P(y|X) e rótulos sintéticos; não alegar cobertura com testes marginais de features.
+- Registrar com clareza que a fase 2 demonstra Data Drift, não Concept Drift; a docência avaliará
+  o plano após a entrega, conforme decisão do operador (2026-11-02). Uma expansão posterior exigiria
+  mecanismo sintético explícito de mudança em P(y|X), sem alterar rótulos reais.
 - Confirmar datas, disponibilidade e recursos por entrega. A atribuição de responsável/revisor por
   ID foi removida por decisão do operador (2026-10-26): o aceite técnico verificado encerra o ID.
-- Confirmar com a docência a cobertura de Concept Drift e fixar métodos/limiares de Data Drift
-  antes da execução de aceite; a exposição histórica do teste já está declarada e o protocolo
-  distingue seleção/treino de avaliação final.
+- A exposição histórica do teste está declarada; o protocolo distingue seleção/treino de avaliação
+  final. Objetos DVC da fase 2 já foram publicados e recuperados em cache isolado.

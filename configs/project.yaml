@@ -84,5 +84,25 @@ contract:
 
 drift:
   features_to_shift: [LIMIT_BAL, PAY_AMT1]
-  alpha: 0.05
-
+  protocol_version: "1.0.2"
+  seed: 42
+  scenario:
+    limit_bal_multiplier: 1.5
+    pay_amt1_multiplier: 0.5
+    rounding: half_to_even
+    preserve_pay_amt1_zeros: true
+    positive_pay_amt1_minimum: 1
+  psi:
+    method: custom_psi
+    features: financial_features
+    reference_quantile_bins: 10
+    separate_zero_mass: true
+    constant_reference_bins: equal_vs_other
+    smoothing: 0.000001
+    per_feature_threshold: 0.20
+    comparison: ">"
+    global_alert: any_feature_exceeds_threshold
+  scoring:
+    persisted_probability_decimals: 12
+    persisted_probability_rounding: half_to_even
+  unused_p_value_alpha: 0.05

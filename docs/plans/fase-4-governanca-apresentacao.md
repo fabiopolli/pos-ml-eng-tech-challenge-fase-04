@@ -144,8 +144,9 @@ apresentado como garantia de ausência de proxies/discriminação. Resultado/ris
    desempenho/viés adverso comprovado → avaliação humana e possível suspensão/revisão de versão.
 5. Distinguir impacto potencial de perda medida; alertas não autorizam automaticamente retreino,
    aprovação de crédito ou mudança de política. Registrar responsáveis/escalonamento a confirmar.
-6. Incorporar a decisão documentada de Concept Drift; se houve experimento separado, identificá-lo
-   como sintético e referenciar suas próprias evidências, sem misturar rótulos ou conclusões.
+6. Incorporar a decisão do operador: a fase 2 demonstra Data Drift e não reivindica Concept Drift;
+   a docência avaliará o plano após a entrega. Se uma avaliação futura solicitar experimento
+   separado, identificá-lo como sintético e referenciar evidências próprias.
 
 **Verificação/aceite:** texto oferece investigação/mitigação acionáveis, sem alegar causalidade
 econômica identificada. Cada recomendação tem condição de uso e limite; resultados de drift não
@@ -241,16 +242,18 @@ de revisar se vídeo/README ainda correspondem ao pacote.
 | Governança | 15% | 4.1–4.5: origem, base legal proposta, retenção, viés, causalidade e resposta no README |
 | Vídeo STAR | 15% | 4.6: duração medida, demonstração fiel e acesso ao link |
 | Controles internos | Sem peso oficial adicional | 1.6/4.7: comparação de modelos, DVC/DagsHub e recuperação independente |
-| Cobertura transversal | Verificar no enunciado | Base financeira binária, ≥5.000 amostras úteis e decisão de Concept Drift |
+| Cobertura transversal | Verificar no enunciado | Base financeira binária, ≥5.000 amostras úteis, Data Drift demonstrado e limitações de Concept Drift registradas; docência avalia pós-entrega |
 
 Matriz é checklist de verificação, não pontuação autoatribuída. Não preencher resultado apenas
 porque o arquivo existe; revisar o conteúdo e a coerência com a versão candidata.
 
 ## 6. Gate M4 e handoff final
 
-M4 exige M3, governança/causalidade no README, cobertura resolvida, reprodução independente,
-vídeo acessível e revisão final. Datas/responsáveis/acessos não confirmados devem ser resolvidos
-ou explicitamente impedir o aceite correspondente, sem afirmar compromisso de terceiros.
+M4 exige M3, governança/causalidade no README, matriz de cobertura e limitações documentadas,
+reprodução independente, vídeo acessível e revisão final. A avaliação da docência sobre Concept
+Drift ocorre após a entrega e não é dependência de execução. Datas/responsáveis/acessos não
+confirmados devem ser resolvidos ou explicitamente impedir o aceite correspondente, sem afirmar
+compromisso de terceiros.
 
 Handoff final: o que foi implementado e verificado, SHA/lock e hashes, matriz/evidências, link
 e duração do vídeo, resultados/limitações, decisões humanas e situação real da publicação/
