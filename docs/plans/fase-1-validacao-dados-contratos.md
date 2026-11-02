@@ -1,10 +1,17 @@
 # Fase 1 — Validação de Dados e Contratos
 
 > Plano de execução, revisado em 2026-10-26 após a análise de estado do código. Expande os IDs
-> 1.1–1.7; **não atesta implementação**. Os estados citados como "verificado" são observações de
-> 2026-10-26 registradas em
-> [`reports/analise-estado-fase-1.md`](../../reports/analise-estado-fase-1.md); os demais itens
-> continuam sendo trabalho planejado.
+> 1.1–1.7; **não atesta implementação**. O **registro de aceite**, verificado por execução, está em
+> [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md); o **diagnóstico de partida**, anterior
+> à execução, está em
+> [`reports/analise-estado-fase-1.md`](../../reports/analise-estado-fase-1.md).
+
+> **Status de execução (2026-10-26):** os pacotes 1.1a, 1.1b, 1.2, 1.3, 1.4, 1.5, 1.6 e 1.7
+> foram executados no branch `fase-1-bill` e verificados; o registro por ID, com comandos, códigos
+> de saída e hashes, está em [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md).
+> A seção 2 abaixo (2.1 a 2.4) é o **diagnóstico anterior à execução** e permanece como referência
+> histórica — não como estado corrente do repositório. Onde os dois registros divergirem, vale
+> o registro de evidências, verificado por execução.
 
 - **Plano geral:** [escopo, protocolo e aceites](plano-de-trabalho-TC4.md).
 - **Próxima fase:** [Simulação e Detecção de Drift](fase-2-simulacao-deteccao-drift.md).
@@ -19,9 +26,9 @@ Random Forest, modelo selecionado/congelado e recuperação verificável de dado
 Atende à etapa de validação do enunciado; a comparação dos dois algoritmos e o DagsHub são
 escolhas internas. Não inclui simulação de drift nem dashboard integrado.
 
-Aplicar o protocolo agêntico da seção 11 do plano geral a cada pacote. Responsáveis, revisores
-e datas por ID precisam ser confirmados; a semana 1 é relativa. Aceites abaixo são observações
-esperadas para a implementação futura, não resultados obtidos nesta revisão.
+Aplicar o protocolo agêntico da seção 11 do plano geral a cada pacote. A semana 1 é relativa.
+Aceites abaixo são observações esperadas para a implementação futura, não resultados obtidos
+nesta revisão.
 
 A revisão de 2026-10-26 não muda o escopo da fase. Ela **corrige o diagnóstico inicial** (o plano
 anterior partia de um código e de um ambiente não verificados), **acrescenta a peça de aquisição
@@ -68,13 +75,15 @@ Verificado por execução local (uv 0.12.18, Python 3.12.14) e leitura de códig
 6. **DagsHub inacessível.** Sem `dvc[s3]`, sem remote e sem credenciais, o aceite de recuperação
    de 1.1/1.6 e o marco M1 permanecem abertos.
 
-### 2.3 Decisões que dependem da equipe (não do agente)
+### 2.3 Decisões do executor do plano (não do agente)
+
+Todas as três foram decididas pelo executor do plano em 2026-10-26; a tabela é registro do
+diagnóstico, não pendência em aberto.
 
 | Decisão | Impacto se não decidida |
 |---|---|
 | Autorização de rede e credenciais do DagsHub (owner, endpoint, chave/segredo) | 1.1 e 1.6 ficam sem aceite de recuperação; M1 não fecha |
 | Manter ou mover o XLS de 5,5 MB do Git para o DVC | 1.2 fica sem política de proveniência; o repositório mantém um dataset binário no histórico |
-| Responsável e revisor por ID | Nenhum pacote pode ser marcado como concluído |
 | Como registrar a exposição prévia do teste | 1.6 pode declarar avaliação final sem descrever a exposição |
 
 ### 2.4 Ordem de execução
@@ -110,7 +119,7 @@ dados preparados antes de qualquer ajuste de modelo.
 | Referência | `data/reference/reference.csv` igual ao treino intacto, inclusive IDs e serialização |
 | Contrato | Esquema rotulado e esquema de inferência; retorno de sucesso ou diagnóstico de falha sem dados pessoais |
 | Seleção | Métricas de validação dos dois modelos, regra de decisão, limiar e fingerprint da configuração |
-| Modelo | `models/credit_model.joblib`, metadados de seleção/versões/hashes, predição reproduzível após carga |
+| Modelo | `models/credit_model.joblib` (o **selecionado**, congelado, única entrada da avaliação) e `models/candidates/credit_model_<candidato>.joblib` (cada candidato, para a comparação ser auditável por artefato), metadados de seleção/versões/hashes, predição reproduzível após carga |
 | Avaliação final | Métricas do escolhido no teste e vínculo com a seleção congelada; exposição anterior declarada |
 | Versionamento | Ponteiros/`dvc.lock` coerente com o código no Git; objetos aprovados no DagsHub e prova de leitura com cache separado |
 
@@ -159,8 +168,16 @@ aponta ao repositório correto sem segredos no diff; `uv run dvc status` sem est
 após a regularização. Registrar recuperação do bruto quando autorizada e completar a prova dos
 artefatos finais em 1.6. Sem uv/acesso, registrar o bloqueio.
 
-### 1.2 — Aquisição e auditoria do dataset
+> **Executada e revalidada por execução em 2026-10-26** (registro de aceite em
+> [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) §1.1 e **§1.1.1**): instalação travada,
+> configuração do remote, ausência de segredos no diff e no histórico, recuperação remota do zero
+> em clone novo do GitHub sem cache e inferência sobre o modelo recuperado. A revalidação
+> **achou um item não executado** — a ação 2 da 1.1a (reavaliar `ucimlrepo`, `evidently`, `mlflow`
+> e `streamlit` como dependências de fases futuras) — que foi **fechado no mesmo dia**: as quatro
+> passaram para os grupos opcionais `provenance`, `drift` e `observability`, com o lock regenerado
+> pela ferramenta; o ambiente padrão caiu de 244 para 170 pacotes e nenhum artefato DVC mudou.
 
+### 1.2 — Aquisição e auditoria do dataset
 **Dependências:** ambiente local de 1.1a; origem do arquivo identificável.
 
 **Ações do agente:**
@@ -227,6 +244,13 @@ razões inválidas ou IDs compartilhados falham. Regras removem apenas o previst
 controladas; referência e treino têm igualdade de conteúdo (verificada por hash e por teste). 1.7
 valida os resultados antes do treino.
 
+> **Executada e verificada em 2026-10-26** (revalidação independente: reexecução do zero com
+> saídas byte-a-byte idênticas, união das remoções conferida em fixture controlada, caminhos de
+> erro exercitados). Duas lacunas foram fechadas nesta passagem: a falha por IDs compartilhados
+> passou a ter cobertura de teste, e o relatório passou a registrar a impressão digital da
+> configuração, as razões de split e o arredondamento das taxas. Detalhes em
+> [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) ("1.3.1").
+
 ### 1.7 — Implementação do Data Contract
 
 **Dependências:** esquema e dados de 1.3; deve terminar antes de 1.4/1.5.
@@ -252,6 +276,14 @@ nulo, coluna ausente, tipo incompatível e alvo inválido falham. Testar limites
 17/101 rejeitados; inferência sem alvo passa. Spy/mock de `fit`/predição comprova zero chamadas
 em falha. Se várias regras falharem, o lote é contado uma só vez como rejeitado.
 
+> **Executada e verificada em 2026-10-26** (revalidação independente: 30/30 checagens vivas
+> sobre o `train.csv` real; o código de produção do contrato não mudou). Duas lacunas de **prova**
+> foram fechadas: o lado da predição do spy (zero chamadas quando o contrato falha) e a prova de
+> que o **lote integral** é validado antes de selecionar as 19 entradas do modelo. Cada teste
+> novo foi validado por mutação do código de produção. Observações registradas sem mudança de
+> comportamento: lote vazio é aceito, valores do alvo estão no código e não no bloco
+> `contract:`. Detalhes em [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) ("1.7.1").
+
 ### 1.4 — Treinamento da Regressão Logística
 
 **Dependências:** 1.3 e 1.7 aceitos; exploração supervisionada restrita ao treino.
@@ -270,6 +302,11 @@ em falha. Se várias regras falharem, o lote é contado uma só vez como rejeita
 chegam ao estimador; probabilidades são finitas no intervalo [0,1]. Execução de seleção funciona
 mesmo sem acesso ao arquivo de teste, comprovando isolamento por comportamento.
 
+> **Executada e revalidada por execução em 2026-10-26** (registro de aceite em
+> [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) §1.4 e **§1.4.1**). A revalidação
+> reexecutou o estágio de treino em clone isolado: artefatos reproduzidos byte a byte, ajuste
+> provado restrito ao treino e uma lacuna de prova automatizada fechada (escopo do `fit`).
+
 ### 1.5 — Treinamento do Random Forest
 
 **Dependências:** mesmas entradas/contrato de 1.4; comparabilidade entre os modelos.
@@ -287,7 +324,18 @@ mesmo sem acesso ao arquivo de teste, comprovando isolamento por comportamento.
 **Verificação/aceite:** entradas/hashes coincidem com 1.4, contrato é aplicado, métricas são
 recalculáveis e somas da matriz correspondem à validação. Não exigir que RF vença o baseline.
 
+> **Executada e revalidada por execução em 2026-10-26** (registro de aceite em
+> [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) §1.5 e **§1.5.1**): comparabilidade
+> das entradas e recalculabilidade das métricas verificadas por execução, com uma lacuna de prova
+> automatizada fechada (somas da matriz e métricas rederivadas da matriz).
+
 ### 1.6 — Avaliação, seleção e versionamento
+
+> **Extensão planejada em 2026-10-26:** o [plano 1.6 — otimização dos modelos](1.6-otimizacao-modelos.md)
+> acrescenta uma campanha limitada de melhoria de LR/RF, priorizando RF, e nova decisão de
+> promoção antes do aceite integrado da fase 2. Inclui o laboratório Streamlit **1.6-O6** para
+> testar e comparar os modelos. A execução dessa extensão está pendente; o aceite e as evidências
+> da versão original abaixo permanecem como histórico.
 
 **Dependências:** 1.4/1.5 e contrato aceitos; acesso remoto de 1.1b para completar M1.
 
@@ -320,6 +368,11 @@ recalculáveis e somas da matriz correspondem à validação. Não exigir que RF
 recarregado preserva probabilidades dentro de tolerância numérica declarada. Recuperação remota
 do bruto, preparados, referência e modelo deve funcionar sem depender do cache principal.
 Relatório e metadados não descrevem a avaliação como intocada se houve exposição anterior.
+
+> **Executada e revalidada por execução em 2026-10-26** (registro de aceite em
+> [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) §1.6, com a **prova de recuperação
+> remota executada** em checkout e cache separados em §1.6.1 e a **revalidação do caminho local**
+> em §1.6.2).
 
 ## 5. Estratégia de verificação e comandos
 
@@ -363,6 +416,13 @@ M1 exige todos os aceites 1.1–1.7: contrato bloqueante demonstrado, splits aud
 de modelos, decisão congelada, avaliação rastreável e recuperação remota dos objetos. Sem a
 prova remota, reportar prontidão local parcial, mantendo M1 aberto.
 
+> **Estado do gate em 2026-10-26: M1 concluído.** Os dez itens do checklist abaixo foram
+> verificados um a um — com comandos, códigos de saída e hashes — em
+> [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) ("Checklist do gate M1"). As caixas
+> ficam **desmarcadas de propósito**: esta seção é a *especificação* do gate; o *registro de
+> aceite* é o documento de evidências. Para o estado corrente de cada entrega, ver também o
+> "Status de execução" no topo deste plano.
+
 Checklist do gate, a ser verificado item a item antes de propor M1 como concluído:
 
 - [ ] Bruto recuperado com hash conferido e script de aquisição versionado; proveniência
@@ -388,3 +448,7 @@ e evidências. Recomenda-se registro textual `docs/evidence/fase-1.md`, com seç
 leitura de `.xls`, regularizar o `dvc.lock` e abrir o registro do recorte local. Em seguida, 1.2
 para restaurar o bruto; se o acesso externo faltar, seguir pela conversão do XLS versionado e
 registrar a dependência pendente para 1.1b.
+
+> **Cumprida em 2026-10-26** (1.1a, 1.2 e 1.1b). O checklist do gate acima permanece aqui como
+> especificação; a verificação item a item, com os comandos executados e os hashes conferidos,
+> está em [`docs/evidence/fase-1.md`](../../docs/evidence/fase-1.md) ("Checklist do gate M1").

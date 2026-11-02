@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "displayName": "Tech Challenge — Fase 4 | ML Engineering",
+  "createdAt": 1793012059295,
+  "description": "Solução local e reproduzível de credit scoring para demonstrar validação de dados, simulação de Data Drift, observabilidade de modelos e governança, conforme Tech Challenge Fase 4."
+}

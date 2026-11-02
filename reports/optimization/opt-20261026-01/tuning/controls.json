@@ -1,0 +1,55 @@
+{
+  "logistic_regression": {
+    "fit_scores": [
+      0.7242459113243268,
+      0.7238051166611107,
+      0.7297411850528456,
+      0.7297386552372201,
+      0.7272836851326479
+    ],
+    "fold_scores": [
+      0.736187042144507,
+      0.7375777414398443,
+      0.7171373248092395,
+      0.7144875589015119,
+      0.7219218437526636
+    ],
+    "mean_roc_auc": 0.7254623022095533,
+    "note": "Media de CV nao e compativel com o ROC-AUC de validacao: sao particoes e estimadores diferentes.",
+    "params": {
+      "C": 1.0,
+      "class_weight": "balanced",
+      "max_iter": 1000
+    },
+    "status": "ok",
+    "std_roc_auc": 0.009634199498592108,
+    "trial_id": "logistic_regression:control:00"
+  },
+  "random_forest": {
+    "fit_scores": [
+      0.8203218299805942,
+      0.8166543583252242,
+      0.8206329150320903,
+      0.8220030261531106,
+      0.82095645376945
+    ],
+    "fold_scores": [
+      0.7815307169801884,
+      0.7986893662840653,
+      0.7751317231804167,
+      0.7757239057128255,
+      0.7736725748899469
+    ],
+    "mean_roc_auc": 0.7809496574094885,
+    "note": "Media de CV nao e compativel com o ROC-AUC de validacao: sao particoes e estimadores diferentes.",
+    "params": {
+      "class_weight": "balanced_subsample",
+      "max_depth": 8,
+      "min_samples_leaf": 20,
+      "n_estimators": 300
+    },
+    "status": "ok",
+    "std_roc_auc": 0.00926442303292159,
+    "trial_id": "random_forest:control:00"
+  }
+}

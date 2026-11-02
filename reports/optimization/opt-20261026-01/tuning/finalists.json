@@ -1,0 +1,97 @@
+{
+  "budget": {
+    "counting": "Um ajuste equivale a um ajuste do estimador: um fit por fold. Controles 10, busca RF 120, busca LR 60, ablacao 10, estabilidade 10 e ajustes finais 2 (212 planejados, margem de 8).",
+    "max_fits": 220,
+    "per_stage": {
+      "final_fit": 2,
+      "fold_fit": 210
+    },
+    "used_fits": 212
+  },
+  "experiment_id": "opt-20261026-01",
+  "finalists": {
+    "logistic_regression": {
+      "algorithm": "logistic_regression",
+      "artifact": "finalists/logistic_regression.joblib",
+      "control_mean_roc_auc": 0.7254623022095533,
+      "converged": true,
+      "cv_gain_over_control": 2.171939268547085e-06,
+      "cv_mean_roc_auc": 0.7254644741488219,
+      "cv_trial_id": "logistic_regression:search:10",
+      "feature_variant": "base",
+      "params": {
+        "C": 10.0,
+        "class_weight": "balanced",
+        "max_iter": 5000
+      },
+      "pipeline_steps": [
+        "scaler",
+        "classifier"
+      ],
+      "seed": 42,
+      "sha256": "933c6cbec350b71f055a5f365751d8de39ac905acffcfee7001f8ddc4b06c0a9",
+      "train_sha256": "9ebd48b6d31c67f46cc28aff0bde36b48f62936aff0011007b7cb78d26108c26"
+    },
+    "random_forest": {
+      "algorithm": "random_forest",
+      "artifact": "finalists/random_forest.joblib",
+      "control_mean_roc_auc": 0.7809496574094885,
+      "converged": true,
+      "cv_gain_over_control": 0.0034667770626102268,
+      "cv_mean_roc_auc": 0.7844164344720987,
+      "cv_trial_id": "random_forest:search:08",
+      "feature_variant": "base",
+      "params": {
+        "class_weight": "balanced",
+        "max_depth": 12,
+        "max_features": 0.5,
+        "min_samples_leaf": 40,
+        "min_samples_split": 10,
+        "n_estimators": 600
+      },
+      "pipeline_steps": [
+        "classifier"
+      ],
+      "seed": 42,
+      "sha256": "a1800a97a28e85b7af4334515d66082ad91d49dda1efa7d1a0e4bffb3b3740a0",
+      "train_sha256": "9ebd48b6d31c67f46cc28aff0bde36b48f62936aff0011007b7cb78d26108c26"
+    }
+  },
+  "fold_fingerprint": "b19d867de65d387aa53f275a2a4cf2c25ef24695fd2bfcd4a953461bedd21505",
+  "note": "Finalistas ajustados nas 21.000 linhas do treino. Nenhum finalista foi consultado na validacao nem no teste.",
+  "protocol_version": "1.6.0",
+  "stability": {
+    "algorithm": "random_forest",
+    "control_mean_roc_auc": 0.7809496574094885,
+    "note": "As repeticoes 17 e 73 sao reportadas com a semente 42, sem escolher a melhor. A versao final mantem a semente 42.",
+    "primary_mean_roc_auc": 0.7844164344720987,
+    "primary_seed": 42,
+    "repetition_mean_roc_auc": 0.7846664213911008,
+    "repetitions_beat_control": true,
+    "seeds": {
+      "17": {
+        "fold_scores": [
+          0.7846813452465298,
+          0.8011816665948172,
+          0.7799544156018953,
+          0.7786282163212023,
+          0.7786239382590063
+        ],
+        "mean_roc_auc": 0.7846139164046901,
+        "status": "ok"
+      },
+      "73": {
+        "fold_scores": [
+          0.784278220155004,
+          0.8013593707167957,
+          0.7804590624001442,
+          0.778929326083444,
+          0.7785686525321687
+        ],
+        "mean_roc_auc": 0.7847189263775113,
+        "status": "ok"
+      }
+    }
+  },
+  "train_sha256": "9ebd48b6d31c67f46cc28aff0bde36b48f62936aff0011007b7cb78d26108c26"
+}

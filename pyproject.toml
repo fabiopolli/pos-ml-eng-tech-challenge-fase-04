@@ -9,10 +9,8 @@ description = "Credit scoring com contratos de dados, deteccao de drift e observ
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "evidently>=0.7,<1",
     "joblib>=1.4,<2",
     "matplotlib>=3.9,<4",
-    "mlflow>=3,<4",
     "numpy>=2,<3",
     "pandas>=2.2,<3",
     "pandera[pandas]>=0.26,<1",
@@ -20,14 +18,32 @@ dependencies = [
     "scikit-learn>=1.5,<2",
     "scipy>=1.13,<2",
     "seaborn>=0.13,<1",
-    "streamlit>=1.40,<2",
-    "ucimlrepo>=0.0.7,<1",
+    "xlrd>=2,<3",
 ]
 
+# Dependencias de fases futuras: declaradas, porem NAO instaladas por padrao.
+# A reavaliacao pedida pela acao 2 da 1.1a separou "instalado" de
+# "implementado": o ambiente padrao carrega apenas o que o codigo da fase
+# usa, e cada fase instala o seu extra quando precisar.
+#
+#   uv sync --dev --locked --extra drift          # fase 2 (evidently)
+#   uv sync --dev --locked --extra observability  # fase 3 (mlflow, streamlit)
+#   uv sync --dev --locked --extra provenance     # reverificar a fonte na UCI
+#   uv sync --dev --locked --extra model_lab      # laboratorio de modelos (plano 1.6)
+[project.optional-dependencies]
+drift = ["evidently>=0.7,<1"]
+observability = ["mlflow>=3,<4", "streamlit>=1.40,<2"]
+provenance = ["ucimlrepo>=0.0.7,<1"]
+model_lab = ["streamlit>=1.40,<2"]
+
 [project.scripts]
+credit-monitoring-acquire = "credit_monitoring.data.acquire:main"
 credit-monitoring-eda = "credit_monitoring.eda:main"
 credit-monitoring-prepare = "credit_monitoring.data.prepare:main"
 credit-monitoring-train = "credit_monitoring.models.train:main"
+credit-monitoring-tune = "credit_monitoring.models.tune:main"
+credit-monitoring-evaluate = "credit_monitoring.models.evaluate:main"
+credit-monitoring-validate = "credit_monitoring.contracts.validate:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
@@ -37,7 +53,7 @@ where = ["src"]
 
 [dependency-groups]
 dev = [
-    "dvc>=3,<4",
+    "dvc[s3]>=3,<4",
     "ipykernel>=6.29,<7",
     "nbconvert>=7.16,<8",
     "nbformat>=5.10,<6",

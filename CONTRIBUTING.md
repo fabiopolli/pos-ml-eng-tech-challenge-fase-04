@@ -5,7 +5,6 @@
 3. Faça commits semânticos e pequenos, como `feat: add credit data contract`.
 4. Rode `uv run ruff format --check .`, `uv run ruff check .` e `uv run pytest`.
 5. Abra PR com objetivo, validações executadas, evidências e impacto no checklist.
-6. Solicite revisão de outro integrante.
 
 Não envie datasets ou modelos binários diretamente ao Git: use DVC/DagsHub para objetos
 autorizados e versione ponteiros/metadados no Git. Não envie informações pessoais, segredos,

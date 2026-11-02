@@ -33,6 +33,8 @@ reports/drift/*
 !reports/drift/README.md
 reports/figures/*
 !reports/figures/README.md
+reports/run_resources.json
+reports/optimization/*/resources.json
 !data/raw/*.dvc
 artifacts/
 mlruns/
@@ -52,3 +54,6 @@ Thumbs.db
 # Temporary review files
 tmp/
 
+
+# Editor pessoal
+.obsidian/

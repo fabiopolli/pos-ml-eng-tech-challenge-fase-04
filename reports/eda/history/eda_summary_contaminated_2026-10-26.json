@@ -1,0 +1,64 @@
+{
+  "age_max": 79,
+  "age_min": 21,
+  "columns": 25,
+  "duplicated_ids": 0,
+  "duplicated_rows": 0,
+  "iqr_outliers": {
+    "BILL_AMT1": 2400,
+    "BILL_AMT2": 2395,
+    "BILL_AMT3": 2469,
+    "BILL_AMT4": 2622,
+    "BILL_AMT5": 2725,
+    "BILL_AMT6": 2693,
+    "LIMIT_BAL": 167,
+    "PAY_AMT1": 2745,
+    "PAY_AMT2": 2714,
+    "PAY_AMT3": 2598,
+    "PAY_AMT4": 2994,
+    "PAY_AMT5": 2945,
+    "PAY_AMT6": 2958
+  },
+  "limit_bal_max": 1000000,
+  "limit_bal_min": 10000,
+  "limit_bal_non_positive": 0,
+  "negative_bill_amt_values": 3932,
+  "negative_pay_amt_values": 0,
+  "non_numeric_columns": [],
+  "null_values": 0,
+  "raw_file": "default_of_credit_card_clients.csv",
+  "raw_sha256": "1fc7fe04822413cf48d0f5ca974cbe47061b21ea10fa1d114bb56b8feac79358",
+  "rows": 30000,
+  "target_counts": {
+    "0": 23364,
+    "1": 6636
+  },
+  "target_rate": 0.2212,
+  "top_target_correlations": {
+    "LIMIT_BAL": -0.1535,
+    "PAY_0": 0.3248,
+    "PAY_2": 0.2636,
+    "PAY_3": 0.2353,
+    "PAY_4": 0.2166,
+    "PAY_5": 0.2041,
+    "PAY_6": 0.1869,
+    "PAY_AMT1": -0.0729,
+    "PAY_AMT2": -0.0586,
+    "PAY_AMT4": -0.0568
+  },
+  "undocumented_codes": {
+    "EDUCATION": {
+      "0": 14,
+      "5": 280,
+      "6": 51
+    },
+    "MARRIAGE": {
+      "0": 54
+    },
+    "PAY": {
+      "-2": 24415,
+      "0": 95919
+    },
+    "SEX": {}
+  }
+}

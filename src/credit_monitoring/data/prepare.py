@@ -1,6 +1,7 @@
 """Cleaning and stratified splitting of the credit default dataset."""
 
 import argparse
+import hashlib
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -27,6 +28,7 @@ class PreparationReport:
     non_positive_limit_rows: int
     age_out_of_range_rows: int
     removed_rows: int
+    rows_matching_multiple_reasons: int
     output_rows: int
 
 
@@ -47,7 +49,18 @@ def prepare_dataset(
     non_positive_limit_mask = ~null_mask & (numeric["LIMIT_BAL"] <= 0)
     age_mask = ~null_mask & ~numeric["AGE"].between(contract["age_min"], contract["age_max"])
 
-    drop = null_mask | duplicated_id_mask | invalid_target_mask | non_positive_limit_mask | age_mask
+    masks = [
+        null_mask,
+        duplicated_id_mask,
+        invalid_target_mask,
+        non_positive_limit_mask,
+        age_mask,
+    ]
+    # ``removed_rows`` counts unique removed rows (the union), never the sum of reasons.
+    drop = null_mask.copy()
+    for mask in masks:
+        drop = drop | mask
+    reasons_hit = sum(mask.astype(int) for mask in masks)
     prepared = numeric.loc[~drop].astype(int).reset_index(drop=True)
     report = PreparationReport(
         input_rows=len(raw),
@@ -57,6 +70,7 @@ def prepare_dataset(
         non_positive_limit_rows=int(non_positive_limit_mask.sum()),
         age_out_of_range_rows=int(age_mask.sum()),
         removed_rows=int(drop.sum()),
+        rows_matching_multiple_reasons=int((reasons_hit > 1).sum()),
         output_rows=len(prepared),
     )
     return prepared, report
@@ -107,6 +121,50 @@ def assert_eda_matches_raw(summary_path: Path, raw_sha256: str) -> None:
         raise ValueError("EDA summary was generated from a different raw file. Re-run the EDA.")
 
 
+MINIMUM_USEFUL_ROWS = 5000
+REFERENCE_FILE = "reference.csv"
+TARGET_RATE_DECIMALS = 4
+PREPARATION_CONFIG_PARAMS = ("project.random_seed", "dataset", "contract")
+
+
+def config_fingerprint(config: dict[str, Any]) -> str:
+    """SHA-256 over the configuration actually consumed by the preparation.
+
+    The scope matches the DVC parameters of the ``prepare`` stage, so the
+    report cannot drift from the configuration that produced the splits.
+    """
+    payload = {
+        "project.random_seed": config["project"]["random_seed"],
+        "dataset": config["dataset"],
+        "contract": config["contract"],
+    }
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def audit_split_ids(splits: dict[str, pd.DataFrame], id_column: str) -> dict[str, Any]:
+    """Evidence that IDs are unique inside each split and disjoint across splits."""
+    ids = {name: set(frame[id_column]) for name, frame in splits.items()}
+    intersections = {}
+    names = list(ids)
+    for index, left in enumerate(names):
+        for right in names[index + 1 :]:
+            shared = ids[left] & ids[right]
+            if shared:
+                intersections[f"{left}&{right}"] = len(shared)
+    total = sum(len(frame) for frame in splits.values())
+    unique = len(set().union(*ids.values()))
+    return {
+        "ids_unique_within_split": {
+            name: bool(frame[id_column].is_unique) for name, frame in splits.items()
+        },
+        "id_intersections": intersections,
+        "sum_of_split_rows": total,
+        "unique_ids_across_splits": unique,
+        "coverage_complete": total == unique,
+    }
+
+
 def run_preparation(
     raw_csv: str | Path,
     config: dict[str, Any],
@@ -120,6 +178,7 @@ def run_preparation(
     assert_eda_matches_raw(Path(eda_summary_path), raw_sha256)
 
     target = config["dataset"]["canonical_target"]
+    id_column = config["dataset"]["id_column"]
     prepared, report = prepare_dataset(load_raw(raw_csv, config), config)
     splits = split_dataset(prepared, config)
 
@@ -130,15 +189,49 @@ def run_preparation(
     for name, frame in splits.items():
         frame.to_csv(processed_dir / f"{name}.csv", index=False)
     # Reference for drift monitoring is the untouched training split.
-    splits["train"].to_csv(reference_dir / "reference.csv", index=False)
+    splits["train"].to_csv(reference_dir / REFERENCE_FILE, index=False)
 
+    train_sha256 = file_sha256(processed_dir / "train.csv")
+    reference_sha256 = file_sha256(reference_dir / REFERENCE_FILE)
     summary = {
         "raw_sha256": raw_sha256,
         "random_seed": config["project"]["random_seed"],
+        "config": {
+            "params": list(PREPARATION_CONFIG_PARAMS),
+            "sha256": config_fingerprint(config),
+        },
+        "split_ratios": {name: float(config["dataset"]["split"][name]) for name in SPLIT_NAMES},
+        "target_rate_rounding_decimals": TARGET_RATE_DECIMALS,
         "cleaning": asdict(report),
+        "cleaning_note": (
+            "Nenhuma linha foi removida no dado real: as cinco regras de limpeza nao "
+            "dispararam. O caminho de remocao continua coberto por fixture controlada "
+            "em tests/test_data_preparation.py; ausencia de remocao nao e ausencia de "
+            "verificacao."
+            if report.removed_rows == 0
+            else (
+                f"{report.removed_rows} linhas unicas removidas; ver contagens por motivo "
+                "e sobreposicao em 'cleaning'."
+            )
+        ),
+        "useful_rows": {
+            "minimum_required": MINIMUM_USEFUL_ROWS,
+            "after_cleaning": report.output_rows,
+            "meets_minimum": report.output_rows >= MINIMUM_USEFUL_ROWS,
+        },
         "splits": {
-            name: {"rows": len(frame), "target_rate": round(float(frame[target].mean()), 4)}
+            name: {
+                "rows": len(frame),
+                "target_rate": round(float(frame[target].mean()), TARGET_RATE_DECIMALS),
+            }
             for name, frame in splits.items()
+        },
+        "id_audit": audit_split_ids(splits, id_column),
+        "reference": {
+            "file": REFERENCE_FILE,
+            "sha256": reference_sha256,
+            "train_sha256": train_sha256,
+            "identical_to_train": reference_sha256 == train_sha256,
         },
     }
     (processed_dir / REPORT_FILE).write_text(

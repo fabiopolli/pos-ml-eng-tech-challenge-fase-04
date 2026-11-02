@@ -1,0 +1,404 @@
+{
+  "budget": {
+    "max_fits": 220
+  },
+  "config_fingerprint": "06de719d3d257c493c153ec7d600fc62e3236f08a05b0cb0f62d26b271db5431",
+  "controls": {
+    "logistic_regression": {
+      "C": 1.0,
+      "class_weight": "balanced",
+      "max_iter": 1000
+    },
+    "random_forest": {
+      "class_weight": "balanced_subsample",
+      "max_depth": 8,
+      "min_samples_leaf": 20,
+      "n_estimators": 300
+    }
+  },
+  "criteria": {
+    "bootstrap_resamples": 2000,
+    "bootstrap_seed": 42,
+    "ci_level": 0.95,
+    "min_ablation_gain": 0.005,
+    "min_gain_cv_mean": 0.005,
+    "min_gain_validation": 0.01
+  },
+  "experiment_id": "opt-20261026-01",
+  "folds": {
+    "fingerprint": "b19d867de65d387aa53f275a2a4cf2c25ef24695fd2bfcd4a953461bedd21505",
+    "n_splits": 5,
+    "random_state": 42,
+    "shuffle": true,
+    "target_positives": 4645,
+    "target_prevalence": 0.2211904761904762,
+    "train_rows": 21000
+  },
+  "inputs": {
+    "id_column": "ID",
+    "train_rows": 21000,
+    "train_sha256": "9ebd48b6d31c67f46cc28aff0bde36b48f62936aff0011007b7cb78d26108c26",
+    "unique_ids": 21000
+  },
+  "isolation": {
+    "never_reads": [
+      "data/processed/validation.csv",
+      "data/processed/test.csv"
+    ],
+    "reads": [
+      "data/processed/train.csv"
+    ],
+    "statement": "A busca, a ablacao e a checagem de estabilidade usam apenas o treino. A validacao e consultada uma unica vez, na rodada comparativa do estagio de selecao; o teste nao participa da campanha."
+  },
+  "primary_metric": "roc_auc",
+  "protocol_version": "1.6.0",
+  "ratio_features": {
+    "min_denominator": 1.0,
+    "names": [
+      "bill_amt1_over_limit_bal",
+      "pay_amt1_over_limit_bal",
+      "pay_amt1_over_abs_bill_amt1"
+    ]
+  },
+  "search": {
+    "logistic_regression": {
+      "C": [
+        0.001,
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0
+      ],
+      "class_weight": [
+        null,
+        "balanced"
+      ],
+      "max_iter": 5000,
+      "penalty": "l2",
+      "solver": "lbfgs"
+    },
+    "random_forest": {
+      "grid": {
+        "class_weight": [
+          null,
+          "balanced",
+          "balanced_subsample"
+        ],
+        "max_depth": [
+          6,
+          8,
+          12,
+          16,
+          null
+        ],
+        "max_features": [
+          "sqrt",
+          0.5,
+          1.0
+        ],
+        "min_samples_leaf": [
+          1,
+          2,
+          5,
+          10,
+          20,
+          40
+        ],
+        "min_samples_split": [
+          2,
+          10,
+          20
+        ],
+        "n_estimators": [
+          200,
+          300,
+          600
+        ]
+      },
+      "n_draws": 24,
+      "sampler_seed": 42
+    }
+  },
+  "seeds": {
+    "primary": 42,
+    "stability": [
+      17,
+      73
+    ]
+  },
+  "sources": {
+    "src/credit_monitoring/config.py": "a35db118878f04ea0903ce108ceaea7e0b09925723a446f7e9e409cfd7402a41",
+    "src/credit_monitoring/models/features.py": "07c65eb1d07b45c85bc2b68edf39c3a1ee6a3c87227146b199547c4267c8544c",
+    "src/credit_monitoring/models/metrics.py": "95db72eb5be6280be58bc7e4426b736fda5c768922969a777e25e1cf6563959b",
+    "src/credit_monitoring/models/tune.py": "da5796f9eba18e930f4abd29e6da2c7e0fb7dce7b9553068c5e65e4bc7e5f447",
+    "src/credit_monitoring/paths.py": "f17ff4fbe925865285519634fb661be69694ecb9286cb1e703745bb16187e7a1"
+  },
+  "state": "protocol_frozen_before_results",
+  "threshold": 0.5,
+  "trial_lists": {
+    "logistic_regression": [
+      {
+        "C": 0.001,
+        "class_weight": null,
+        "max_iter": 5000
+      },
+      {
+        "C": 0.001,
+        "class_weight": "balanced",
+        "max_iter": 5000
+      },
+      {
+        "C": 0.01,
+        "class_weight": null,
+        "max_iter": 5000
+      },
+      {
+        "C": 0.01,
+        "class_weight": "balanced",
+        "max_iter": 5000
+      },
+      {
+        "C": 0.1,
+        "class_weight": null,
+        "max_iter": 5000
+      },
+      {
+        "C": 0.1,
+        "class_weight": "balanced",
+        "max_iter": 5000
+      },
+      {
+        "C": 1.0,
+        "class_weight": null,
+        "max_iter": 5000
+      },
+      {
+        "C": 1.0,
+        "class_weight": "balanced",
+        "max_iter": 5000
+      },
+      {
+        "C": 10.0,
+        "class_weight": null,
+        "max_iter": 5000
+      },
+      {
+        "C": 10.0,
+        "class_weight": "balanced",
+        "max_iter": 5000
+      },
+      {
+        "C": 100.0,
+        "class_weight": null,
+        "max_iter": 5000
+      },
+      {
+        "C": 100.0,
+        "class_weight": "balanced",
+        "max_iter": 5000
+      }
+    ],
+    "random_forest": [
+      {
+        "class_weight": "balanced",
+        "max_depth": 6,
+        "max_features": "sqrt",
+        "min_samples_leaf": 40,
+        "min_samples_split": 10,
+        "n_estimators": 600
+      },
+      {
+        "class_weight": "balanced",
+        "max_depth": 12,
+        "max_features": 1.0,
+        "min_samples_leaf": 40,
+        "min_samples_split": 20,
+        "n_estimators": 300
+      },
+      {
+        "class_weight": "balanced",
+        "max_depth": 8,
+        "max_features": 1.0,
+        "min_samples_leaf": 40,
+        "min_samples_split": 10,
+        "n_estimators": 600
+      },
+      {
+        "class_weight": "balanced",
+        "max_depth": 8,
+        "max_features": 1.0,
+        "min_samples_leaf": 2,
+        "min_samples_split": 20,
+        "n_estimators": 200
+      },
+      {
+        "class_weight": "balanced_subsample",
+        "max_depth": 6,
+        "max_features": "sqrt",
+        "min_samples_leaf": 5,
+        "min_samples_split": 2,
+        "n_estimators": 200
+      },
+      {
+        "class_weight": "balanced_subsample",
+        "max_depth": 16,
+        "max_features": 0.5,
+        "min_samples_leaf": 2,
+        "min_samples_split": 2,
+        "n_estimators": 200
+      },
+      {
+        "class_weight": null,
+        "max_depth": 12,
+        "max_features": 1.0,
+        "min_samples_leaf": 10,
+        "min_samples_split": 20,
+        "n_estimators": 300
+      },
+      {
+        "class_weight": "balanced",
+        "max_depth": 12,
+        "max_features": 0.5,
+        "min_samples_leaf": 40,
+        "min_samples_split": 10,
+        "n_estimators": 600
+      },
+      {
+        "class_weight": null,
+        "max_depth": 12,
+        "max_features": "sqrt",
+        "min_samples_leaf": 1,
+        "min_samples_split": 20,
+        "n_estimators": 200
+      },
+      {
+        "class_weight": "balanced",
+        "max_depth": null,
+        "max_features": "sqrt",
+        "min_samples_leaf": 5,
+        "min_samples_split": 20,
+        "n_estimators": 200
+      },
+      {
+        "class_weight": "balanced_subsample",
+        "max_depth": 16,
+        "max_features": "sqrt",
+        "min_samples_leaf": 10,
+        "min_samples_split": 2,
+        "n_estimators": 600
+      },
+      {
+        "class_weight": null,
+        "max_depth": 6,
+        "max_features": 1.0,
+        "min_samples_leaf": 5,
+        "min_samples_split": 10,
+        "n_estimators": 300
+      },
+      {
+        "class_weight": "balanced_subsample",
+        "max_depth": 6,
+        "max_features": 0.5,
+        "min_samples_leaf": 2,
+        "min_samples_split": 2,
+        "n_estimators": 600
+      },
+      {
+        "class_weight": null,
+        "max_depth": null,
+        "max_features": 1.0,
+        "min_samples_leaf": 2,
+        "min_samples_split": 10,
+        "n_estimators": 300
+      },
+      {
+        "class_weight": "balanced_subsample",
+        "max_depth": null,
+        "max_features": 1.0,
+        "min_samples_leaf": 2,
+        "min_samples_split": 20,
+        "n_estimators": 200
+      },
+      {
+        "class_weight": "balanced",
+        "max_depth": null,
+        "max_features": 0.5,
+        "min_samples_leaf": 1,
+        "min_samples_split": 10,
+        "n_estimators": 200
+      },
+      {
+        "class_weight": "balanced",
+        "max_depth": 12,
+        "max_features": 0.5,
+        "min_samples_leaf": 10,
+        "min_samples_split": 2,
+        "n_estimators": 200
+      },
+      {
+        "class_weight": "balanced",
+        "max_depth": 6,
+        "max_features": 1.0,
+        "min_samples_leaf": 20,
+        "min_samples_split": 2,
+        "n_estimators": 300
+      },
+      {
+        "class_weight": "balanced_subsample",
+        "max_depth": null,
+        "max_features": 0.5,
+        "min_samples_leaf": 1,
+        "min_samples_split": 2,
+        "n_estimators": 600
+      },
+      {
+        "class_weight": "balanced",
+        "max_depth": 12,
+        "max_features": "sqrt",
+        "min_samples_leaf": 40,
+        "min_samples_split": 10,
+        "n_estimators": 600
+      },
+      {
+        "class_weight": null,
+        "max_depth": 12,
+        "max_features": 1.0,
+        "min_samples_leaf": 10,
+        "min_samples_split": 2,
+        "n_estimators": 200
+      },
+      {
+        "class_weight": null,
+        "max_depth": 6,
+        "max_features": "sqrt",
+        "min_samples_leaf": 5,
+        "min_samples_split": 10,
+        "n_estimators": 200
+      },
+      {
+        "class_weight": "balanced_subsample",
+        "max_depth": null,
+        "max_features": "sqrt",
+        "min_samples_leaf": 10,
+        "min_samples_split": 10,
+        "n_estimators": 600
+      },
+      {
+        "class_weight": null,
+        "max_depth": null,
+        "max_features": 0.5,
+        "min_samples_leaf": 40,
+        "min_samples_split": 2,
+        "n_estimators": 200
+      }
+    ]
+  },
+  "versions": {
+    "numpy": "2.5.4",
+    "pandas": "2.3.3",
+    "platform": "Linux-7.2.8-9-omarchy-x86_64-with-glibc2.44",
+    "python": "3.12.14",
+    "scikit-learn": "1.9.1"
+  }
+}

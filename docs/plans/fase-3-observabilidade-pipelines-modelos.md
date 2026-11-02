@@ -18,7 +18,7 @@ Não criar serviço de alertas externo, compute remoto ou retreinamento automát
 drift pode coexistir com execução tecnicamente bem-sucedida; contrato inválido bloqueia o modelo.
 O Streamlit é consumidor de evidências, não deve treinar nem refazer inferência ao renderizar.
 
-Aplicar o protocolo comum do plano geral, confirmando responsável/revisor de cada ID. Código
+Aplicar o protocolo comum do plano geral. Código
 inicial existente: `dashboard/app.py` é uma shell com placeholders, não monitoramento integrado.
 Verificar o estado real dos módulos e logs produzidos nas fases 1/2 antes de duplicar instrumentação.
 
@@ -152,6 +152,11 @@ consultável, inclusive quando não há HTML/predições. Nova tentativa não so
 
 ### 3.5 — Desenvolvimento do dashboard Streamlit
 
+> O [laboratório de modelos 1.6-O6](1.6-otimizacao-modelos.md#51-etapa-adicional-16-o6--laboratório-streamlit-de-modelos)
+> planeja `dashboard/app_dev.py` para comparação e inferência manual. Esta entrega mantém
+> `dashboard/app.py` como consulta operacional de execuções/drift. Reaproveitar helpers de
+> leitura compatíveis, preservando a regra de que o painel operacional não executa inferência.
+
 **Dependências:** contrato de consulta/artefatos de 3.4.
 
 **Ações do agente:**
@@ -215,6 +220,13 @@ logs, contagens ou artefatos; estabilidade local medida e limitações reportada
 isolada sem vínculo a execução não comprova o monitoramento.
 
 ## 5. Operação local e verificações
+
+`mlflow` e `streamlit` são **extras** (`observability`) e não são instalados no ambiente padrão.
+Antes de usar os comandos abaixo:
+
+```bash
+uv sync --dev --locked --extra observability
+```
 
 Comandos de visualização existentes, a usar após configurar a mesma URI na aplicação:
 
