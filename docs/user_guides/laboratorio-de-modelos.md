@@ -4,8 +4,9 @@ Guia operacional da aplicação local que permite **inspecionar, comparar e test
 congelados do projeto: o modelo publicado, os dois controles serializados e os finalistas da
 campanha de otimização (plano 1.6, recorte **1.6-O6**).
 
-Todos os números cited neste guia foram verificados por execução em 2026-10-26 e podem ser
-reconferidos com os comandos indicados em cada seção.
+Os exemplos das abas de modelos foram verificados por execução em 2026-10-26. A aba Data Drift
+(§12) foi verificada localmente em 2026-11-02; a evidência e a captura agregada estão em
+[`docs/evidence/1.6-o6-data-drift-laboratorio.md`](../evidence/1.6-o6-data-drift-laboratorio.md).
 
 ---
 
@@ -37,11 +38,20 @@ disparada por botão; um recarregamento da página não repete a operação.
 | Incumbente arquivado | `models/optimization/<experiment_id>/incumbent/` | estágio DVC `train` |
 | Relatório congelado | `reports/optimization/<experiment_id>/selection/comparison.json` | estágio DVC `train` |
 | Probabilidades da rodada | `models/optimization/<experiment_id>/selection/validation_predictions.csv` | estágio DVC `train` |
+| Resultados de Data Drift | `reports/drift/results-v1.0.2.json` e `prediction_summary-v1.0.2.json` | snapshots agregados dos estágios `detect_drift`/`score_production`; necessários apenas à aba Data Drift |
+| Relatório Data Drift v6 | `reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html` | download opcional; não é necessário para os resumos JSON |
 
-Em um clone novo eles vêm do remote com `uv run dvc pull -r dagshub` (ver
+Em um clone novo, os artefatos de modelos/campanha vêm do remote com `uv run dvc pull -r dagshub` (ver
 [`docs/DAGSHUB.md`](../DAGSHUB.md)) ou são reconstruídos pelo pipeline
 (`uv run dvc repro tune && uv run dvc repro train`). Sem eles, a aplicação **abre** e informa
 quais artefatos estão indisponíveis, com o motivo.
+
+Os snapshots de Data Drift não são pré-requisito para as outras telas: se os JSONs não estiverem
+materializados, apenas a aba Data Drift informa indisponibilidade. A interface não executa operações
+DVC (`dvc pull` ou `dvc repro`), inferência ou cálculo de PSI para preencher essa ausência.
+Em um clone novo, recupere os JSONs com o DVC ou gere-os seguindo o fluxo da fase 2 no
+[`README principal`](../../README.md#cenário-de-drift). O HTML v6 pode não estar no remote; sua
+ausência só remove a opção de download.
 
 ---
 

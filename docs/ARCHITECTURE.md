@@ -101,6 +101,9 @@ Regras estruturais:
 O **laboratório de modelos** (`dashboard/app_dev.py`) é uma aplicação Streamlit local de
 inspeção, comparação e teste dos artefatos congelados. Ela não treina, não promove, não
 escreve sobre datasets, métricas oficiais ou `dvc.lock`, e nunca expõe o conjunto de teste.
+Sua aba didática de Data Drift valida e lê somente os snapshots agregados fixos `1.0.2` e oferece
+o relatório HTML versionado para download se estiver materializado; não executa o detector nem
+associa o cenário aos modelos selecionados na barra lateral.
 O painel operacional da fase 3 (`dashboard/app.py`) continua com a observabilidade do pipeline.
 Ver [`dashboard/README.md`](../dashboard/README.md).
 

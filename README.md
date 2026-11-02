@@ -8,13 +8,15 @@ Solução local e reproduzível de **Credit Scoring**, com contratos de qualidad
 simulação e detecção de drift, rastreamento de experimentos e documentação de governança.
 
 > **Status atual:** M1 (fase 1) concluído e revalidado; Data Drift da fase 2 implementado e
-> verificado localmente sob o protocolo `1.0.2`. O controle não gerou alertas; as intervenções
-> detectaram `LIMIT_BAL` e `PAY_AMT1`. Concept Drift não é demonstrado; por decisão do operador, a
-> docência avaliará o plano após a entrega, sem resposta prévia como gate de M2. A publicação/
-> versões `1.0.1` e `1.0.2` foram enviadas e recuperadas em cache isolado. O remote DagsHub está
-> configurado; ver
-> [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md) e
-> [`docs/evidence/fase-2.md`](docs/evidence/fase-2.md).
+> verificado sob o protocolo `1.0.2`. O controle não gerou alertas; as intervenções detectaram
+> `LIMIT_BAL` e `PAY_AMT1`. A aba didática Data Drift do laboratório (adendo ao 1.6-O6) está
+> implementada na branch `feat/bill/data-drift-lab`; não substitui o dashboard operacional da fase 3.
+> Concept Drift não é demonstrado; por decisão do operador, a docência avaliará o plano após a
+> entrega, sem resposta prévia como gate de M2. As versões DVC `1.0.1` e `1.0.2` foram enviadas e
+> recuperadas em cache isolado; o HTML ampliado v6 permanece no cache local, sem sincronização DVC.
+> Ver [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md),
+> [`docs/evidence/fase-2.md`](docs/evidence/fase-2.md) e
+> [`docs/evidence/1.6-o6-data-drift-laboratorio.md`](docs/evidence/1.6-o6-data-drift-laboratorio.md).
 
 ## Equipe e frentes de trabalho
 
@@ -91,9 +93,10 @@ sob protocolo congelado — não uma avaliação intocada.
 | Qualidade | Pytest, Ruff e GitHub Actions |
 
 O DVC rastreia dados e artefatos do pipeline; seus ponteiros e metadados ficam no GitHub,
-enquanto os objetos publicados ficam no DagsHub Storage. O remote está configurado; os novos
-objetos da fase 2 ainda estão apenas no cache local. Veja [`docs/DAGSHUB.md`](docs/DAGSHUB.md);
-nunca coloque tokens ou credenciais em arquivos versionados.
+enquanto os objetos publicados ficam no DagsHub Storage. Os outputs analíticos das versões `1.0.1`
+e `1.0.2` foram publicados e recuperados em cache isolado. O HTML ampliado v6 permanece no cache
+local, sem sincronização ao remote. Veja [`docs/DAGSHUB.md`](docs/DAGSHUB.md); nunca coloque
+tokens ou credenciais em arquivos versionados.
 
 ## Fluxo do pipeline
 
@@ -102,15 +105,15 @@ UCI 350 (XLS, objeto DVC)
   -> aquisição versionada (hash conferido) -> CSV bruto
   -> auditoria estrutural do bruto
   -> preparação + split 70/15/15 + referência = treino
-  -> explorationsupervisionada no treino
+  -> exploração supervisionada no treino
   -> contrato Pandera antes do treino
   -> treino + seleção na validação -> modelo congelado
   -> avaliação do escolhido no teste (estágio separado)
-   -> produção original = features da validação + cópia com drift (estágio `simulate_production`)
-   -> contrato + inferência do modelo congelado (`score_production`)
-   -> PSI customizado e relatório Evidently (controle e lote alterado; `detect_drift`)
+  -> produção original = features da validação + cópia com drift (estágio `simulate_production`)
+  -> contrato + inferência do modelo congelado (`score_production`)
+  -> PSI customizado e relatório Evidently (controle e lote alterado; `detect_drift`)
   -> MLflow local + relatórios -> dashboard Streamlit
-  -> laboratório Streamlit de comparação e teste dos modelos (plano 1.6)
+  -> laboratório Streamlit de comparação/teste e leitura agregada de Data Drift (plano 1.6 + adendo O6)
 
 Datasets/modelo <-> cache DVC <-> DagsHub Storage
 Código, parâmetros, ponteiros e dvc.lock -> GitHub
@@ -174,6 +177,13 @@ As CLIs também estão disponíveis como `credit-monitoring-simulate`,
 alternativos. O relatório em português é `reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html`; os resultados
 estruturados agregados ficam em `reports/drift/results-v1.0.2.json`. O relatório declara que Concept
 Drift não foi demonstrado; a docência avaliará o plano após a entrega.
+
+O laboratório também tem uma aba de leitura do snapshot `1.0.2`: as três comparações congeladas,
+resultados PSI das 19 features, bins persistidos de `LIMIT_BAL`/`PAY_AMT1` e resumos agregados de
+scores. Ela não executa PSI ou inferência, e seus resultados permanecem ligados ao SHA do modelo
+M2, independentemente da seleção e dos uploads das outras abas. Limites, fontes e indisponibilidade
+estão no [guia do laboratório](docs/user_guides/laboratorio-de-modelos.md); evidência e captura em
+[`docs/evidence/1.6-o6-data-drift-laboratorio.md`](docs/evidence/1.6-o6-data-drift-laboratorio.md).
 
 Alterar features mantendo rótulos originais demonstra **Data Drift**; isso não prova Concept
 Drift ou perda real de performance. O enunciado também cita Concept Drift, que este cenário não
@@ -258,9 +268,11 @@ resultados. A decisão congelada fica em
 
 Aplicação local (`dashboard/app_dev.py`) para **inspecionar, comparar e testar** os modelos
 congelados: o publicado, os dois controles serializados e os finalistas da campanha do plano
-1.6. Ela não treina, não promove, não avalia o conjunto de teste e não altera datasets,
-métricas oficiais nem o `dvc.lock`. O painel operacional da fase 3 (`dashboard/app.py`) é outra
-aplicação, destinada à observabilidade do pipeline.
+1.6. Inclui ainda a aba didática Data Drift `1.0.2`, que lê os snapshots agregados fixos,
+independentemente dos modelos selecionados e dos uploads de inferência. O laboratório não treina,
+não promove, não avalia o conjunto de teste e não altera datasets, métricas oficiais nem o
+`dvc.lock`. O painel operacional da fase 3 (`dashboard/app.py`) é outra aplicação, destinada à
+observabilidade do pipeline.
 
 **Resumo do guia de uso** — o que cada tela mostra e o que observar:
 
@@ -270,6 +282,7 @@ aplicação, destinada à observabilidade do pipeline.
 | **Comparacao dos modelos** | a rodada única de validação lado a lado: métricas, deltas contra o RF vigente, intervalos pareados, matrizes, a decisão congelada com os critérios e as curvas ROC/PR | os números vêm do relatório congelado e a aplicação não recalcula nada; o intervalo do finalist do RF é [−0,002859; +0,004968] e **inclui zero** |
 | **Predicao** (registro individual e lote CSV) | probabilidade de inadimplência, classe no limiar 0,5, divergências entre os modelos e duração local da chamada | o lote é validado **antes** de qualquer chamada: inválido ⇒ recusado por inteiro, com **zero chamadas** a qualquer modelo |
 | **Cenarios de contrato** | cinco lotes sintéticos (válido, ID duplicado, limite não positivo, idade fora da faixa, feature nula) com o resultado esperado, o observado e o diagnóstico por regra | servem para comprovar a recusa integral do lote, não para medir qualidade |
+| **Data Drift — cenário 1.0.2** | as três comparações congeladas, resultados PSI das 19 features, bins persistidos e resumos agregados de scores | controle sem alertas; `LIMIT_BAL` e `PAY_AMT1` sinalizadas nas comparações com o lote modificado; PSI não é p-value nem prova degradação |
 
 **Cuidados de leitura** (o guia completo detalha cada um):
 
@@ -294,7 +307,10 @@ modelo e da campanha (`models/credit_model.joblib`, `models/candidates/`,
 `models/optimization/<experiment_id>/` e `reports/optimization/<experiment_id>/selection/`). Em
 um clone novo, eles vêm do remote com `uv run dvc pull -r dagshub` (ver
 [`docs/DAGSHUB.md`](docs/DAGSHUB.md)) ou são reconstruídos pelo pipeline; sem eles, a aplicação
-abre e informa quais artefatos estão indisponíveis.
+abre e informa quais artefatos estão indisponíveis. A aba Data Drift usa também os dois JSONs
+agregados `reports/drift/results-v1.0.2.json` e
+`reports/drift/prediction_summary-v1.0.2.json`; se estiverem ausentes, somente essa aba fica
+indisponível. Nenhum `dvc pull` ou cálculo é disparado pela interface.
 
 **Instalação e execução** (o processo abre apenas em `127.0.0.1`):
 
@@ -337,6 +353,11 @@ true` sem abrir o navegador). Para encerrar, interrompa o comando no terminal (`
 6. **Aba "Cenarios de contrato".** Cinco predefinições sintéticas — lote válido, ID duplicado,
    limite não positivo, idade fora do intervalo e feature nula — cada uma com o resultado
    esperado, o observado e o diagnóstico agregado por regra e coluna.
+7. **Aba "Data Drift — cenário 1.0.2".** Selecione um dos três pares congelados e confira as
+   contagens e os 19 resultados PSI. Os gráficos de `LIMIT_BAL` e `PAY_AMT1` reutilizam bins e
+   proporções persistidos. Scores/deltas são previsões agregadas associadas ao SHA fixo de M2,
+   nunca desfechos observados; não há execução de PSI, inferência ou detector nesta aba. O HTML v6
+   aparece como download quando estiver materializado localmente.
 
 **Formato do lote de inferência:** colunas canônicas do projeto (`ID`, as 19 features
 financeiras e as quatro de governança) e **sem** a coluna de alvo — o upload com alvo é recusado
@@ -360,6 +381,7 @@ treina, não promove, não grava sobre datasets, sobre as métricas oficiais nem
 
 ```bash
 uv run --extra model_lab pytest tests/test_app_dev.py
+uv run --extra model_lab pytest tests/test_drift_snapshot.py
 ```
 
 O roteiro completo, com os estados previstos e a distinção frente ao painel da fase 3, está em
@@ -367,6 +389,8 @@ O roteiro completo, com os estados previstos e a distinção frente ao painel da
 [`docs/user_guides/laboratorio-de-modelos.md`](docs/user_guides/laboratorio-de-modelos.md); e a
 evidência de execução e de inspeção visual, em
 [`docs/evidence/1.6-otimizacao-modelos.md`](docs/evidence/1.6-otimizacao-modelos.md) (§11).
+O adendo de Data Drift do laboratório tem evidência e captura agregada em
+[`docs/evidence/1.6-o6-data-drift-laboratorio.md`](docs/evidence/1.6-o6-data-drift-laboratorio.md).
 
 O dashboard inicial já pode ser aberto; a integração de observabilidade será concluída na fase 3.
 `streamlit` e `mlflow` são **extras** e não são
