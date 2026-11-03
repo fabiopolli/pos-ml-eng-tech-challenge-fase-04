@@ -33,6 +33,7 @@ reports/drift/*
 !reports/drift/README.md
 !reports/drift/results-v1.0.1.json
 !reports/drift/results-v1.0.2.json
+!reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html
 reports/figures/*
 !reports/figures/README.md
 reports/run_resources.json

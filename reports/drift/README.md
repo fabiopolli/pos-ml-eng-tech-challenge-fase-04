@@ -12,7 +12,7 @@ Relatório HTML de Data Drift e resumos estatísticos agregados, sem registros i
   customizada registrada no JSON.
 
 Use os nomes versionados. Saídas intermediárias não versionadas do mesmo cenário não são fonte
-autoritativa. Os dados e resultados analíticos da revisão `1.0.2` foram enviados/recuperados; a
-revisão de apresentação `ptbr-v6` foi gerada localmente e ainda precisa ser sincronizada ao DagsHub.
-A revisão de dados `1.0.2` persiste probabilidades a 12 casas e elimina a variação de ponto
-flutuante inferior a `3.4e-16`.
+autoritativa. Os dados e resultados analíticos da revisão `1.0.2` e o relatório de apresentação
+`ptbr-v6` foram enviados/recuperados do DagsHub; o HTML também está versionado no Git, por ser
+entrega do tech challenge. A revisão de dados `1.0.2` persiste probabilidades a 12 casas e
+elimina a variação de ponto flutuante inferior a `3.4e-16`.

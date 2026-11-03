@@ -69,7 +69,7 @@ seções pendentes explícitas até integrar a versão final.
 | Protocolo de drift | `1.0.2`, `protocol_sha256=e160b86e5d6f62382859df8828f053ef16bef438a6f0967e022a99cb4ae536fb`, `scenario_id=phase-2-1.0.2` | `data/production/v1.0.2/manifest.json` |
 | Lotes de produção | original `d9f855a7…`; modified `8da682f3…`; ambos 4.500 linhas | M2 |
 | Resultado de drift | `results-v1.0.2.json` (SHA-256 `f0c02e97fbb3a6301ec1cf65593c9c7977f051bd4c4a2eec7c1276b45ec4bd48`), schema `1.0.0` | M2 |
-| Relatório pt-BR v6 | SHA-256 `d47a792b1dfb7d94ee4469ada01298d2bf0e0809e7beda2c4641ae4cf284a451` — **só no cache DVC local** | M2 |
+| Relatório pt-BR v6 | SHA-256 `d47a792b1dfb7d94ee4469ada01298d2bf0e0809e7beda2c4641ae4cf284a451` — enviado ao remote DagsHub e versionado no Git | M2 |
 | Grupos de governança | `SEX`, `EDUCATION`, `MARRIAGE`, `AGE` | `configs/project.yaml` §`dataset.governance_features` |
 
 ### 2.2 Sequência
@@ -134,7 +134,7 @@ A parte **pendente** é o inventário por artefato com o estado real de versiona
 | `train/validation/test.csv`, `reference.csv`, `preparation_report.json` | `data/processed/`, `data/reference/` | DVC |
 | `data/production/v1.0.1/` e `v1.0.2/` (lotes, manifesto, predições) | `data/production/` | DVC |
 | `results-v1.0.1.json` e `results-v1.0.2.json` | `reports/drift/` | Git (exceção deliberada: JSON pequeno e canônico) |
-| HTML de drift (incluindo pt-BR v6) | `reports/drift/*.html` | Cache DVC local; **v6 ainda não enviado ao remote** |
+| HTML de drift (incluindo pt-BR v6) | `reports/drift/*.html` | v6 enviado ao remote DagsHub e versionado no Git; demais revisões são saídas intermediárias locais |
 | Modelo e candidatos | `models/` | DVC + remote; nunca no Git |
 | Banco e artefatos MLflow | `mlflow.db`, `mlruns/` | Fora do Git (já ignorado) |
 | Recursos de execução | `reports/run_resources.json` (estágio `train`), `reports/optimization/*/resources.json` | Fora do Git (já ignorado) |
@@ -348,16 +348,15 @@ mesmo com roteiro pronto. Não substituir evidência dinâmica por promessa de i
 |---|---|---|
 | M1: recuperação remota em checkout/cache separado | **Já provada** (`docs/evidence/fase-1.md` §1.6.1 e §1.1.1) | Não como prova nova; é precedente de método |
 | M2: objetos `1.0.1` e `1.0.2` enviados e recuperados em cache isolado | **Já provada** (`docs/evidence/fase-2.md`) | Não como prova nova |
-| HTML pt-BR v6 | Gerado e inspecionado localmente; **ausente no remote DagsHub** | O ensaio do pacote final **não** o recupera via `dvc pull` |
+| HTML pt-BR v6 | Enviado ao remote DagsHub e versionado no Git; geração determinística | O ensaio do pacote final o recupera via `dvc pull` ou Git, sem depender de regeneração |
 | M3: banco MLflow, logs e registros de execução | Locais e fora do Git por desenho | O checkout novo precisa **reconstruir** a observabilidade |
 | M4: pacote completo (bruto → modelo → drift → observabilidade → UI → vídeo) | **Não provada** | É a prova que 4.7 precisa produzir |
 
-**Consequência prática:** antes do ensaio, decidir explicitamente entre (a) enviar o HTML v6 ao
-remote, ou (b) regenerá-lo no checkout novo com
-`uv run dvc repro --force --single-item detect_drift` e declarar a divergência de hash como
-esperada. A opção (b) só é aceitável se o ensaio verificar que o JSON canônico e os PSI são
-idênticos. Não prometer no README que o relatório HTML está disponível no remote sem que isso
-tenha sido feito.
+**Consequência prática:** o HTML v6 já foi enviado ao remote DagsHub e está versionado no Git,
+e sua geração é determinística (regerar o estágio reproduz o mesmo SHA-256). O ensaio do pacote
+final pode obtê-lo por `dvc pull` ou pelo Git, sem depender de regeneração. Se o checkout novo
+optar por regenerar com `uv run dvc repro --force --single-item detect_drift`, a convergência deve
+ser verificada contra o hash registrado, e não presumida.
 
 **Verificação/aceite:** reprodução independente por hash, README executável, vídeo acessível e
 matriz completa conferida. Se houver correção de código/configuração

@@ -101,6 +101,13 @@ figuras e outputs DVC da fase 2 — o conjunto inteiro de objetos em cache. Em 2
 estágios da fase 2 foram publicados explicitamente e recuperados em cache isolado; antes de
 compartilhar o ponteiro Git correspondente, sincronizar o commit que o contém.
 
+O relatório HTML `reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html` foi publicado no DagsHub e
+também está versionado no Git, por ser entrega do tech challenge. Por isso o estágio `detect_drift`
+o declara com `cache: false`, como `results-v1.0.2.json`: o DVC mantém o hash no `dvc.lock` e o
+Git mantém o conteúdo. O mesmo arquivo não pode ser rastreado pelas duas camadas ao mesmo tempo —
+o DVC recusa a duplicação. A geração é determinística, então regerar o estágio reproduz o mesmo
+SHA-256 e o artefato pode ser recuperado pelo Git ou por `dvc pull`.
+
 Em um checkout autorizado, recuperar os objetos necessários para o commit atual:
 
 ```bash

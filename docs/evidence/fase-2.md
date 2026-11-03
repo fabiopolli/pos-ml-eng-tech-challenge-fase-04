@@ -171,13 +171,17 @@ as predições ou os resultados PSI/JSON:
 
 | Artefato | SHA-256 | Estado |
 |---|---|---|
-| `reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html` | `d47a792b1dfb7d94ee4469ada01298d2bf0e0809e7beda2c4641ae4cf284a451` | Gerado e renderizado localmente; saída DVC `detect_drift` |
+| `reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html` | `d47a792b1dfb7d94ee4469ada01298d2bf0e0809e7beda2c4641ae4cf284a451` | Enviado ao remote DagsHub e versionado no Git; saída do estágio `detect_drift` |
 
 O v6 tem 65.692 bytes. O relatório incorpora hashes de auditoria/preparação, seleção/avaliação e
 campanha de treinamento; o estágio DVC declara esses arquivos e os módulos de treino/busca como
 dependências. A avaliação de teste continua explicitando a exposição histórica do EDA, portanto
-não é descrita como holdout intocado. A nova saída HTML permanece no cache DVC local e ainda não
-foi enviada ao remote.
+não é descrita como holdout intocado. A saída HTML foi enviada ao remote DagsHub e também está
+versionada no Git, por ser entrega do tech challenge. A geração é determinística: regerar o
+estágio reproduz o mesmo SHA-256, verificado com `dvc repro --force --single-item detect_drift`.
+Como o arquivo passa a ser versionado no Git, o estágio o declara com `cache: false`, seguindo o
+mesmo padrão de `results-v1.0.2.json` — o DVC mantém o registro de hash no `dvc.lock` e o Git
+mantém o conteúdo, evitando o conflito de duplo rastreamento.
 
 ## Comandos e verificações
 

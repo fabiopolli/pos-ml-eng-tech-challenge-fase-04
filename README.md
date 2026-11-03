@@ -10,10 +10,11 @@ simulação e detecção de drift, rastreamento de experimentos e documentação
 > **Status atual:** M1 (fase 1) concluído e revalidado; Data Drift da fase 2 implementado e
 > verificado sob o protocolo `1.0.2`. O controle não gerou alertas; as intervenções detectaram
 > `LIMIT_BAL` e `PAY_AMT1`. A aba didática Data Drift do laboratório (adendo ao 1.6-O6) está
-> implementada na branch `feat/bill/data-drift-lab`; não substitui o dashboard operacional da fase 3.
+> implementada; não substitui o dashboard operacional da fase 3.
 > Concept Drift não é demonstrado; por decisão do operador, a docência avaliará o plano após a
 > entrega, sem resposta prévia como gate de M2. As versões DVC `1.0.1` e `1.0.2` foram enviadas e
-> recuperadas em cache isolado; o HTML ampliado v6 permanece no cache local, sem sincronização DVC.
+> recuperadas em cache isolado; o HTML ampliado v6 também foi enviado ao DagsHub e está versionado
+> no Git, por ser entrega do tech challenge.
 > Ver [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md),
 > [`docs/evidence/fase-2.md`](docs/evidence/fase-2.md) e
 > [`docs/evidence/1.6-o6-data-drift-laboratorio.md`](docs/evidence/1.6-o6-data-drift-laboratorio.md).
@@ -94,9 +95,9 @@ sob protocolo congelado — não uma avaliação intocada.
 
 O DVC rastreia dados e artefatos do pipeline; seus ponteiros e metadados ficam no GitHub,
 enquanto os objetos publicados ficam no DagsHub Storage. Os outputs analíticos das versões `1.0.1`
-e `1.0.2` foram publicados e recuperados em cache isolado. O HTML ampliado v6 permanece no cache
-local, sem sincronização ao remote. Veja [`docs/DAGSHUB.md`](docs/DAGSHUB.md); nunca coloque
-tokens ou credenciais em arquivos versionados.
+e `1.0.2` foram publicados e recuperados em cache isolado. O HTML ampliado v6 também foi publicado
+no DagsHub e está versionado no Git, por ser entrega do tech challenge. Veja
+[`docs/DAGSHUB.md`](docs/DAGSHUB.md); nunca coloque tokens ou credenciais em arquivos versionados.
 
 ## Fluxo do pipeline
 
