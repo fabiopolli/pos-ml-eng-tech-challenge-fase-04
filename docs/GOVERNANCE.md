@@ -37,4 +37,6 @@ distinguir dados pessoais/PII de categorias sensíveis definidas em lei.
 - resposta a drift e critérios para suspensão/revisão do modelo;
 - análise causal: intervenções sintéticas são conhecidas por construção; inflação ou novos perfis
   são hipóteses de contexto, não causas identificadas pelo teste de drift;
-- cobertura da menção a Concept Drift no enunciado, sem confundi-lo com mudança marginal de features.
+- limite de cobertura: a fase 2 demonstra Data Drift, não Concept Drift; registrar isso sem
+  confundir mudança marginal de features com mudança em `P(y|X)`. A docência avaliará o plano após
+  a entrega, sem resposta prévia como dependência.

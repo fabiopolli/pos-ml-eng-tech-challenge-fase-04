@@ -12,10 +12,11 @@
 
 ## Pipeline implementado (DVC)
 
-O `dvc.yaml` encadeia sete estágios locais, executados com `uv run dvc repro`:
+O `dvc.yaml` encadeia os sete estágios M1 e três estágios locais da fase 2:
 
 ```text
 data/default of credit card clients.xls (objeto DVC) -> acquire -> eda -> prepare -> explore -> tune -> train -> evaluate
+                                                                                                                -> simulate_production -> score_production -> detect_drift
 ```
 
 | Estágio | Entrada | Saída |
@@ -27,6 +28,9 @@ data/default of credit card clients.xls (objeto DVC) -> acquire -> eda -> prepar
 | `tune` | `data/processed/train.csv` + `configs/optimization.yaml` | `reports/optimization/<exp>/tuning/`, `models/optimization/<exp>/finalists/` |
 | `train` | treino + validação + finalistas | `models/credit_model.joblib`, `models/credit_model_metadata.json`, `models/candidates/`, `models/optimization/<exp>/{incumbent,selection}/`, `reports/metrics.json`, `reports/optimization/<exp>/selection/comparison.json`, `reports/figures/model/` |
 | `evaluate` | modelo congelado + `data/processed/test.csv` | `reports/test_metrics.json` |
+| `simulate_production` | validação + referência + metadados congelados | `data/production/v1.0.2/{original,modified}.csv`, `manifest.json` |
+| `score_production` | lotes de produção + modelo congelado + contrato | `data/production/v1.0.2/predictions/`, `reports/drift/prediction_summary-v1.0.2.json` |
+| `detect_drift` | referência + lotes + predições + auditoria/modelagem + template HTML | `reports/drift/results-v1.0.2.json`, `reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html` |
 
 Fronteiras que o DAG impõe:
 
@@ -44,6 +48,18 @@ Fronteiras que o DAG impõe:
   finalistas, e a decisão segue os critérios pré-declarados em `configs/optimization.yaml`.
 - `evaluate` é o estágio de **avaliação final**: lê o artefato congelado, confere o hash
   registrado na seleção, valida o lote de teste contra o contrato e só então prevê.
+- `simulate_production` verifica o hash de validação salvo nos metadados M1, valida o lote
+  rotulado original, remove o alvo e cria a cópia modificada por transformações determinísticas;
+  não usa o teste nem sobrescreve entradas M1. As saídas são versionadas pelo protocolo `1.0.2`.
+- `score_production` carrega o modelo pelo hash esperado, rejeita lotes vazios/inválidos, mantém ID
+  apenas para associação e passa somente as 19 features financeiras ao modelo.
+- `detect_drift` calcula PSI com bins ajustados só na referência da comparação, gera resultados para
+  referência×controle, referência×modificada e controle×modificada, e produz resumo HTML/JSON.
+  O detector canônico é customizado; o template HTML em português usa o Evidently para conferir
+  contagem de linhas e integra perfil do dataset, estratégia/seleção do modelo, avaliações e
+  impacto agregado nos scores. `detect_drift` depende dos relatórios de treino/teste, auditoria,
+  preparação, seleção e template para manter as conclusões rastreáveis. Não inclui linhas/IDs de
+  clientes nem alvo de produção.
 
 Cada saída tem um único dono: `models/credit_model.joblib` pertence a `train`, e os
 artefatos da campanha ficam isolados em `models/optimization/<experiment_id>/`. O relatório
@@ -51,9 +67,9 @@ de comparação (`reports/optimization/<experiment_id>/selection/comparison.json
 pelo estágio de seleção **antes** de qualquer execução de teste.
 
 O `prepare` depende do resumo do EDA e confere o SHA-256 do CSV bruto, garantindo que a preparação
-só rode após o EDA do mesmo dado. Os parâmetros vêm de `configs/project.yaml`. DagsHub Storage é
-o remote planejado; ainda não está configurado em `.dvc/config` neste checkout. Consulte
-[`DAGSHUB.md`](DAGSHUB.md) para conexão e configuração local de credenciais.
+só rode após o EDA do mesmo dado. Os parâmetros vêm de `configs/project.yaml`. O remote DagsHub está
+configurado; recuperação M1 foi comprovada. Os objetos novos da fase 2 permanecem locais até
+publicação autorizada. Consulte [`DAGSHUB.md`](DAGSHUB.md) para o procedimento.
 
 ## Campanha de otimização dos modelos (plano 1.6)
 
@@ -85,6 +101,9 @@ Regras estruturais:
 O **laboratório de modelos** (`dashboard/app_dev.py`) é uma aplicação Streamlit local de
 inspeção, comparação e teste dos artefatos congelados. Ela não treina, não promove, não
 escreve sobre datasets, métricas oficiais ou `dvc.lock`, e nunca expõe o conjunto de teste.
+Sua aba didática de Data Drift valida e lê somente os snapshots agregados fixos `1.0.2` e oferece
+o relatório HTML versionado para download se estiver materializado; não executa o detector nem
+associa o cenário aos modelos selecionados na barra lateral.
 O painel operacional da fase 3 (`dashboard/app.py`) continua com a observabilidade do pipeline.
 Ver [`dashboard/README.md`](../dashboard/README.md).
 
@@ -97,7 +116,7 @@ linhas e sem imprimir valores de registro. A limpeza histórica de `prepare.py` 
 não pode ser usada como filtro de lote operacional.
 
 
-## Fluxo planejado
+## Fluxo de fases
 
 1. Aquisição do UCI 350 para `data/raw`.
 2. Normalização do esquema e preparação em `data/processed`.
@@ -108,11 +127,13 @@ não pode ser usada como filtro de lote operacional.
 7. Cópia das features da validação para produção original, mais cópia modificada em duas features;
    sem reutilizar o teste ou compartilhar IDs com a referência. A validação já foi usada na seleção.
 8. Contrato antes da inferência e comparação da referência com controle/original e modificada,
-   com métodos, intensidades e limiares fixados antes do aceite.
+   usando o protocolo Data Drift `1.0.2` congelado antes dos resultados.
 9. Consolidação de métricas, consumo local de recursos e alertas no Streamlit, por execução.
 
-Este fluxo é requisito de planejamento: os estágios de produção, drift e observabilidade ainda
-precisam ser implementados. A revisão da fase 1 **registrou** a exposição prévia do teste (o EDA
+Os estágios de produção e Data Drift `1.0.2` estão implementados/verificados; observabilidade
+ainda precisa ser implementada. Concept Drift não é demonstrado nesta entrega; a docência avaliará
+  o plano após a entrega. Objetos DVC `1.0.1` e `1.0.2` foram enviados/recuperados em cache
+  isolado. A revisão da fase 1 **registrou** a exposição prévia do teste (o EDA
 histórico calculou relações feature-alvo sobre as 30.000 linhas do bruto) e separou a exploração
 supervisada no treino; a avaliação final é uma reavaliação sob protocolo congelado, não uma
 avaliação intocada. Ver [`evidence/fase-1.md`](evidence/fase-1.md) e

@@ -745,3 +745,385 @@ stages:
       md5: 79da42ea47b134b2ac1e6f87e317e9b2.dir
       size: 78882
       nfiles: 6
+  simulate_production:
+    cmd: python -m credit_monitoring.data.simulate
+    deps:
+    - path: data/processed/validation.csv
+      hash: md5
+      md5: b3b783043ad58b194cf3d2dd1d2aa5be
+      size: 430389
+    - path: data/reference/reference.csv
+      hash: md5
+      md5: dd57d28df2ec5b23960b1bbda5e36d00
+      size: 2007586
+    - path: models/credit_model_metadata.json
+      hash: md5
+      md5: b568597e176da6cfb941b08898c0184f
+      size: 11371
+    - path: src/credit_monitoring/config.py
+      hash: md5
+      md5: dcc6b47dd5862af2c46c60615575c10d
+      size: 987
+    - path: src/credit_monitoring/contracts
+      hash: md5
+      md5: b189eeeffd023c038bd06a40d72dba69.dir
+      size: 13977
+      nfiles: 6
+    - path: src/credit_monitoring/data/loading.py
+      hash: md5
+      md5: ce9a861d2f64ba6a27993955cf967cf2
+      size: 1202
+    - path: src/credit_monitoring/data/simulate.py
+      hash: md5
+      md5: 93d5cd0c95ee647ee66df8927de63106
+      size: 10045
+    params:
+      configs/project.yaml:
+        dataset.canonical_target: default_payment_next_month
+        dataset.financial_features:
+        - LIMIT_BAL
+        - PAY_0
+        - PAY_2
+        - PAY_3
+        - PAY_4
+        - PAY_5
+        - PAY_6
+        - BILL_AMT1
+        - BILL_AMT2
+        - BILL_AMT3
+        - BILL_AMT4
+        - BILL_AMT5
+        - BILL_AMT6
+        - PAY_AMT1
+        - PAY_AMT2
+        - PAY_AMT3
+        - PAY_AMT4
+        - PAY_AMT5
+        - PAY_AMT6
+        dataset.governance_features:
+        - SEX
+        - EDUCATION
+        - MARRIAGE
+        - AGE
+        dataset.id_column: ID
+        drift:
+          features_to_shift:
+          - LIMIT_BAL
+          - PAY_AMT1
+          protocol_version: 1.0.2
+          seed: 42
+          scenario:
+            limit_bal_multiplier: 1.5
+            pay_amt1_multiplier: 0.5
+            rounding: half_to_even
+            preserve_pay_amt1_zeros: true
+            positive_pay_amt1_minimum: 1
+          psi:
+            method: custom_psi
+            features: financial_features
+            reference_quantile_bins: 10
+            separate_zero_mass: true
+            constant_reference_bins: equal_vs_other
+            smoothing: 1e-06
+            per_feature_threshold: 0.2
+            comparison: '>'
+            global_alert: any_feature_exceeds_threshold
+          scoring:
+            persisted_probability_decimals: 12
+            persisted_probability_rounding: half_to_even
+          unused_p_value_alpha: 0.05
+    outs:
+    - path: data/production/v1.0.2/manifest.json
+      hash: md5
+      md5: 44332b723661f65e95dd6ddc143b4077
+      size: 1403
+    - path: data/production/v1.0.2/modified.csv
+      hash: md5
+      md5: 2a491141265a7c2a6a89c89bcdd08534
+      size: 627565
+    - path: data/production/v1.0.2/original.csv
+      hash: md5
+      md5: ab294e7925f4954a4bab1a9e844f8aa3
+      size: 628362
+  score_production:
+    cmd: python -m credit_monitoring.models.score_production
+    deps:
+    - path: data/production/v1.0.2/manifest.json
+      hash: md5
+      md5: 44332b723661f65e95dd6ddc143b4077
+      size: 1403
+    - path: data/production/v1.0.2/modified.csv
+      hash: md5
+      md5: 2a491141265a7c2a6a89c89bcdd08534
+      size: 627565
+    - path: data/production/v1.0.2/original.csv
+      hash: md5
+      md5: ab294e7925f4954a4bab1a9e844f8aa3
+      size: 628362
+    - path: models/credit_model.joblib
+      hash: md5
+      md5: 95e041c68a280caedc64f6eb93c895e6
+      size: 5490050
+    - path: models/credit_model_metadata.json
+      hash: md5
+      md5: b568597e176da6cfb941b08898c0184f
+      size: 11371
+    - path: src/credit_monitoring/config.py
+      hash: md5
+      md5: dcc6b47dd5862af2c46c60615575c10d
+      size: 987
+    - path: src/credit_monitoring/contracts
+      hash: md5
+      md5: b189eeeffd023c038bd06a40d72dba69.dir
+      size: 13977
+      nfiles: 6
+    - path: src/credit_monitoring/data/loading.py
+      hash: md5
+      md5: ce9a861d2f64ba6a27993955cf967cf2
+      size: 1202
+    - path: src/credit_monitoring/data/simulate.py
+      hash: md5
+      md5: 93d5cd0c95ee647ee66df8927de63106
+      size: 10045
+    - path: src/credit_monitoring/models/inference.py
+      hash: md5
+      md5: a1220cdb42b13c6136f81415d11e0c31
+      size: 6626
+    - path: src/credit_monitoring/models/metrics.py
+      hash: md5
+      md5: 8e6f55bc35676a9c4024530f7aca103d
+      size: 3150
+    - path: src/credit_monitoring/models/score_production.py
+      hash: md5
+      md5: 5b37cfbc2a54db4bc9fa89386edc8c0d
+      size: 9132
+    params:
+      configs/project.yaml:
+        contract:
+          age_min: 18
+          age_max: 100
+          require_unique_id: true
+          require_positive_limit_bal: true
+          reject_null_features: true
+        dataset.canonical_target: default_payment_next_month
+        dataset.financial_features:
+        - LIMIT_BAL
+        - PAY_0
+        - PAY_2
+        - PAY_3
+        - PAY_4
+        - PAY_5
+        - PAY_6
+        - BILL_AMT1
+        - BILL_AMT2
+        - BILL_AMT3
+        - BILL_AMT4
+        - BILL_AMT5
+        - BILL_AMT6
+        - PAY_AMT1
+        - PAY_AMT2
+        - PAY_AMT3
+        - PAY_AMT4
+        - PAY_AMT5
+        - PAY_AMT6
+        drift.scoring:
+          persisted_probability_decimals: 12
+          persisted_probability_rounding: half_to_even
+        modeling:
+          primary_metric: roc_auc
+          secondary_metrics:
+          - precision
+          - recall
+          - f1
+          - accuracy
+          candidates:
+          - logistic_regression
+          - random_forest
+          baseline: logistic_regression
+          tie_break: baseline
+          logistic_regression:
+            C: 1.0
+            max_iter: 1000
+            class_weight: balanced
+          random_forest:
+            n_estimators: 300
+            max_depth: 8
+            min_samples_leaf: 20
+            class_weight: balanced_subsample
+            n_jobs: -1
+    outs:
+    - path: data/production/v1.0.2/predictions/modified.csv
+      hash: md5
+      md5: e6bbe75023c15b1b75f7e727baa4bbd6
+      size: 182990
+    - path: data/production/v1.0.2/predictions/original.csv
+      hash: md5
+      md5: 2fd840cf42fbd8ad7fcc466dacf552c6
+      size: 183186
+    - path: reports/drift/prediction_summary-v1.0.2.json
+      hash: md5
+      md5: ea75f1b45f2a0dba6790625b7b559576
+      size: 2210
+  detect_drift:
+    cmd: python -m credit_monitoring.monitoring.drift
+    deps:
+    - path: configs/optimization.yaml
+      hash: md5
+      md5: fd6c2b9865f9d83c5feff56c0e58c624
+      size: 2771
+    - path: data/processed/preparation_report.json
+      hash: md5
+      md5: eb6a97bc8ca57907d200bfbbef44090e
+      size: 1814
+    - path: data/production/v1.0.2/manifest.json
+      hash: md5
+      md5: 44332b723661f65e95dd6ddc143b4077
+      size: 1403
+    - path: data/production/v1.0.2/modified.csv
+      hash: md5
+      md5: 2a491141265a7c2a6a89c89bcdd08534
+      size: 627565
+    - path: data/production/v1.0.2/original.csv
+      hash: md5
+      md5: ab294e7925f4954a4bab1a9e844f8aa3
+      size: 628362
+    - path: data/reference/reference.csv
+      hash: md5
+      md5: dd57d28df2ec5b23960b1bbda5e36d00
+      size: 2007586
+    - path: docs/DATASET.md
+      hash: md5
+      md5: a42f2e40e31e8c65ece26565083ae7e1
+      size: 6148
+    - path: models/credit_model_metadata.json
+      hash: md5
+      md5: b568597e176da6cfb941b08898c0184f
+      size: 11371
+    - path: reports/drift/prediction_summary-v1.0.2.json
+      hash: md5
+      md5: ea75f1b45f2a0dba6790625b7b559576
+      size: 2210
+    - path: reports/eda/eda_summary.json
+      hash: md5
+      md5: 4f082c7d106a4bd472c7cb98f6d41ad3
+      size: 1132
+    - path: reports/metrics.json
+      hash: md5
+      md5: 89d53a4a537d6117db45e8ba9b5116d4
+      size: 7073
+    - path: reports/optimization/opt-20261026-01/selection/comparison.json
+      hash: md5
+      md5: 2f9d66be926e5185bd932f6aff2da9fb
+      size: 8715
+    - path: reports/optimization/opt-20261026-01/tuning/manifest.json
+      hash: md5
+      md5: 212431ea1ca341dc61aaae4f8043957b
+      size: 9651
+    - path: reports/test_metrics.json
+      hash: md5
+      md5: 0130eb8f7b655ecbc739a3adcc91b8f6
+      size: 1272
+    - path: src/credit_monitoring/config.py
+      hash: md5
+      md5: dcc6b47dd5862af2c46c60615575c10d
+      size: 987
+    - path: src/credit_monitoring/contracts
+      hash: md5
+      md5: b189eeeffd023c038bd06a40d72dba69.dir
+      size: 13977
+      nfiles: 6
+    - path: src/credit_monitoring/data/loading.py
+      hash: md5
+      md5: ce9a861d2f64ba6a27993955cf967cf2
+      size: 1202
+    - path: src/credit_monitoring/models/train.py
+      hash: md5
+      md5: 2d1811d9b7e0946e8983d98b357bc88e
+      size: 32435
+    - path: src/credit_monitoring/models/tune.py
+      hash: md5
+      md5: 59da4a6b23dd3e1c744990c325158049
+      size: 32461
+    - path: src/credit_monitoring/monitoring/drift.py
+      hash: md5
+      md5: ea6ef9f1304863d49b15e2f79f2a2bdb
+      size: 31617
+    - path: src/credit_monitoring/monitoring/drift_report_template.html
+      hash: md5
+      md5: c7276f237d4e5d6f487edfc6113f855f
+      size: 19261
+    - path: src/credit_monitoring/monitoring/report_context.py
+      hash: md5
+      md5: 9c62c646e7c435cdc172dc754cf2b8cb
+      size: 24142
+    params:
+      configs/project.yaml:
+        dataset.acquisition.doi: 10.24432/C55S3H
+        dataset.acquisition.license: CC BY 4.0
+        dataset.canonical_target: default_payment_next_month
+        dataset.financial_features:
+        - LIMIT_BAL
+        - PAY_0
+        - PAY_2
+        - PAY_3
+        - PAY_4
+        - PAY_5
+        - PAY_6
+        - BILL_AMT1
+        - BILL_AMT2
+        - BILL_AMT3
+        - BILL_AMT4
+        - BILL_AMT5
+        - BILL_AMT6
+        - PAY_AMT1
+        - PAY_AMT2
+        - PAY_AMT3
+        - PAY_AMT4
+        - PAY_AMT5
+        - PAY_AMT6
+        dataset.governance_features:
+        - SEX
+        - EDUCATION
+        - MARRIAGE
+        - AGE
+        dataset.id_column: ID
+        dataset.split:
+          train: 0.7
+          validation: 0.15
+          test: 0.15
+        dataset.target_column_raw: default payment next month
+        drift:
+          features_to_shift:
+          - LIMIT_BAL
+          - PAY_AMT1
+          protocol_version: 1.0.2
+          seed: 42
+          scenario:
+            limit_bal_multiplier: 1.5
+            pay_amt1_multiplier: 0.5
+            rounding: half_to_even
+            preserve_pay_amt1_zeros: true
+            positive_pay_amt1_minimum: 1
+          psi:
+            method: custom_psi
+            features: financial_features
+            reference_quantile_bins: 10
+            separate_zero_mass: true
+            constant_reference_bins: equal_vs_other
+            smoothing: 1e-06
+            per_feature_threshold: 0.2
+            comparison: '>'
+            global_alert: any_feature_exceeds_threshold
+          scoring:
+            persisted_probability_decimals: 12
+            persisted_probability_rounding: half_to_even
+          unused_p_value_alpha: 0.05
+    outs:
+    - path: reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html
+      hash: md5
+      md5: 66e4ad3719b372e3c5461731a7c49e4e
+      size: 65692
+    - path: reports/drift/results-v1.0.2.json
+      hash: md5
+      md5: c0b6be22ac92bc963396368f1eabd5cb
+      size: 122176

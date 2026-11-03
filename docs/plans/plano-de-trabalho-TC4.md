@@ -31,8 +31,8 @@ de otimização de LR/RF, com prioridade para RF, antes do aceite integrado da f
 os 28 IDs e o aceite histórico de M1; acrescenta comparação com o modelo atual, orçamento e
 critérios explícitos de promoção. Inclui o recorte **1.6-O6**, laboratório Streamlit para testar
 e comparar modelos, inspirado nos dashboards da Fase 3 anterior; seu aceite compõe a extensão.
-A restrição a otimização **extensa** permanece; esta campanha tem limites próprios e ainda não
-foi executada.
+A restrição a otimização **extensa** permanece; esta campanha limitada foi executada e seu aceite
+está registrado em [`docs/evidence/1.6-otimizacao-modelos.md`](../evidence/1.6-otimizacao-modelos.md).
 
 ---
 
@@ -233,12 +233,12 @@ Os resultados permitirão comparar:
 A simulação será tratada como um experimento de **Data Drift**. Alterações artificiais nas features, mantendo os rótulos originais, não serão interpretadas como prova de Concept Drift ou degradação real de desempenho.
 
 **Limite de cobertura do enunciado:** a página 2 cita Data Drift e Concept Drift, enquanto as
-tarefas e a rubrica de drift detalham alteração de distribuições. Confirmar essa interpretação
-com a docência antes do aceite final. Se for exigida demonstração de Concept Drift, planejar em
-2.2/2.3 um experimento sintético separado com mudança explícita de `P(y|X)` e rótulos gerados sob
-esse mecanismo; comparar com seu controle e identificar os rótulos como sintéticos. Não alterar
-os rótulos reais nem alegar que Evidently sobre features, sozinho, detecta Concept Drift. A
-pendência deve permanecer visível até haver decisão e evidência de cobertura.
+tarefas e a rubrica de drift detalham alteração de distribuições. Por decisão de Bill Kopp em
+2026-11-02, esta entrega implementa Data Drift; não reivindica Concept Drift. A docência avaliará
+o plano e a cobertura após a entrega, sem resposta prévia como dependência de execução ou gate de
+M2. Se a avaliação pós-entrega solicitar escopo adicional, planejar em mudança separada um
+experimento sintético com mudança explícita de `P(y|X)` e rótulos gerados sob esse mecanismo.
+Não alterar rótulos reais nem alegar que Evidently sobre features, sozinho, detecta Concept Drift.
 
 ### Critério de conclusão
 
@@ -246,8 +246,8 @@ A etapa estará concluída quando lotes válidos passarem pelo contrato e pela i
 Evidently demonstrar drift nas duas variáveis sob critérios pré-definidos e o relatório HTML
 incluir controle, métodos, estatísticas, limiares, hashes, seed e interpretação. Registrar também
 distribuições de probabilidades previstas; não usar métricas calculadas com rótulos antigos de
-features modificadas como evidência de perda real de desempenho. Resolver a cobertura de Concept
-Drift antes de declarar atendimento integral ao enunciado.
+features modificadas como evidência de perda real de desempenho. Declarar que a entrega demonstra
+Data Drift, não Concept Drift; a avaliação da docência ocorre após a entrega e não bloqueia o marco.
 
 **Entregável oficial:** relatório HTML ou painel customizado com identificação das variáveis
 afetadas (enunciado, p. 5). A equipe escolheu HTML do Evidently, com interpretação e controle.
@@ -381,7 +381,7 @@ O desenvolvimento deverá ocorrer de forma incremental: as funcionalidades produ
 | M1 — fim da fase 1 | Contrato bloqueia lotes inválidos; modelo selecionado com protocolo de avaliação registrado; dados/modelo recuperáveis do remote. |
 | M2 — fim da fase 2 | M1 + cenários e relatório de drift reproduzíveis, com controle e limiares registrados. |
 | M3 — fim da fase 3 | M2 + quatro cenários operacionais correlacionados no MLflow/Streamlit e sinais de recursos locais. |
-| M4 — entrega | M3 + governança/causalidade no README, reprodução independente, vídeo acessível e cobertura do enunciado resolvida. |
+| M4 — entrega | M3 + governança/causalidade no README, reprodução independente, vídeo acessível e matriz de cobertura/limitações; a avaliação da docência ocorre após a entrega. |
 
 O caminho crítico é dados/contrato → seleção/versionamento → simulação/relatório → integração
 de monitoramento → reprodução e vídeo. Documentação e governança progridem em paralelo.
@@ -415,14 +415,16 @@ drift, rastreamento, versionamento (DVC/DagsHub Storage) e visualização.
 
 | Risco/pendência | Controle e próxima ação |
 |---|---|
-| Cobertura de Concept Drift | Bill/equipe deve confirmar com a docência a interpretação da p. 2; registrar resposta e eventual cenário sintético antes do aceite final. |
+| Limite de Concept Drift | Esta entrega demonstra Data Drift e não reivindica Concept Drift. A docência avaliará o plano após a entrega; resposta prévia não é gate. |
 | Exposição do teste durante EDA/reexecuções | Revisar 1.2/1.6, registrar uso prévio e congelar protocolo; não apresentar o teste já consultado como avaliação intocada nem simplesmente trocar seed até obter resultado melhor. |
-| DagsHub ainda não configurado e suporte S3 não declarado | Concluir 1.1 com owner/endpoint real, credenciais locais e dependências S3 travadas; só declarar recuperação após teste em cache separado. |
-| Métodos/limiares e intensidades de drift incompletos | Fixar em 2.2 antes da execução de aceite; reportar falhas/controle e revisar o desenho com histórico se o cenário não funcionar. |
+| Recuperação remota dos novos artefatos da fase 2 | Fechado em 2026-11-02: versões `1.0.1` e `1.0.2` enviadas; objetos dos três estágios recuperados em cache isolado; ponteiros/lock ainda precisam ser sincronizados no commit correspondente. |
+| Cobertura e protocolo de drift | Protocolo Data Drift `1.0.2` inclui precisão persistida determinística; Concept Drift não foi implementado e está registrado como limite para avaliação pós-entrega, sem bloquear M2. |
 | Prazo, responsáveis e capacidade local não confirmados | Confirmar datas e responsáveis por ID; medir a primeira execução e ajustar a estimativa sem inventar compromisso da equipe. |
 
-Essas pendências não representam resultados obtidos. Contrato Pandera, simulação, integração
-MLflow/Streamlit e os controles acima devem ser implementados/verificados nas entregas indicadas.
+As pendências remanescentes não representam resultados obtidos. Contrato Pandera/M1 e Data Drift
+foram executados e verificados, incluindo publicação/recuperação DVC. Concept Drift permanece um
+limite explícito a ser avaliado após a entrega. MLflow/Streamlit e os controles de governança
+continuam pendentes para as fases indicadas.
 
 ## 9. Critérios de avaliação
 

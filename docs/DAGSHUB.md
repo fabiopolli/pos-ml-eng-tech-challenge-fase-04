@@ -11,11 +11,15 @@ A partir da fase 1, o **workbook original da UCI também é um objeto DVC**
 (`data/default of credit card clients.xls.dvc`): ele saiu do histórico do Git e passou a ser
 versionado pelo DVC. Consequência direta: **um clone novo só reproduz o pipeline depois de
 `uv run dvc pull -r dagshub`**, porque a fonte do bruto não está mais no repositório Git.
-Enquanto o remote não estiver configurado, a única cópia do XLS está no cache local do DVC.
+O remote foi configurado e os objetos da fase 1 foram recuperados de um checkout/cache separado,
+conforme `docs/evidence/fase-1.md`. Neste checkout atual, o workbook pode não estar materializado;
+o `dvc status` registra essa ausência no estágio `acquire`.
 
-O repositório já rastreia o CSV bruto e declara os datasets preparados e modelos como saídas DVC.
-No estado atual, `.dvc/config` ainda não define um remote. A integração só estará ativa depois que
-o projeto GitHub for conectado/importado no DagsHub e as credenciais forem configuradas localmente.
+O repositório rastreia o CSV bruto, datasets preparados, modelos e outputs da fase 2 como saídas
+DVC. `.dvc/config` define o remote `dagshub` (`s3://dvc`); as credenciais ficam somente em
+`.dvc/config.local`, ignorado pelo Git. Os outputs da fase 2 `v1.0.1` foram enviados em 2026-11-02
+e recuperados em cache isolado; `v1.0.2`, com precisão persistida estabilizada, também foi enviado
+e recuperado em cache isolado.
 
 O endpoint S3 abaixo exige suporte S3 no DVC. A dependência atual `dvc[s3]>=3,<4` está declarada
 e travada no `uv.lock` desde a fase 1, junto com `xlrd` (leitura de `.xls`) usada pelo estágio
@@ -92,9 +96,10 @@ irrecuperável por falta dos objetos:
 uv run dvc push -r dagshub
 ```
 
-O `dvc push` cobre o workbook original da UCI, o CSV bruto, os datasets preparados, a referência,
-o modelo e as figuras — o conjunto inteiro de objetos do DVC. Conferir o conjunto compartilhado,
-não apenas o CSV e o modelo.
+O `dvc push` cobre o workbook original da UCI, CSV bruto, datasets preparados, referência, modelo,
+figuras e outputs DVC da fase 2 — o conjunto inteiro de objetos em cache. Em 2026-11-02, os três
+estágios da fase 2 foram publicados explicitamente e recuperados em cache isolado; antes de
+compartilhar o ponteiro Git correspondente, sincronizar o commit que o contém.
 
 Em um checkout autorizado, recuperar os objetos necessários para o commit atual:
 

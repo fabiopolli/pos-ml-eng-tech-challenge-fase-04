@@ -38,16 +38,29 @@ mesmos IDs entre cenários e sem IDs da referência. Essa reutilização não cr
 desempenho. Não usar teste para ajustar modelo, limiares ou simulação. Transformações aprendidas
 ajustam-se no treino. Seleção por ROC-AUC; empate favorece baseline; limiar inicial 0.5.
 
-O código atual faz EDA com relações com o alvo no bruto completo e avalia o teste em cada treino:
-registrar exposição prévia e revisar protocolo antes de alegar avaliação intocada. Contrato,
-produção/drift e monitoramento ainda dependem de implementação/validação.
+O EDA histórico calculou relações com o alvo no bruto completo, incluindo registros depois
+alocados ao teste; essa exposição está declarada em `docs/evidence/fase-1.md`. O estágio `train`
+seleciona usando treino e validação e não lê o teste; `evaluate` é um estágio separado, que valida
+e avalia no teste o modelo já congelado. Portanto, não descrever o teste como avaliação intocada.
+O gate M1 (1.1–1.7) está concluído, incluindo a recuperação DVC verificada em checkout/cache
+separado; a extensão 1.6 de otimização e laboratório também está concluída. A fase 2 tem cenário
+Data Drift `1.0.2`, inferência, PSI e relatório HTML implementados e verificados. Os objetos DVC
+das versões `1.0.1` e `1.0.2` foram publicados/recuperados em cache isolado. Concept Drift não é demonstrado
+nesta entrega; por decisão do operador, a docência avaliará o plano após a entrega, sem resposta
+prévia como gate de M2. A observabilidade da fase 3 ainda precisa ser concluída.
 
 ## Methods and resources
 
 Python 3.12/uv, Pandas/NumPy, scikit-learn, Pandera, Evidently, DVC, DagsHub Storage, MLflow local,
-Streamlit, Pytest/Ruff e GitHub Actions. O remote DagsHub e o extra S3 travado ainda estão
-pendentes; consultar `docs/DAGSHUB.md`. Treino e visualização são locais; rede é necessária para
-sincronizar objetos, não para treino com cache disponível. Não há orçamento/cota aprovados.
+Streamlit, Pytest/Ruff e GitHub Actions. `dvc[s3]` está travado e o remote DagsHub está configurado;
+25 objetos foram enviados e a recuperação foi comprovada em checkout/cache separado (evidência em
+`docs/evidence/fase-1.md`). O estado local pode não conter todos os objetos: neste checkout,
+`uv run dvc status` indicou o workbook da UCI ausente/não materializado, embora referência,
+validação e modelo estejam presentes e com hashes conferidos. Consultar `docs/DAGSHUB.md` para
+recuperação. Treino e visualização são locais; rede é necessária para sincronizar objetos, não para
+treino com cache disponível. As saídas analíticas DVC `1.0.2` foram publicadas e recuperadas em
+cache isolado; o relatório acadêmico ampliado em pt-BR (v6) permanece apenas no cache local até
+sincronização autorizada. Não há orçamento/cota aprovados.
 
 ## Risks and governance
 
@@ -72,15 +85,16 @@ andamento, em revisão e concluído. Requisitos planejados não são resultados.
 
 Ambiente: `uv sync --dev --locked`. Código: `uv run pytest`, `uv run ruff check .` e
 `uv run ruff format --check .`. Documentação: links, consistência com enunciado/configuração,
-IDs/aceites e `git diff --check`. Revisão de planejamento em 2026-10-26 verificou documentação e
-código por leitura, sem executar pipeline ou testar acesso remoto DVC; uv não estava disponível.
+IDs/aceites e `git diff --check`. A evidência de M1 registra execução local e recuperação DVC remota
+em clone/cache separado; conferir sempre o estado do checkout atual antes de repetir a DAG ou
+sincronizar dados.
 
 ## Open questions
 
-- Confirmar com a docência a cobertura de Concept Drift, citado no contexto do PDF e não
-  detalhado na rubrica. Se necessário, planejar cenário separado com mudança explícita de
-  P(y|X) e rótulos sintéticos; não alegar cobertura com testes marginais de features.
+- Registrar com clareza que a fase 2 demonstra Data Drift, não Concept Drift; a docência avaliará
+  o plano após a entrega, conforme decisão do operador (2026-11-02). Uma expansão posterior exigiria
+  mecanismo sintético explícito de mudança em P(y|X), sem alterar rótulos reais.
 - Confirmar datas, disponibilidade e recursos por entrega. A atribuição de responsável/revisor por
   ID foi removida por decisão do operador (2026-10-26): o aceite técnico verificado encerra o ID.
-- Concluir remote DagsHub/suporte S3 e teste de recuperação; tratar exposição do teste na revisão
-  de EDA/avaliação e fixar métodos/limiares de drift antes da execução de aceite.
+- A exposição histórica do teste está declarada; o protocolo distingue seleção/treino de avaliação
+  final. Objetos DVC da fase 2 já foram publicados e recuperados em cache isolado.

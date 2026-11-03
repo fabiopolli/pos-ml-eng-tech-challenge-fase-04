@@ -5,7 +5,7 @@ repositório — e não para quem vai recuperar a arquitetura ou a governança.
 
 | Guia | Aplicação | Para quê |
 |---|---|---|
-| [`laboratorio-de-modelos.md`](laboratorio-de-modelos.md) | `dashboard/app_dev.py` (Streamlit) | inspecionar, comparar e testar os modelos congelados: artefatos, comparação lado a lado, predição individual e em lote, cenários de contrato |
+| [`laboratorio-de-modelos.md`](laboratorio-de-modelos.md) | `dashboard/app_dev.py` (Streamlit) | inspecionar/comparar modelos congelados, fazer predição individual e em lote, testar contratos e consultar o snapshot agregado de Data Drift `1.0.2` |
 
 ## Convenção
 

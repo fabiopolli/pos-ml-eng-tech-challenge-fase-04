@@ -31,6 +31,8 @@ models/*
 !models/README.md
 reports/drift/*
 !reports/drift/README.md
+!reports/drift/results-v1.0.1.json
+!reports/drift/results-v1.0.2.json
 reports/figures/*
 !reports/figures/README.md
 reports/run_resources.json

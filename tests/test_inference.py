@@ -87,6 +87,21 @@ def test_an_invalid_batch_is_rejected_before_any_model_call(
     assert calls == []
 
 
+def test_an_empty_batch_is_rejected_before_any_model_call(model, processed_dir, config):
+    batch = _batch(processed_dir, config).iloc[:0]
+    calls = []
+
+    class Spy:
+        def predict_proba(self, features):
+            calls.append(features)
+            return model.predict_proba(features)
+
+    with pytest.raises(ModelArtifactError, match="must not be empty"):
+        infer_batch(Spy(), batch, config)
+
+    assert calls == []
+
+
 def test_compare_models_validates_once_and_scores_every_model(model, processed_dir, config):
     batch = _batch(processed_dir, config)
     comparison = compare_models({"a": model, "b": model}, batch, config)

@@ -44,12 +44,18 @@ credit-monitoring-train = "credit_monitoring.models.train:main"
 credit-monitoring-tune = "credit_monitoring.models.tune:main"
 credit-monitoring-evaluate = "credit_monitoring.models.evaluate:main"
 credit-monitoring-validate = "credit_monitoring.contracts.validate:main"
+credit-monitoring-simulate = "credit_monitoring.data.simulate:main"
+credit-monitoring-score-production = "credit_monitoring.models.score_production:main"
+credit-monitoring-drift = "credit_monitoring.monitoring.drift:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"credit_monitoring.monitoring" = ["drift_report_template.html"]
 
 [dependency-groups]
 dev = [
@@ -73,4 +79,3 @@ extend-exclude = ["notebooks"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
-
