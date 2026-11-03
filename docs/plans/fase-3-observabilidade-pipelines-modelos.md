@@ -53,7 +53,7 @@ hash, com schema definido.
 | `data/production/v1.0.2/predictions/{original,modified}.csv` | `76c3821e…` / `49748dd0…` | Predições com ID de origem associado |
 | `reports/drift/prediction_summary-v1.0.2.json` | `a92f59f6c525877be209cd4804c603334161153a23093237ded53ab2696a742a` | Resumo agregado por cenário |
 | `reports/drift/results-v1.0.2.json` | `f0c02e97fbb3a6301ec1cf65593c9c7977f051bd4c4a2eec7c1276b45ec4bd48` | Schema `1.0.0` com comparações, hashes e limitações |
-| `reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html` | `d47a792b1dfb7d94ee4469ada01298d2bf0e0809e7beda2c4641ae4cf284a451` | Relatório pt-BR — **apenas no cache DVC local, ainda não no remote** |
+| `reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html` | `d47a792b1dfb7d94ee4469ada01298d2bf0e0809e7beda2c4641ae4cf284a451` | Relatório pt-BR — enviado ao remote DagsHub e versionado no Git |
 
 Protocolo: `protocol_sha256=e160b86e5d6f62382859df8828f053ef16bef438a6f0967e022a99cb4ae536fb`,
 contrato `1.0.0`, limiar `0,5`, Evidently `0.7.23`.
@@ -396,8 +396,9 @@ SHA/hashes, logs/resumo e evidência de UI; falta de recurso/acesso impede o ace
 
 Restrições a observar no gate:
 
-- O HTML pt-BR v6 está no cache DVC local e **ainda não no remote DagsHub**. Um ensaio de
-  reprodução que dependa do remote não recupera esse artefato específico; o painel deve tolerar
+- O HTML pt-BR v6 foi enviado ao remote DagsHub e está versionado no Git. A geração é
+  determinística (regerar o estágio reproduz o mesmo SHA-256), então um checkout novo pode
+  obtê-lo pelo Git ou por `dvc pull`, sem depender de regeneração. O painel deve ainda tolerar
   HTML ausente sem quebrar a leitura do restante do registro.
 - Os outputs DVC de M2 (`results-v1.0.2.json`, `prediction_summary-v1.0.2.json`, CSV de
   predições) permanecem imutáveis. Qualquer nova informação de execução é registrada fora deles.

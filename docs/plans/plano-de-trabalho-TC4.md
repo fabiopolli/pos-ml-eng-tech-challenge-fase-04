@@ -417,7 +417,7 @@ drift, rastreamento, versionamento (DVC/DagsHub Storage) e visualização.
 |---|---|
 | Limite de Concept Drift | Esta entrega demonstra Data Drift e não reivindica Concept Drift. A docência avaliará o plano após a entrega; resposta prévia não é gate. |
 | Exposição do teste durante EDA/reexecuções | Revisar 1.2/1.6, registrar uso prévio e congelar protocolo; não apresentar o teste já consultado como avaliação intocada nem simplesmente trocar seed até obter resultado melhor. |
-| Recuperação remota dos novos artefatos da fase 2 | Fechado em 2026-11-02: versões `1.0.1` e `1.0.2` enviadas; objetos dos três estágios recuperados em cache isolado; ponteiros/lock ainda precisam ser sincronizados no commit correspondente. |
+| Recuperação remota dos novos artefatos da fase 2 | Fechado em 2026-11-02: versões `1.0.1` e `1.0.2` enviadas; objetos dos três estágios recuperados em cache isolado; ponteiros/lock ainda precisam ser sincronizados no commit correspondente. O HTML ampliado v6 também foi publicado no DagsHub e versionado no Git. |
 | Cobertura e protocolo de drift | Protocolo Data Drift `1.0.2` inclui precisão persistida determinística; Concept Drift não foi implementado e está registrado como limite para avaliação pós-entrega, sem bloquear M2. |
 | Prazo, responsáveis e capacidade local não confirmados | Confirmar datas e responsáveis por ID; medir a primeira execução e ajustar a estimativa sem inventar compromisso da equipe. |
 

@@ -231,4 +231,5 @@ stages:
     outs:
       - reports/drift/results-v1.0.2.json:
           cache: false
-      - reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html
+      - reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html:
+          cache: false

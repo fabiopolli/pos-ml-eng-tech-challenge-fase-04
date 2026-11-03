@@ -59,8 +59,8 @@ Streamlit, Pytest/Ruff e GitHub Actions. `dvc[s3]` está travado e o remote Dags
 validação e modelo estejam presentes e com hashes conferidos. Consultar `docs/DAGSHUB.md` para
 recuperação. Treino e visualização são locais; rede é necessária para sincronizar objetos, não para
 treino com cache disponível. As saídas analíticas DVC `1.0.2` foram publicadas e recuperadas em
-cache isolado; o relatório acadêmico ampliado em pt-BR (v6) permanece apenas no cache local até
-sincronização autorizada. Não há orçamento/cota aprovados.
+cache isolado; o relatório acadêmico ampliado em pt-BR (v6) foi publicado no DagsHub e também
+está versionado no Git, por ser entrega do tech challenge. Não há orçamento/cota aprovados.
 
 ## Risks and governance
 
