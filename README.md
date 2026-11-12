@@ -393,27 +393,45 @@ evidência de execução e de inspeção visual, em
 O adendo de Data Drift do laboratório tem evidência e captura agregada em
 [`docs/evidence/1.6-o6-data-drift-laboratorio.md`](docs/evidence/1.6-o6-data-drift-laboratorio.md).
 
-O dashboard inicial já pode ser aberto; a integração de observabilidade será concluída na fase 3.
-`streamlit` e `mlflow` são **extras** e não são
-instalados no ambiente padrão — instale o extra da fase 3 antes de usá-los:
+O painel operacional da Etapa 3 consulta tentativas, recursos, volumes, métricas do modelo,
+alertas e drift. Instale o extra de observabilidade para iniciar o painel local:
 
 ```bash
 uv sync --dev --locked --extra observability
-uv run streamlit run dashboard/app.py
+uv run --extra observability streamlit run dashboard/app.py --server.address 127.0.0.1
 ```
 
 ### Convenções locais
 
 ```bash
-# Ativar o MLflow local quando a Etapa 3 estiver implementada
-# (requer o extra observability, instalado acima)
-uv run mlflow ui --backend-store-uri sqlite:///mlflow.db
+uv run --extra observability mlflow ui --backend-store-uri sqlite:///observability/mlflow.db --host 127.0.0.1
 
 # Copiar configurações locais sem versionar segredos
 cp .env.example .env
 ```
 
 No PowerShell, use `Copy-Item .env.example .env` no lugar de `cp` se preferir o comando nativo.
+
+### Evidências de teste da Etapa 3
+
+O Playwright no Microsoft Edge validou **5 de 5 cenários** com o Streamlit local.
+Nos quatro cenários oficiais, o teste conferiu o estado, os volumes, os alertas e o ID do
+run no MLflow. Nas duas execuções bem-sucedidas, o SHA-256 do HTML baixado pelo painel
+coincidiu com o hash registrado na tentativa.
+
+![Painel operacional com 4.500 inferências e alertas de drift em LIMIT_BAL e PAY_AMT1](docs/evidence/fase-3-playwright/02-modified.png)
+
+| Captura | Resultado verificado |
+|---|---|
+| [Lote de controle](docs/evidence/fase-3-playwright/01-original.png) | 4.500 inferências e zero alertas |
+| [Lote com drift](docs/evidence/fase-3-playwright/02-modified.png) | 4.500 inferências e alertas em `LIMIT_BAL` e `PAY_AMT1` |
+| [Lote inválido](docs/evidence/fase-3-playwright/03-invalid.png) | 4.500 rejeições e zero inferências |
+| [Falha controlada](docs/evidence/fase-3-playwright/04-execution-error.png) | 4.500 registros aprovados no contrato e falha antes da predição |
+| [Painel sem execuções](docs/evidence/fase-3-playwright/05-sem-execucoes.png) | Aviso de histórico vazio e métricas indisponíveis |
+| [Detalhe do PSI](docs/evidence/fase-3-playwright/06-detalhe-psi.png) | Distribuição de scores e comparação do lote modificado com a referência |
+
+Os comandos de reprodução e os IDs das tentativas e dos runs estão no
+[relatório de evidências da Etapa 3](docs/evidence/fase-3.md).
 
 ## Etapas e evidências
 
@@ -433,7 +451,7 @@ O acompanhamento operacional está em [`docs/CHECKLIST.md`](docs/CHECKLIST.md).
 | Modelos e Data Contract | Concluído | Contrato Pandera integrado antes do `fit`; seleção na validação e avaliação final em estágios separados; [`docs/evidence/fase-1.md`](docs/evidence/fase-1.md) |
 | Campanha de otimização (plano 1.6) | Concluído | Estágio `tune` (só treino) + rodada única de validação com decisão registrada; laboratório Streamlit de comparação e teste; [`docs/evidence/1.6-otimizacao-modelos.md`](docs/evidence/1.6-otimizacao-modelos.md) |
 | Simulação e relatório de drift | M2 Data Drift concluído; `1.0.2` enviado e recuperado via DVC | [`docs/evidence/fase-2.md`](docs/evidence/fase-2.md); Concept Drift é limitação declarada, avaliação docente pós-entrega |
-| MLflow e Streamlit | Em preparação | Shell do dashboard criada |
+| MLflow e Streamlit | Concluído | Quatro cenários oficiais registrados no MLflow e cinco verificações no Playwright. [Evidências da Etapa 3](docs/evidence/fase-3.md) |
 | Governança e vídeo | Em preparação | Documento-base e roteiro de entregas |
 
 ## Fluxo de colaboração

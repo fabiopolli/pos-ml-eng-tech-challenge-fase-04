@@ -42,6 +42,9 @@ jobs:
       - name: Test the model laboratory with the model_lab extra
         run: uv run --extra model_lab pytest tests/test_app_dev.py
 
+      - name: Test the observability stack
+        run: uv run --locked --extra observability pytest tests/test_observability.py
+
       - name: Build package
         run: uv build
 

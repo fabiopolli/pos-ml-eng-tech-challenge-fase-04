@@ -41,6 +41,7 @@ reports/optimization/*/resources.json
 !data/raw/*.dvc
 artifacts/
 mlruns/
+observability/
 mlflow.db
 *.joblib
 *.pkl
