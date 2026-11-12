@@ -8,7 +8,7 @@ diferentes:
 | Fase / recorte | Fase 3 — observabilidade do pipeline | Recorte **1.6-O6** do plano 1.6 |
 | Objetivo | observar a saúde do pipeline | inspecionar, comparar e testar modelos congelados |
 | Extra de dependências | `observability` (MLflow + Streamlit) | `model_lab` (Streamlit) |
-| Estado atual | shell inicial com métricas placeholder; a integração da observabilidade é a entrega **3.5**, ainda pendente | implementado e verificado (**1.6-O6** concluído) |
+| Estado atual | histórico operacional, métricas e alertas; aceite descrito na [evidência da Etapa 3](../docs/evidence/fase-3.md) | implementado e verificado (**1.6-O6** concluído) |
 | Executa inferência | não | sim, sob demanda explícita |
 | Lê o conjunto de teste | nunca | nunca |
 | Treina ou promove | nunca | nunca |
@@ -19,24 +19,9 @@ As duas podem ser executadas no mesmo checkout, em processos e portas separados.
 
 ## `dashboard/app.py` — painel operacional da fase 3
 
-Aplicação de observabilidade do pipeline. **É o destino da fase 3**: histórico de execuções,
-métricas operacionais, alertas e resultados do monitoramento de drift.
-
-### O que existe hoje
-
-[`dashboard/app.py`](app.py) é um **shell inicial de 15 linhas**, e não uma tela de
-observabilidade funcional:
-
-- lê **nenhum** artefato — nem `reports/metrics.json`, nem MLflow, nem DVC, nem datasets;
-- exibe três `st.metric` com valores fixos, escolhidos no código;
-- não executa inferência, não treina, não promove e não lê o conjunto de teste.
-
-A leitura de resumos e do MLflow, a lista de execuções, as métricas operacionais e os alertas
-(entregas 3.1–3.7 da fase 3) **ainda não estão implementadas**; o status está em
-[`docs/CHECKLIST.md`](../docs/CHECKLIST.md) e o desenho em
-[`docs/plans/fase-3-observabilidade-pipelines-modelos.md`](../docs/plans/fase-3-observabilidade-pipelines-modelos.md)
-(§3.5). O painel não deve ser apresentado como observabilidade do pipeline enquanto isso não
-acontecer.
+O painel lê o histórico local de execução e identifica o run correspondente no MLflow.
+Use **Atualizar execuções** para reler o diretório, ou selecione um ID para inspecionar uma
+tentativa anterior. O painel mantém visíveis a tentativa mais recente e a última bem-sucedida.
 
 ### Instalação e execução
 
@@ -53,27 +38,21 @@ eles.
 
 ### O que esperar na tela
 
-Verificado por execução local em 2026-11-02:
+- Estado da tentativa, duração, CPU, pico de memória e contagens do lote.
+- Métricas de avaliação congeladas, distribuição agregada de scores, PSI e alertas.
+- Estado vazio, indicação de tracking indisponível e acesso ao HTML verificado por hash.
 
-- título **Credit Scoring - Observabilidade**;
-- um aviso informando que a fundação do dashboard foi criada e que as métricas de execução,
-  qualidade e drift serão conectadas na Etapa 3;
-- três métricas **placeholder**: `Status do pipeline` = `Aguardando execução`,
-  `Features com drift` = `-`, `Alertas ativos` = `-`.
-
-Não há pré-requisito de artefato: o painel abre em um clone novo, sem `dvc pull`, porque não
-lê nada do disco. As três métricas são literais, não medições — leia `-` como *indisponível*,
-nunca como zero.
+O painel abre sem materializar objetos DVC. Consulte a
+[evidência da Etapa 3](../docs/evidence/fase-3.md) para popular o histórico.
 
 ### Limites
 
 - Um rerender não executa o pipeline, não altera dados e não gera alertas.
 - Nenhuma linha, ID ou alvo é exibido ou exportado.
-- O backend do MLflow é local (`sqlite:///mlflow.db`); a UI do MLflow é um processo separado e
-  só tem execuções depois que 3.3 e 3.4 existirem:
+- A UI do MLflow roda em processo separado com o mesmo backend SQLite do produtor:
 
   ```bash
-  uv run --extra observability mlflow ui --backend-store-uri sqlite:///mlflow.db --host 127.0.0.1
+  uv run --extra observability mlflow ui --backend-store-uri sqlite:///observability/mlflow.db --host 127.0.0.1
   ```
 
 ---
@@ -184,12 +163,12 @@ As duas são processos locais persistentes: abra em terminais separados e interr
 ```bash
 uv run --extra model_lab pytest tests/test_app_dev.py
 uv run --extra model_lab pytest tests/test_drift_snapshot.py
+uv run --extra observability pytest tests/test_observability.py
 ```
 
 Os testes de aplicação usam `streamlit.testing.v1.AppTest` e fixtures locais; não retreinam nem
 avaliam o conjunto de teste. Sem o extra `model_lab`, o arquivo de teste é ignorado e o restante
 da suíte continua valendo.
 
-O shell `dashboard/app.py` **não tem teste automatizado**: ele ainda não implementa a
-observabilidade da fase 3 (entrega 3.5), e um teste sobre os placeholders não acrescentaria
-evidência sobre o pipeline.
+O teste operacional percorre estado vazio, controle, drift, rejeição e falha com fixtures locais
+e um banco MLflow isolado.

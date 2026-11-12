@@ -43,13 +43,13 @@ evidência em [`docs/evidence/1.6-otimizacao-modelos.md`](evidence/1.6-otimizaca
 
 ## Semana 3 - Observabilidade
 
-- [ ] **3.1** Logs estruturados de todas as etapas.
-- [ ] **3.2** Métricas operacionais, contagens sem duplicação, tempo de CPU e pico de memória com unidades/plataforma.
-- [ ] **3.3** Ambiente e experimento MLflow.
-- [ ] **3.4** Métricas/artefatos no MLflow por ID de execução, SHA Git, hashes DVC/modelo/dados e configuração.
-- [ ] **3.5** Dashboard Streamlit funcional.
-- [ ] **3.6** Alertas de contrato, execução e drift.
-- [ ] **3.7** Controle, drift válido, falha de contrato e falha de execução demonstrados; dashboard também trata ausência de execuções.
+- [x] **3.1** Logs estruturados por tentativa e etapa, com encerramento testado nos quatro cenários sintéticos.
+- [x] **3.2** Contagens por lote, duração, CPU e pico de memória do processo com unidades/plataforma; verificados localmente.
+- [x] **3.3** MLflow local com SQLite e experimento do projeto; registro e leitura verificados.
+- [x] **3.4** Registro de métricas, artefatos e proveniência verificado com os objetos oficiais recuperados via DVC; quatro runs vinculados às respectivas tentativas.
+- [x] **3.5** Dashboard operacional verificado com AppTest e Playwright no Edge. Capturas locais mostram estado, métricas, volumes, alertas e detalhe do PSI.
+- [x] **3.6** Alertas persistidos de contrato, execução e drift; deduplicação e exibição cobertas pela matriz sintética.
+- [x] **3.7** Matriz oficial com quatro cenários registrada no MLflow e conferida no navegador com Playwright. O estado vazio também passou. Ver [evidências e reprodução](evidence/fase-3.md).
 
 ## Semana 4 - Governança e apresentação
 

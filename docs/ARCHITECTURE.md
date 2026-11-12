@@ -130,8 +130,12 @@ não pode ser usada como filtro de lote operacional.
    usando o protocolo Data Drift `1.0.2` congelado antes dos resultados.
 9. Consolidação de métricas, consumo local de recursos e alertas no Streamlit, por execução.
 
-Os estágios de produção e Data Drift `1.0.2` estão implementados/verificados; observabilidade
-ainda precisa ser implementada. Concept Drift não é demonstrado nesta entrega; a docência avaliará
+O comando operacional da Etapa 3 valida e infere sobre um lote congelado por tentativa e associa
+a comparação M2 verificada por hash. Seu histórico fica em `observability/`, consultado pelo
+Streamlit e registrado no MLflow local. Veja [execução e evidências](evidence/fase-3.md).
+
+Os estágios de produção e Data Drift `1.0.2` estão implementados/verificados. Concept Drift
+não é demonstrado nesta entrega; a docência avaliará
   o plano após a entrega. Objetos DVC `1.0.1` e `1.0.2` foram enviados/recuperados em cache
   isolado. A revisão da fase 1 **registrou** a exposição prévia do teste (o EDA
 histórico calculou relações feature-alvo sobre as 30.000 linhas do bruto) e separou a exploração
