@@ -2,6 +2,11 @@
 
 > Plano de execução, revisado em 2026-11-02 contra o estado real do código após a conclusão de
 > M1 e M2. Expande os IDs 4.1–4.7; não atesta implementação.
+>
+> **Atualização de 2026-11-14:** os estados das tabelas das seções 1.1, 1.2 e 3 foram alinhados ao
+> que existe na branch `docs/denis/fase-4-governanca`. O aceite continua sendo o de
+> [`docs/CHECKLIST.md`](../CHECKLIST.md) e [`docs/evidence/fase-4.md`](../evidence/fase-4.md);
+> este plano não atesta conclusão.
 
 - **Plano geral:** [escopo, protocolo e aceites](plano-de-trabalho-TC4.md).
 - **Entrada técnica:** [fase 3](fase-3-observabilidade-pipelines-modelos.md), marco M3.
@@ -29,26 +34,26 @@ A fase 4 **consolida**; não reconstrói o que as fases anteriores já provaram.
 | Fundação | Onde está | Estado |
 |---|---|---|
 | Proveniência completa (DOI, CC BY 4.0, atribuição, conversão XLS→CSV, hashes, 30.000 linhas, 19 features, 4 features de governança, Taiwan/2005/NT$) | [`docs/DATASET.md`](../DATASET.md) | Pronto e validado |
-| Fluxo de tratamento e minimização, distinção ID técnico × PII × categorias sensíveis | [`docs/GOVERNANCE.md`](../GOVERNANCE.md) §"Origem e finalidade" e §"Inventário e minimização" | Parcial; lista de "Pontos a concluir" aberta |
+| Fluxo de tratamento e minimização, distinção ID técnico × PII × categorias sensíveis | [`docs/GOVERNANCE.md`](../GOVERNANCE.md) §1 | Consolidado em 2026-11-14 (fluxo, variáveis pessoais, inventário por artefato) |
 | Exposição prévia do teste, revalidações independentes, prova de recuperação DVC remota | [`docs/evidence/fase-1.md`](../evidence/fase-1.md) | Concluído |
 | Resultado de Data Drift `1.0.2`, hashes, três comparações, ressalva de Concept Drift, HTML pt-BR v6 | [`docs/evidence/fase-2.md`](../evidence/fase-2.md) | Concluído |
-| Estado da implementação, comandos, contrato, limites de drift, seção "Dados e privacidade" | [`README.md`](../../README.md) | Consolidado, mas **sem** seções substantivas de governança e causalidade |
-| Controles de acesso, retenção e limites do armazenamento por hash | [`docs/DAGSHUB.md`](../DAGSHUB.md) | Operacionais; falta formalizar retenção/prazos/responsáveis |
+| Estado da implementação, comandos, contrato, limites de drift, seção "Dados e privacidade" | [`README.md`](../../README.md) | Consolidado; seções de governança e causalidade adicionadas em 2026-11-14 (falta o link do vídeo) |
+| Controles de acesso, retenção e limites do armazenamento por hash | [`docs/DAGSHUB.md`](../DAGSHUB.md) | Operacionais; retenção proposta em `GOVERNANCE.md` §2.5, com prazos e responsáveis **pendentes de validação** |
 | Arquitetura, decisões de escopo e fronteiras entre componentes | [`docs/ARCHITECTURE.md`](../ARCHITECTURE.md) | Consolidado |
 
-### 1.2 Pendências reais que esta fase precisa fechar
+### 1.2 Pendências desta fase (situação em 2026-11-14)
 
 | Pendência | Situação observada |
 |---|---|
-| Inventário completo por artefato | `GOVERNANCE.md` descreve minimização em abstrato; não lista cada artefato com cópias locais/remotas e retenção |
-| Base legal proposta e matriz de acesso | Ausentes; só há a distinção uso acadêmico × cenário hipotético |
-| Retenção com responsável e prazo | Ausente; `DAGSHUB.md` diz que retenção "abrange objetos remotos e caches" sem prazos |
-| Avaliação agregada de viés por grupo | Planejada em 4.3, nunca executada |
-| Análise causal | Planejada em 4.4, nunca executada |
-| Seções de governança e causalidade no README | Ausentes; hoje o README só aponta para `GOVERNANCE.md` |
-| Registro de evidências da fase 4 | `docs/evidence/fase-4.md` não existe |
-| Índice de evidências | `docs/evidence/README.md` não existe |
-| Vídeo STAR | Roteiro e material de apoio não produzidos |
+| Inventário completo por artefato | **Feito** em `GOVERNANCE.md` §1.3, conferido contra `.gitignore`, `dvc.yaml` e `git ls-files` |
+| Base legal proposta e matriz de acesso | **Propostas** em `GOVERNANCE.md` §2.2 e §2.4; revisão jurídica e conferência dos artigos no texto oficial **pendentes** |
+| Retenção com responsável e prazo | Proposta em §2.5 (5 anos e 24 meses; término pelo critério dos arts. 15 e 16 da LGPD); responsáveis atribuídos de forma simulada (§3.3); revisão jurídica **simulada** por decisão do grupo |
+| Avaliação agregada de viés por grupo | **Executada** (`src/credit_monitoring/models/bias.py`, `reports/bias/validation_bias.json`) com os objetos oficiais recuperados por `dvc pull`; resultado descritivo |
+| Análise causal | **Documentada** em `GOVERNANCE.md` §4, ancorada em `reports/drift/results-v1.0.2.json` |
+| Seções de governança e causalidade no README | **Adicionadas**; falta validação por outro integrante |
+| Registro de evidências da fase 4 | Criado: [`docs/evidence/fase-4.md`](../evidence/fase-4.md) |
+| Índice de evidências | Criado: [`docs/evidence/README.md`](../evidence/README.md) |
+| Vídeo STAR | Roteiro e material de apoio não produzidos; gravação com outro integrante |
 | Reprodução do pacote final | Provas de M1 existem; a do pacote completo ainda não |
 
 ## 2. Entrada e sequência
@@ -88,15 +93,15 @@ ciclo: o ensaio é uma verificação parcial, e a revisão final inspeciona o pa
 
 | Artefato | Conteúdo esperado | Estado atual |
 |---|---|---|
-| [`docs/GOVERNANCE.md`](../GOVERNANCE.md) | Inventário, finalidade, acesso, retenção, riscos, supervisão, análise de viés e resposta a drift | Documento inicial; seções a consolidar |
-| [`README.md`](../../README.md) | Seções substantivas de governança e causalidade, resultados/limitações, comandos e link do vídeo | Sem essas seções |
-| Registro de avaliação agregada | Dataset/partição, modelo/limiar, grupos/denominadores/métricas e incerteza; sem linhas de clientes | Inexistente |
-| Matriz de cobertura | Requisito do enunciado → ID → evidência/versão → resultado observado/pendência | Inexistente |
-| Registro de reprodução | SHA/lock, ambiente, comandos/códigos de saída, hashes recuperados e verificação de cenário/UI | Inexistente |
+| [`docs/GOVERNANCE.md`](../GOVERNANCE.md) | Inventário, finalidade, acesso, retenção, riscos, supervisão, análise de viés e resposta a drift | Consolidado em 2026-11-14; partes marcadas como **Proposta** ou **Pendente** |
+| [`README.md`](../../README.md) | Seções substantivas de governança e causalidade, resultados/limitações, comandos e link do vídeo | Seções adicionadas; falta o link do vídeo |
+| Registro de avaliação agregada | Dataset/partição, modelo/limiar, grupos/denominadores/métricas e incerteza; sem linhas de clientes | [`reports/bias/validation_bias.json`](../../reports/bias/validation_bias.json) |
+| Matriz de cobertura | Requisito do enunciado → ID → evidência/versão → resultado observado/pendência | Rascunho por critério em `docs/evidence/fase-4.md` §5; conferência das 28 entregas pendente |
+| Registro de reprodução | SHA/lock, ambiente, comandos/códigos de saída, hashes recuperados e verificação de cenário/UI | Parcial: recuperação por `dvc pull` com hashes conferidos em `fase-4.md`; checkout/cache separados pendente |
 | Roteiro/vídeo | Tempos STAR, cenas e IDs de execução; duração medida e acesso verificado após publicação autorizada | Inexistente |
 
-Proposta de localização dos registros: `docs/evidence/fase-4.md` e índice
-`docs/evidence/README.md`, criados na implementação. O índice aponta às evidências das quatro
+Localização dos registros: `docs/evidence/fase-4.md` e índice `docs/evidence/README.md`
+(criados em 2026-11-14). O índice aponta às evidências das quatro
 fases sem duplicar dados/modelos/banco MLflow no Git. Capturas só com conteúdo agregado aprovado.
 
 Cada afirmação de resultado deve apontar a arquivo/execução/versão. Afirmação jurídica ou sobre
@@ -273,11 +278,11 @@ são apresentados como perda real de desempenho. Governança e causalidade apare
 5. Manter instruções de credenciais sem valores reais e explicar o que requer rede e o que roda
    com cache local. Validar links e acessibilidade dos materiais autorizados para avaliadores.
 
-**Estado atual a alterar:** o README já cobre estado M1/M2, arquitetura, comandos, contrato,
-limites de Data Drift, alerta sobre probabilidade não calibrada, seção "Dados e privacidade" e a
-distinção entre laboratório e painel operacional. Faltam as **seções substantivas** de governança
-e de causalidade exigidas pelo enunciado (hoje há apenas um ponteiro para `docs/GOVERNANCE.md`), o
-link final do vídeo e a matriz de resultados agregados de viés.
+**Estado do README (2026-11-14):** além do estado M1/M2, arquitetura, comandos, contrato,
+limites de Data Drift, alerta sobre probabilidade não calibrada e a distinção entre laboratório e
+painel operacional, o README agora tem as seções substantivas "Governança e LGPD" e "Análise
+causal", com a tabela agregada de viés. Falta o **link final do vídeo** e a validação por outro
+integrante.
 
 **Verificação/aceite:** outro integrante segue o README sem depender do histórico da conversa;
 nenhum comando de módulo ainda inexistente aparece como funcional. Métricas/resultados/limitações
