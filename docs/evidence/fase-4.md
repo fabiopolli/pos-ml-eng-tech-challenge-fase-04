@@ -76,10 +76,25 @@ importar `train` justamente para funcionar no Windows.
   [`DAGSHUB.md`](../DAGSHUB.md)) e o `dvc pull -r dagshub` recuperou os objetos oficiais, com
   hashes conferidos (§2.1). Isso não é a prova de recuperação em **checkout e cache separados**,
   que continua pendente (4.7): o cache local deste diretório já existia.
-- `uv run dvc status` ainda lista dependências e saídas como modificadas (código em `src/`,
-  `configs/optimization.yaml`, JSON/HTML de `reports/drift/`). Não foi investigado; pode ser
-  efeito de quebras de linha CRLF no checkout Windows ou de alterações posteriores ao `dvc.lock`.
-  Deve ser esclarecido antes da reprodução final.
+- **`dvc status` com o Git limpo (investigado em 2026-11-14):** o comando lista quase todo o
+  código em `src/`, `configs/optimization.yaml` e os JSON/HTML de `reports/` como modificados.
+  **Causa: quebras de linha**, não alteração de conteúdo. O checkout Windows tem
+  `core.autocrlf=true` e não há `.gitattributes`; o Git guarda LF (`git ls-files --eol` mostra
+  `i/lf w/crlf`), mas o DVC calcula o MD5 sobre os bytes do disco (CRLF). Conferência feita
+  sobre **todos** os arquivos de `dvc.lock` que existem no disco: 44 arquivos, dos quais 29
+  coincidem com o `dvc.lock` apenas após normalizar CRLF→LF, 15 coincidem direto e **0 divergem**
+  (10 entradas são diretórios ou não existem no disco e não foram comparadas). Portanto o
+  `dvc.lock` está coerente com o código versionado. Não foi alterada nenhuma configuração do Git;
+  uma opção é adotar um `.gitattributes` com `eol=lf` (decisão do time, afeta todos os
+  checkouts). Em Linux/CI, ou em checkout com LF, o `dvc status` deve ficar limpo.
+- **Remote:** `uv run dvc status -c -r dagshub` retorna "Cache and remote 'dagshub' are in sync"
+  (2026-11-14), ou seja, os objetos do `dvc.lock`, incluindo os lotes `v1.0.1` e `v1.0.2`
+  referenciados pelo pipeline, estão no remote.
+- **Conferência de números:** as tabelas de viés de `GOVERNANCE.md` e do README e os valores de
+  PSI, score e contagem da classe 1 foram comparados automaticamente com
+  `reports/bias/validation_bias.json` e `reports/drift/results-v1.0.2.json`: 115 valores
+  conferidos, nenhuma divergência. Premissas do dataset (Taiwan, 2005, NT$) conferem com
+  [`DATASET.md`](../DATASET.md).
 - Não foi feita conferência do acesso dos avaliadores.
 
 ## 5. Matriz de cobertura (rascunho, por critério oficial)

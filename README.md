@@ -487,7 +487,9 @@ termos de uso e a autorização para armazenamento remoto. A governança complet
 **Origem e finalidade.** Dataset público UCI 350 (Taiwan, 2005, CC BY 4.0, DOI
 `10.24432/C55S3H`), usado apenas para estudo acadêmico de monitoramento; o sistema não decide
 sobre pessoas. A licença permite reutilizar o dado e **não é base legal** para tratar dados de
-clientes reais. Ser público não elimina o risco de reidentificação.
+clientes reais. Para o uso exclusivamente acadêmico, o art. 4º, II, "b", da LGPD afasta a lei
+**mas mantém os arts. 7º e 11**; a hipótese aplicável é questão de revisão jurídica. Ser público
+não elimina o risco de reidentificação.
 
 **Dados pessoais e minimização.** `ID` é identificador técnico, não identidade civil. `SEX`,
 `EDUCATION`, `MARRIAGE` e `AGE` são dados pessoais e ficam **fora do modelo**, usados só em
@@ -504,7 +506,8 @@ automatizadas (art. 20). O protótipo não implementa essas comunicações.
 **Acesso, retenção e descarte.** Credenciais ficam em `.env` e `.dvc/config.local`, ignorados
 pelo Git; dados e modelos vivem no DVC/DagsHub, nunca no Git. A retenção por classe de artefato,
 com gatilhos de revisão, está em [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md#25-retenção-e-descarte-proposta--responsáveis-e-prazos-a-confirmar);
-**prazos e responsáveis estão pendentes**. Apagar um ponteiro Git não apaga o objeto por hash no
+**prazos estão pendentes de validação jurídica**; os responsáveis são atribuídos de forma simulada
+aos integrantes do grupo (e a um Jurídico fictício). Apagar um ponteiro Git não apaga o objeto por hash no
 remote nem nos caches.
 
 **Modelo e viés agregado.** Random Forest (19 features, limiar 0,5, contrato `1.0.0`),

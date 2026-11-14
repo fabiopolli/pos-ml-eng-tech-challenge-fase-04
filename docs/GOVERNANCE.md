@@ -47,9 +47,10 @@ uma). A preparação não removeu linhas (30.000 de entrada, 30.000 de saída). 
 | Financeiras | `LIMIT_BAL`, `PAY_0`, `PAY_2`–`PAY_6`, `BILL_AMT1`–`6`, `PAY_AMT1`–`6` | Sim (19 features) | Dados pessoais financeiros em tese; no dataset estão sem nome ou documento. |
 | Alvo | `default_payment_next_month` | Rótulo (só em treino/validação/teste) | Ausente nos lotes de produção simulados. |
 
-- **Categorias sensíveis (LGPD art. 5º, II):** origem racial/étnica, convicção religiosa, opinião
-  política, filiação sindical/religiosa/política, saúde, vida sexual, dado genético ou
-  biométrico. O dataset **não contém** essas variáveis. Sexo, escolaridade, estado civil e idade
+- **Categorias sensíveis (LGPD art. 5º, II):** origem racial ou étnica, convicção religiosa,
+  opinião política, filiação a sindicato ou a organização de caráter religioso, filosófico ou
+  político, saúde ou vida sexual, dado genético ou biométrico, quando vinculado a uma pessoa
+  natural. O dataset **não contém** essas variáveis. Sexo, escolaridade, estado civil e idade
   são dados pessoais, mas não constam dessa lista legal.
 - **Justificativa de exclusão da demografia do modelo:** minimização e redução do risco de
   discriminação direta. Isso **não elimina proxies** (por exemplo, limite de crédito ou padrão de
@@ -91,29 +92,81 @@ dados ou modelo está no Git.
 | Dados | Dataset público, CC BY 4.0, de terceiros | Dados reais de clientes da própria instituição |
 | Finalidade | Estudo de monitoramento de modelos | Apoio à análise de risco de crédito |
 | Decisão sobre pessoas | Nenhuma | Qualquer uso em crédito exigiria base legal, avaliação de impacto e supervisão humana |
-| Base legal | Não se aplica (dado público, sem decisão sobre titulares) | Ver §2.2 |
+| Base legal | Não está definida: o art. 4º, II, "b", afasta a LGPD de tratamento **exclusivamente** acadêmico, **mas mantém a aplicação dos arts. 7º e 11**; o art. 7º, § 3º, exige considerar finalidade, boa-fé e interesse público de dados de acesso público. O art. 7º, IV (estudos por "órgão de pesquisa", art. 5º, XVIII) só serve se a entidade responsável se enquadrar nessa definição; segundo o estudo técnico da ANPD (ver §2.2), quem não se enquadra precisa de outra hipótese, como consentimento ou legítimo interesse. **Pendente:** definir sob qual instituição o grupo atua e submeter à revisão jurídica | Ver §2.2 |
 
 ### 2.2 Base legal proposta (Proposta — revisão jurídica pendente)
 
 Para o cenário hipotético, hipóteses a submeter à revisão do encarregado/jurídico, **sem
-afirmar que estejam validadas**:
+afirmar que estejam validadas**. A empresa é uma **fintech fictícia**, criada só para ilustrar o
+tema em um projeto acadêmico: seu porte, natureza jurídica, papel (controladora ou operadora) e
+eventual regulação **não estão definidos** e não devem ser lidos como fato. Por isso as hipóteses
+abaixo são condicionais.
 
 - **Proteção do crédito** (LGPD art. 7º, X) como hipótese principal para análise de risco de
   inadimplência;
 - **execução de contrato** (art. 7º, V) para dados necessários ao contrato com o titular, quando
   aplicável;
-- **cumprimento de obrigação legal ou regulatória** (art. 7º, II) para exigências de órgãos
-  reguladores, quando aplicável.
+- **cumprimento de obrigação legal ou regulatória** (art. 7º, II): mantido **apenas como
+  hipótese condicional**, que só vale se a instituição estiver sujeita a normas prudenciais do
+  BACEN/CMN que exijam modelagem de perda esperada. Neste projeto acadêmico, a fintech é
+  **fictícia** e **nenhuma autorização ou licença real é afirmada**; se o cenário não pressupuser
+  uma instituição regulada, o inciso deve ser removido para evitar enquadramento indevido.
 
-Princípios do art. 6º a observar: finalidade, adequação, necessidade, livre acesso, qualidade,
-transparência, segurança, prevenção, **não discriminação** e responsabilização.
+Princípios do art. 6º a observar: finalidade (I), adequação (II), necessidade (III), livre acesso
+(IV), qualidade (V), transparência (VI), segurança (VII), prevenção (VIII), **não discriminação**
+(IX) e responsabilização e prestação de contas (X). O art. 7º, § 6º, estabelece que a dispensa de
+consentimento não desobriga os agentes das demais obrigações da lei, em especial os princípios e
+os direitos do titular; o art. 20 garante a revisão de decisões automatizadas, inclusive de perfil
+de crédito; e o art. 37 exige registro das operações de tratamento.
+
+Recomendação preventiva para um uso real (Proposta): elaborar o **Relatório de Impacto à Proteção
+de Dados Pessoais (RIPD)** (definido no art. 5º, XVII) antes de entrar em produção, documentando
+as métricas de não discriminação (§3.2) e o fluxo de atendimento ao art. 20. O art. 38 apenas
+prevê que a ANPD **pode determinar** a elaboração do RIPD; a elaboração prévia é boa prática, não
+exigência literal do texto. Quanto ao art. 12, os dados anonimizados deixam de ser pessoais
+**salvo** se a anonimização for reversível com esforços razoáveis; o projeto **não presume
+anonimização** do dataset público e trata todo registro sob controles de dados pessoais.
+
+**Conferência no texto oficial (2026-11-14).** Os artigos 4º, 5º, 6º, 7º, 12, 15, 16, 20, 37, 38 e
+48 foram conferidos contra a cópia local [`docs/LGPD.txt`](LGPD.txt) (texto da Lei nº
+13.709/2018 com o cabeçalho da Presidência da República, incluindo alterações até a Lei nº
+15.352/2026). O art. 20 também havia sido visto no portal da Câmara. As hipóteses do art. 7º
+(II, V e X) e os princípios do art. 6º (I, III, VI e IX) citados acima **coincidem** com o texto.
+A conferência confirma o que a lei diz; **não** valida o enquadramento. Os arts. 15 e 16 tratam do
+término do tratamento e da eliminação (com exceções de conservação, como obrigação legal), mas
+**não fixam prazos**: os prazos de §2.5 continuam propostas sem base legal conferida.
+
+> Origem: parte desta seção e das §2.5, §3.3 e §4.4 vem de uma pesquisa interna sem referências
+> primárias. O que **não** foi conferido: a base normativa de cada prazo de retenção, as
+> orientações da ANPD e o enquadramento jurídico (revisão humana pendente).
 
 Referências oficiais: [Lei 13.709/2018 (Planalto)](https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm)
 e [texto na Câmara dos Deputados](https://www2.camara.leg.br/legin/fed/lei/2018/lei-13709-14-agosto-2018-787077-publicacaooriginal-156212-pl.html).
-Consulta de 2026-11-14: apenas o art. 20 foi confirmado (portal da Câmara); o portal do
-Planalto estava inacessível. **Pendente:** conferir os demais artigos citados no texto
-atualizado e consultar as orientações da [ANPD](https://www.gov.br/anpd/pt-br) sobre decisões
-automatizadas e proteção do crédito.
+**Pendente:** orientações finais da ANPD sobre decisões automatizadas e proteção do crédito.
+
+**Orientação da ANPD sobre uso acadêmico (consultada em 2026-11-14).** O
+[Estudo Técnico "A LGPD e o tratamento de dados pessoais para fins acadêmicos e para a realização de estudos por órgão de pesquisa"](https://www.gov.br/anpd/pt-br/centrais-de-conteudo/documentos-tecnicos-orientativos/estudo-tecnico-a-lgpd-e-o-tratamento-de-dados-pessoais-para-fins-academicos-e-para-a-realizacao-de-estudos-por-orgao-de-pesquisa.pdf/@@display-file/file)
+(Texto para Discussão nº 1/2022, abril/2022) foi lido diretamente. Ele é **preliminar**: declara
+que "não representa necessariamente a opinião final da ANPD". Dele se extrai, como leitura
+cautelosa, que o art. 7º, IV exige entidade que se enquadre no art. 5º, XVIII (por exemplo,
+instituições de ensino superior públicas ou privadas **sem fins lucrativos**), e que quem não se
+enquadra precisa amparar o tratamento em outra hipótese legal, como consentimento ou legítimo
+interesse. Se o grupo atua sob uma instituição que se qualifique como órgão de pesquisa é fato a
+confirmar (Pendente).
+
+**Dados de origem estrangeira (art. 4º, IV).** Pelo texto da lei, a exclusão exige que os dados
+venham de fora do território nacional **e** não sejam objeto de comunicação ou uso compartilhado
+com agentes de tratamento brasileiros, nem de transferência internacional a país diferente do de
+origem, **e** que o país de origem ofereça grau de proteção adequado. Como o dataset é usado por
+agentes brasileiros (o grupo), leitura provisória: a exceção **provavelmente não** cobre o
+projeto, que por isso adota controles de dados pessoais. É leitura do texto, não parecer: fica
+para a revisão jurídica.
+
+**Art. 20 e revisão humana.** O texto atual do art. 20 **não exige** que a revisão seja feita por
+pessoa natural (o § 3º, que tratava disso, foi vetado, conforme `docs/LGPD.txt`). A revisão
+humana adotada neste documento é uma **escolha de desenho proposta**, não uma exigência
+literal. Afirmações de blogs sobre a posição da ANPD em "intervenção humana significativa" **não
+foram verificadas** em fonte primária e não são usadas aqui.
 
 ### 2.3 Transparência, contestação e supervisão (Proposta)
 
@@ -121,9 +174,18 @@ automatizadas e proteção do crédito.
   da análise. O protótipo **não** implementa essa comunicação.
 - **Contestação:** o titular pode solicitar a revisão de decisões tomadas unicamente com base em
   tratamento automatizado (LGPD art. 20). O protótipo **não** decide sobre pessoas; em um uso
-  real, a saída do modelo seria apoio, com revisão humana antes de qualquer negativa.
+  real, a saída do modelo seria apoio, com revisão humana antes de qualquer negativa. A
+  contestação exige revisão pelo controlador e informações claras sobre os critérios (respeitado o
+  segredo comercial e industrial); **não** gera, por si, comunicação à ANPD. Se o controlador
+  negar as informações alegando segredo industrial, a ANPD pode realizar auditoria (art. 20, § 2º).
+- **Incidente de segurança:** o art. 48 manda comunicar **à ANPD e ao titular** o incidente que
+  possa acarretar risco ou dano relevante aos titulares, em prazo definido pela autoridade
+  (§ 1º). Segundo o art. 6º da
+  [Resolução CD/ANPD nº 15/2024](https://www.in.gov.br/en/web/dou/-/resolucao-cd/anpd-n-15-de-24-de-abril-de-2024-556243024)
+  (DOU, consultado em 2026-11-14), deve ocorrer em **três dias úteis** contados do conhecimento
+  de que o incidente afetou dados pessoais.
 - **Supervisão humana:** alertas de contrato, execução ou drift são **sinais de investigação**
-  para um responsável (a definir). Nenhum alerta aprova crédito, retreina o modelo ou altera
+  para os responsáveis definidos em §3.3 (simulação acadêmica). Nenhum alerta aprova crédito, retreina o modelo ou altera
   política automaticamente.
 - **Probabilidades:** a saída é `predict_proba` do Random Forest, **não calibrada**; não deve ser
   comunicada como probabilidade real de inadimplência.
@@ -133,7 +195,7 @@ automatizadas e proteção do crédito.
 | Recurso | Quem acessa | Estado |
 |---|---|---|
 | Repositório GitHub (código, docs, JSON agregados) | Equipe do projeto | Realizado |
-| Objetos DVC no DagsHub | Integrantes com token de leitura/escrita | Realizado; **Pendente:** confirmar acesso de leitura dos avaliadores |
+| Objetos DVC no DagsHub | Integrantes com token de leitura/escrita | Realizado; leitura dos avaliadores confirmada pelo responsável do repositório (**sem evidência registrada**) |
 | Token DagsHub | Cada integrante, em `.env` / `.dvc/config.local` (ignorados pelo Git) | Realizado; nunca versionado |
 | MLflow, logs, dashboard | Máquina local de quem executa | Realizado (sem servidor compartilhado) |
 | Vídeo STAR | A definir | Pendente: confirmar acesso sem credencial pessoal do autor |
@@ -143,18 +205,61 @@ estágios e versionamento; apenas o estágio `evaluate` lê `test.csv`.
 
 ### 2.5 Retenção e descarte (Proposta — responsáveis e prazos a confirmar)
 
-Não há prazo legal inventado aqui. A tabela propõe **gatilhos**; prazos e responsáveis são
-decisões humanas pendentes.
+Os prazos abaixo são **parâmetros propostos**, não exigência legal verificada. Os arts. 15 e 16 da
+LGPD não fixam prazo: o término ocorre quando a finalidade é alcançada ou os dados deixam de ser
+necessários (art. 15) e a conservação é autorizada, entre outros casos, para cumprimento de
+obrigação legal ou regulatória (art. 16, I). Para o prazo de 5 anos, uma pesquisa interna indica
+como fundamentos o CDC art. 43, § 1º (informação negativa em cadastros por no máximo 5 anos; Súmula
+323 do STJ), o CDC art. 27 (prescrição de 5 anos da pretensão por fato do serviço) e o Código
+Civil art. 206, § 5º, I (cobrança de dívida líquida). Esses dispositivos **não foram conferidos em
+texto oficial** e têm funções diferentes: o CDC art. 43, § 1º é um **teto** para cadastros de
+inadimplentes, não uma regra de retenção de logs de inferência, e os prazos prescricionais correm
+de marcos distintos. Cabe ao encarregado/Jurídico validar a aplicação e segregar base ativa de
+arquivo para defesa judicial.
 
-| Classe | Onde existe | Gatilho de revisão proposto | Descarte (procedimento) |
+**Protótipo acadêmico (Proposta).** Gatilho: **90 dias após o encerramento da avaliação**,
+contados da data posterior entre a apresentação e a divulgação do resultado final (data a
+confirmar pelo grupo). O prazo de 90 dias é uma **escolha acadêmica**, sem base legal. Escopo:
+
+- o dataset de origem é **público e real** (UCI 350, CC BY 4.0), não fictício; fictícios são
+  apenas o cenário da fintech e os lotes de produção **sintéticos** derivados dele. Por isso a
+  exclusão é uma medida de minimização e de coerência com o plano de retenção, não uma exigência
+  da licença;
+- o que seria excluído são as **cópias e os objetos de dados e modelos** (cache DVC local, objetos
+  no DagsHub, MLflow, logs); o **repositório Git** (código, documentação e JSON agregados, sem
+  dados de clientes) **permanece** como caso de estudo, e o histórico do Git não é reescrito;
+- a reprodutibilidade não depende dos objetos remotos para os dados de origem: o workbook pode ser
+  obtido de novo na UCI e conferido pelos hashes registrados em `configs/project.yaml`
+  (`expected_xls_md5`); os modelos e lotes sintéticos seriam regenerados pelo pipeline;
+- a exclusão **só será declarada como feita com evidência** (comando, data e conferência), por
+  quem executa (Denis Barros Melo, simulado) e com ciência do DPO simulado (Fábio Polli). Até lá,
+  é **proposta**. A coleta de lixo do DVC e a exclusão no DagsHub **não foram executadas**;
+- **riscos a registrar:** após a exclusão, um `dvc pull` deixa de funcionar para quem precisar
+  reproduzir o projeto; por isso o prazo conta a partir do fim da avaliação. Cópias de avaliadores
+  e a plataforma do vídeo **não estão sob controle do grupo**: pode-se apenas **solicitar** a
+  eliminação.
+
+| Classe (protótipo) | Onde existe | Gatilho proposto | Descarte (procedimento) |
 |---|---|---|---|
-| Dados brutos e partições | Cache DVC local, objetos no DagsHub | Fim do uso acadêmico / encerramento do projeto | Remover cópia local; exclusão remota exige decisão e autorização explícitas |
-| Modelo e candidatos | Cache DVC, DagsHub | Substituição ou descontinuação do modelo | Idem |
-| Lotes de produção simulados | Cache DVC, DagsHub | Fim da demonstração | Idem |
-| Relatórios JSON/HTML agregados | Git, DagsHub | Fim do projeto; sem dado pessoal | Permanecem no histórico Git; remoção exigiria reescrita de histórico (não proposta) |
-| MLflow, logs, recursos | Somente local | Após a avaliação | Apagar pastas locais |
-| Cópias de avaliadores | Cache DVC deles | Fim da avaliação | Responsabilidade do avaliador; **Pendente** |
-| Capturas e vídeo | Plataforma de vídeo | Fim da avaliação | A definir pelo responsável |
+| Dados brutos e partições | Cache DVC local, objetos no DagsHub | 90 dias após o fim da avaliação | Remover cópia local e objetos remotos; registrar evidência. Dado de origem é recuperável na UCI |
+| Modelo e candidatos | Cache DVC, DagsHub | Idem | Idem; regenerável pelo pipeline |
+| Lotes de produção simulados | Cache DVC, DagsHub | Idem | Idem; regeneráveis (protocolo `1.0.2`, seed 42) |
+| Relatórios JSON/HTML agregados | Git, DagsHub | Não se aplica; sem dado pessoal | Permanecem no Git como caso de estudo; reescrever histórico não é proposto |
+| MLflow, logs, recursos | Somente local | 90 dias após o fim da avaliação | Apagar pastas locais |
+| Cópias de avaliadores | Cache DVC deles | Fim da avaliação | **Solicitar** a eliminação; sem controle do grupo |
+| Capturas e vídeo | Plataforma de vídeo | A definir | Só agregados; decisão do responsável pela gravação (**Pendente**) |
+
+**Cenário de produção com dados reais (Proposta, a validar):**
+
+| Classe | Retenção proposta | Descarte proposto |
+|---|---|---|
+| Logs de inferência e predição | 5 anos após o fim da relação contratual ou da última consulta de crédito | Exclusão lógica no vencimento e expurgo físico (sobrescrita) em até 30 dias |
+| Datasets de treino e validação | 24 meses em ambiente isolado e pseudonimizado, para auditoria de viés e reprodutibilidade | Eliminação ou anonimização irreversível ao fim do ciclo (LGPD, arts. 15 e 16, a conferir) |
+
+Responsáveis (simulação acadêmica, ver §3.3): definição e auditoria dos prazos —
+Encarregado (DPO) **Fábio Polli**, com o Jurídico fictício; execução técnica do expurgo —
+Engenharia de Dados **Denis Barros Melo**. O encarregado não executa o expurgo, para manter a
+separação entre quem define e quem executa.
 
 **Limites do armazenamento por hash:** apagar um ponteiro `.dvc`/`dvc.lock` do Git **não** apaga
 o objeto no remote nem no cache local; o histórico Git continua apontando para versões antigas.
@@ -253,11 +358,55 @@ artefatos regenerados localmente no Windows, produziu **exatamente os mesmos res
 
 - Cada versão do modelo é identificada por hash, contrato, configuração e `dvc.lock`; os
   registros de execução ficam no MLflow local.
-- Revisão de alertas e de uso do modelo: responsável a definir (**Pendente**).
 - **Suspensão/reavaliação:** em um uso real, suspender ou revisar a versão quando houver
   (a) falha de contrato recorrente, (b) drift confirmado e investigado sem explicação benigna,
   (c) degradação de desempenho ou diferença adversa entre grupos **comprovada com rótulos**.
-  Gatilhos numéricos são decisão humana pendente.
+
+#### Gatilhos numéricos
+
+**Regras ativas no protótipo (Realizado, `configs/project.yaml`):**
+
+- **Contrato de dados:** o processamento é em lote; qualquer violação de esquema, tipo ou nulos
+  fora do contrato bloqueia o lote inteiro antes da inferência.
+- **PSI por feature:** alerta quando o PSI é **maior que 0,20** (`comparison: ">"`), com revisão
+  humana; o alerta não dispara retreino automático.
+
+**Regras adicionais para um cenário real (Proposta, referência de mercado a validar):**
+
+| Gatilho | Revisão (amarelo) | Suspensão preventiva (vermelho) | Observação |
+|---|---|---|---|
+| PSI das features ou do score | 0,10 a 0,25 | acima de 0,25 | O protótipo usa um único limiar de 0,20 para testes |
+| AUC-ROC | queda relativa > 5% frente à validação | queda > 10% | Exige rótulos reais (safra); **não se aplica ao protótipo** |
+| KS | — | abaixo de 0,20 | Idem |
+| Equidade | — | razão entre taxas de predição positiva < 0,80 entre grupos | Regra dos 80% é referência técnica externa (EEOC, EUA), **não exigência da LGPD**; aplicada à taxa de predição positiva (classe 1 = risco), não à aprovação |
+
+#### Papéis e responsáveis (simulação acadêmica)
+
+Os papéis são da fintech hipotética. Por se tratar de projeto acadêmico, foram atribuídos aos
+integrantes do grupo, seguindo as frentes iniciais do [README](../README.md#equipe-e-frentes-de-trabalho),
+e o papel jurídico é **fictício**. A atribuição é uma **simulação para fins de documentação**:
+**não** constitui atribuição formal de responsabilidade individual, e **a revisão jurídica real
+continua pendente**; o Jurídico fictício não valida nada. Atribuição a confirmar pelo grupo.
+
+| Papel | Responsável (simulado) | Frente inicial |
+|---|---|---|
+| Encarregado (DPO) | Fábio Polli | Repositório, arquitetura, CI e integração |
+| Engenharia de Dados (qualidade, contrato, expurgo) | Denis Barros Melo | Engenharia e qualidade de dados |
+| MLOps / operação do monitoramento | Romario Silva | Observabilidade, dashboard e integração |
+| Cientista de Dados líder | Willian Kopp | Plano técnico e modelagem |
+| Responsável de produto de crédito | Denis Barros Melo | Atribuição simulada |
+| Jurídico | Advogado(a) fictício(a), do "Escritório Fictício Exemplo & Associados" (papel simulado, sem existência real) | — |
+
+#### Revisão de alertas e escalonamento (Proposta)
+
+Nenhum alerta técnico dispara retreino automático; toda ação corretiva exige revisão humana
+prévia. Os SLAs são propostos, sem base normativa.
+
+| Nível | Tipo de alerta | Responsável (simulado) | SLA | Ação e escalonamento |
+|---|---|---|---|---|
+| N1 (operacional) | Falha de contrato no lote, falha de execução ou drift moderado | Romario Silva (MLOps) | até 4 h | Bloquear o lote inválido ou diagnosticar features; escala para N2 se persistir por mais de 24 h |
+| N2 (tático/negócio) | Drift severo ou desvio na taxa de predição positiva | Willian Kopp (Cientista de Dados líder) e Denis Barros Melo (produto de crédito) | até 24 h | Revisão humana, com possível retreino ou revisão do limiar em nova versão; escala para N3 se houver risco regulatório ou viés |
+| N3 (crítico/privacidade) | Contestação do art. 20, suspeita de discriminação ilícita (art. 6º, IX) ou incidente de segurança (art. 48) | Comitê simulado: Fábio Polli (DPO), Willian Kopp (modelo) e o Jurídico fictício | imediato (até 2 h) | Suspensão preventiva do modelo, com fallback manual; incidente com risco relevante segue o prazo da Resolução CD/ANPD nº 15/2024 (§2.3) |
 
 ## 4. Análise causal e resposta (4.4)
 
@@ -304,7 +453,7 @@ Num alerta real de drift, antes de atribuir causa econômica, considerar e testa
 | Desempenho ou viés adverso **comprovado** com rótulos | Avaliação humana e possível suspensão/revisão de versão | Ajustar limiar consultando o teste reservado |
 
 Impacto potencial (ex.: mais decisões erradas se a população mudar) **não é perda medida**.
-Responsáveis e escalonamento: **Pendente** de confirmação.
+Responsáveis e escalonamento propostos em §3.3; a atribuição nominal está **pendente**.
 
 ## 5. Riscos e mitigação
 
@@ -316,11 +465,19 @@ Responsáveis e escalonamento: **Pendente** de confirmação.
 | Viés entre grupos | Análise agregada por grupo (§3.2) | Descritiva; proxies não investigados |
 | Concept Drift não detectável | Limitação declarada | Sem rótulos em produção simulada |
 | Dados fora do contexto (Taiwan/2005) | Limite declarado | Sem validação em dados atuais |
-| Retenção indefinida em cache/remote | Procedimento descrito (§2.5) | Prazos e responsáveis pendentes |
+| Retenção indefinida em cache/remote | Procedimento descrito (§2.5); responsáveis simulados em §3.3 | Prazos pendentes de validação jurídica real |
 
 ## 6. Pendências que dependem de decisão humana
 
-- revisão jurídica da base legal proposta e conferência do texto atualizado da LGPD/ANPD;
-- prazos e responsáveis de retenção/descarte; responsável por revisar alertas;
-- confirmação do acesso de leitura dos avaliadores aos objetos DVC e ao vídeo;
-- gatilhos numéricos de suspensão/revisão do modelo.
+- revisão jurídica da base legal proposta (art. 7º, II, V e X); definição da instituição sob a
+  qual o grupo atua e se ela é "órgão de pesquisa" (art. 5º, XVIII) para o uso acadêmico; leitura
+  do art. 4º, IV; e aplicação dos fundamentos do prazo de 5 anos (CDC e Código Civil, não
+  conferidos em texto oficial). Os artigos da LGPD citados já foram conferidos contra
+  `docs/LGPD.txt` (§2.2) e o estudo técnico da ANPD foi lido (preliminar);
+- confirmação pelo grupo da atribuição simulada de responsáveis (§3.3); o papel jurídico é
+  fictício e **não substitui** a revisão jurídica real;
+- validação dos gatilhos numéricos do cenário real (§3.3) e das orientações da ANPD;
+- confirmação pelo grupo da data-base e da execução da exclusão proposta (90 dias após o fim da
+  avaliação, §2.5), com evidência; solicitação de eliminação às cópias de avaliadores;
+- confirmação do acesso de leitura dos avaliadores ao vídeo (o acesso ao DagsHub foi confirmado
+  pelo responsável do repositório, sem evidência registrada neste documento).
