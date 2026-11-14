@@ -12,7 +12,7 @@
 | ID | Entrega | Onde está | Estado |
 |---|---|---|---|
 | 4.1 | Tratamento e origem dos dados | `GOVERNANCE.md` §1 (fluxo, variáveis pessoais, inventário por artefato) | Documentado; inventário conferido contra `.gitignore`, `dvc.yaml` e `git ls-files` |
-| 4.2 | Plano de privacidade/LGPD | `GOVERNANCE.md` §2 | Documentado como **proposta**; base legal, prazos, responsáveis e acesso dos avaliadores **pendentes** |
+| 4.2 | Plano de privacidade/LGPD | `GOVERNANCE.md` §2 | Documentado como **proposta acadêmica** com revisão jurídica **simulada** (decisão do grupo, 2026-11-14); acesso dos avaliadores declarado, sem verificação independente; eliminação de dados a executar e registrar após a avaliação |
 | 4.3 | Governança do modelo e viés agregado | `GOVERNANCE.md` §3; `src/credit_monitoring/models/bias.py`; `reports/bias/validation_bias.json` | Implementado e executado; resultado descritivo |
 | 4.4 | Análise causal e resposta | `GOVERNANCE.md` §4 | Documentado; ancorado em `reports/drift/results-v1.0.2.json` |
 | 4.5 | README consolidado | `README.md` (seções "Governança e LGPD" e "Análise causal") | **Parcial**: falta o link do vídeo e a validação por outro integrante |
@@ -95,7 +95,9 @@ importar `train` justamente para funcionar no Windows.
   `reports/bias/validation_bias.json` e `reports/drift/results-v1.0.2.json`: 115 valores
   conferidos, nenhuma divergência. Premissas do dataset (Taiwan, 2005, NT$) conferem com
   [`DATASET.md`](../DATASET.md).
-- Não foi feita conferência do acesso dos avaliadores.
+- **Acesso dos avaliadores:** o grupo declarou em 2026-11-14 que todos os repositórios estão
+  liberados para os avaliadores. É declaração, **sem captura de tela nem verificação
+  independente** (não foi testado com uma conta sem permissão).
 
 ## 5. Matriz de cobertura (rascunho, por critério oficial)
 
@@ -111,9 +113,11 @@ Não substitui a conferência das 28 entregas, que continua pendente (4.7).
 
 ## 6. Pendências
 
-- decisão humana: base legal, prazos e responsáveis de retenção, gatilhos de suspensão,
-  responsável por alertas (`GOVERNANCE.md` §6);
+- limitações assumidas (`GOVERNANCE.md` §6): revisão jurídica simulada, prazos de 5 anos e 24
+  meses como propostas acadêmicas, resumo da ANPD não verificado na fonte, acesso dos avaliadores
+  apenas declarado;
 - `dvc pull` com credenciais corrigidas — **feito**; falta apenas a prova em checkout/cache separado (4.7);
-- acesso de leitura dos avaliadores (DagsHub e vídeo);
+- acesso de leitura ao vídeo, quando publicado;
+- eliminação de objetos e caches após a conclusão da avaliação, com evidência;
 - link do vídeo no README (4.5/4.6);
 - reprodução em checkout/cache separado e conferência das 28 entregas (4.7).

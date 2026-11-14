@@ -9,6 +9,21 @@
 **Legenda:** `Realizado` = verificado no repositório; `Proposta` = desenho para a fintech
 hipotética, sem operação real; `Pendente` = precisa de decisão/confirmação humana.
 
+**Premissas da entrega simulada (decididas pelo grupo em 2026-11-14):**
+
+- a **revisão jurídica é simulada**: o Jurídico é fictício e não há parecer de profissional real.
+  Base legal, prazos e demais enquadramentos são tratados como **proposta acadêmica**, não como
+  validados;
+- os prazos de retenção de produção adotados são **5 anos** (logs de inferência) e **24 meses**
+  (datasets de treino e validação), como parâmetros propostos (§2.5);
+- a instituição fictícia que representa o grupo é **premissa de cenário**: considera-se um
+  "órgão de pesquisa" (LGPD art. 5º, XVIII) para discutir o art. 7º, IV. Nenhuma constituição
+  legal, sede ou ausência de fins lucrativos é afirmada como fato (§2.1);
+- o término do tratamento do protótipo segue o critério da LGPD (arts. 15 e 16), sem prazo
+  numérico próprio (§2.5);
+- o acesso de leitura dos avaliadores aos repositórios foi **declarado** liberado pelo grupo (§2.4);
+- a distribuição de papéis e SLAs foi **comunicada ao grupo** (§3.3).
+
 ## 1. Origem e finalidade (4.1)
 
 - **Dataset:** UCI *Default of Credit Card Clients* (ID 350), 30.000 clientes de cartão de crédito
@@ -92,9 +107,9 @@ dados ou modelo está no Git.
 | Dados | Dataset público, CC BY 4.0, de terceiros | Dados reais de clientes da própria instituição |
 | Finalidade | Estudo de monitoramento de modelos | Apoio à análise de risco de crédito |
 | Decisão sobre pessoas | Nenhuma | Qualquer uso em crédito exigiria base legal, avaliação de impacto e supervisão humana |
-| Base legal | Não está definida: o art. 4º, II, "b", afasta a LGPD de tratamento **exclusivamente** acadêmico, **mas mantém a aplicação dos arts. 7º e 11**; o art. 7º, § 3º, exige considerar finalidade, boa-fé e interesse público de dados de acesso público. O art. 7º, IV (estudos por "órgão de pesquisa", art. 5º, XVIII) só serve se a entidade responsável se enquadrar nessa definição; segundo o estudo técnico da ANPD (ver §2.2), quem não se enquadra precisa de outra hipótese, como consentimento ou legítimo interesse. **Pendente:** definir sob qual instituição o grupo atua e submeter à revisão jurídica | Ver §2.2 |
+| Base legal | Não está definida: o art. 4º, II, "b", afasta a LGPD de tratamento **exclusivamente** acadêmico, **mas mantém a aplicação dos arts. 7º e 11**; o art. 7º, § 3º, exige considerar finalidade, boa-fé e interesse público de dados de acesso público. O art. 7º, IV (estudos por "órgão de pesquisa", art. 5º, XVIII) só serve se a entidade responsável se enquadrar nessa definição; segundo o estudo técnico da ANPD (ver §2.2), quem não se enquadra precisa de outra hipótese, como consentimento ou legítimo interesse. **Premissa do cenário simulado:** a instituição fictícia que representa o grupo é um órgão de pesquisa, o que permite apoiar o uso acadêmico no art. 7º, IV, com anonimização "sempre que possível". Isso **não é fato verificado** e exige revisão jurídica real em um uso verdadeiro | Ver §2.2 |
 
-### 2.2 Base legal proposta (Proposta — revisão jurídica pendente)
+### 2.2 Base legal proposta (Proposta — revisão jurídica simulada)
 
 Para o cenário hipotético, hipóteses a submeter à revisão do encarregado/jurídico, **sem
 afirmar que estejam validadas**. A empresa é uma **fintech fictícia**, criada só para ilustrar o
@@ -151,8 +166,11 @@ que "não representa necessariamente a opinião final da ANPD". Dele se extrai, 
 cautelosa, que o art. 7º, IV exige entidade que se enquadre no art. 5º, XVIII (por exemplo,
 instituições de ensino superior públicas ou privadas **sem fins lucrativos**), e que quem não se
 enquadra precisa amparar o tratamento em outra hipótese legal, como consentimento ou legítimo
-interesse. Se o grupo atua sob uma instituição que se qualifique como órgão de pesquisa é fato a
-confirmar (Pendente).
+interesse. O mesmo estudo define órgão de pesquisa como entidade constituída sob as leis
+brasileiras, com sede e foro no País, sem fins lucrativos (se privada) e com pesquisa em sua
+missão. **Premissa adotada:** a instituição fictícia do grupo atende a esses requisitos; é uma
+suposição de cenário, não um fato. A camada da **fintech hipotética**, com fins lucrativos, **não**
+se apoia no art. 7º, IV (§2.2).
 
 **Dados de origem estrangeira (art. 4º, IV).** Pelo texto da lei, a exclusão exige que os dados
 venham de fora do território nacional **e** não sejam objeto de comunicação ou uso compartilhado
@@ -195,7 +213,7 @@ foram verificadas** em fonte primária e não são usadas aqui.
 | Recurso | Quem acessa | Estado |
 |---|---|---|
 | Repositório GitHub (código, docs, JSON agregados) | Equipe do projeto | Realizado |
-| Objetos DVC no DagsHub | Integrantes com token de leitura/escrita | Realizado; leitura dos avaliadores confirmada pelo responsável do repositório (**sem evidência registrada**) |
+| Objetos DVC no DagsHub | Integrantes com token de leitura/escrita | Realizado; leitura dos avaliadores **declarada liberada pelo grupo para todos os repositórios** em 2026-11-14 (declaração; sem captura de tela nem verificação independente) |
 | Token DagsHub | Cada integrante, em `.env` / `.dvc/config.local` (ignorados pelo Git) | Realizado; nunca versionado |
 | MLflow, logs, dashboard | Máquina local de quem executa | Realizado (sem servidor compartilhado) |
 | Vídeo STAR | A definir | Pendente: confirmar acesso sem credencial pessoal do autor |
@@ -217,9 +235,13 @@ inadimplentes, não uma regra de retenção de logs de inferência, e os prazos 
 de marcos distintos. Cabe ao encarregado/Jurídico validar a aplicação e segregar base ativa de
 arquivo para defesa judicial.
 
-**Protótipo acadêmico (Proposta).** Gatilho: **90 dias após o encerramento da avaliação**,
-contados da data posterior entre a apresentação e a divulgação do resultado final (data a
-confirmar pelo grupo). O prazo de 90 dias é uma **escolha acadêmica**, sem base legal. Escopo:
+**Protótipo acadêmico (Proposta).** Gatilho: o **término do tratamento**. Pela LGPD, ele ocorre
+quando a finalidade é alcançada ou os dados deixam de ser necessários (art. 15, I), e os dados são
+então eliminados "no âmbito e nos limites técnicos das atividades" (art. 16). A lei **não fixa
+número de dias**; por isso o protótipo não adota prazo numérico próprio. Para o projeto, a
+finalidade (estudo acadêmico e demonstração) é considerada alcançada com a **conclusão da
+avaliação**; a eliminação ocorre a partir daí, dentro dos limites técnicos (o grupo pode, se
+quiser, registrar uma data operacional, sem valor legal). Escopo:
 
 - o dataset de origem é **público e real** (UCI 350, CC BY 4.0), não fictício; fictícios são
   apenas o cenário da fintech e os lotes de produção **sintéticos** derivados dele. Por isso a
@@ -235,17 +257,19 @@ confirmar pelo grupo). O prazo de 90 dias é uma **escolha acadêmica**, sem bas
   quem executa (Denis Barros Melo, simulado) e com ciência do DPO simulado (Fábio Polli). Até lá,
   é **proposta**. A coleta de lixo do DVC e a exclusão no DagsHub **não foram executadas**;
 - **riscos a registrar:** após a exclusão, um `dvc pull` deixa de funcionar para quem precisar
-  reproduzir o projeto; por isso o prazo conta a partir do fim da avaliação. Cópias de avaliadores
+  reproduzir o projeto; por isso a eliminação só ocorre após a conclusão da avaliação. O art. 16,
+  IV admite conservar dados **anonimizados** para uso exclusivo do controlador, o que sustenta
+  manter os relatórios agregados no Git. Cópias de avaliadores
   e a plataforma do vídeo **não estão sob controle do grupo**: pode-se apenas **solicitar** a
   eliminação.
 
 | Classe (protótipo) | Onde existe | Gatilho proposto | Descarte (procedimento) |
 |---|---|---|---|
-| Dados brutos e partições | Cache DVC local, objetos no DagsHub | 90 dias após o fim da avaliação | Remover cópia local e objetos remotos; registrar evidência. Dado de origem é recuperável na UCI |
+| Dados brutos e partições | Cache DVC local, objetos no DagsHub | Conclusão da avaliação (art. 15, I) | Remover cópia local e objetos remotos; registrar evidência. Dado de origem é recuperável na UCI |
 | Modelo e candidatos | Cache DVC, DagsHub | Idem | Idem; regenerável pelo pipeline |
 | Lotes de produção simulados | Cache DVC, DagsHub | Idem | Idem; regeneráveis (protocolo `1.0.2`, seed 42) |
 | Relatórios JSON/HTML agregados | Git, DagsHub | Não se aplica; sem dado pessoal | Permanecem no Git como caso de estudo; reescrever histórico não é proposto |
-| MLflow, logs, recursos | Somente local | 90 dias após o fim da avaliação | Apagar pastas locais |
+| MLflow, logs, recursos | Somente local | Conclusão da avaliação (art. 15, I) | Apagar pastas locais |
 | Cópias de avaliadores | Cache DVC deles | Fim da avaliação | **Solicitar** a eliminação; sem controle do grupo |
 | Capturas e vídeo | Plataforma de vídeo | A definir | Só agregados; decisão do responsável pela gravação (**Pendente**) |
 
@@ -381,15 +405,30 @@ artefatos regenerados localmente no Windows, produziu **exatamente os mesmos res
 | PSI das features ou do score | 0,10 a 0,25 | acima de 0,25 | O protótipo usa um único limiar de 0,20 para testes |
 | AUC-ROC | queda relativa > 5% frente à validação | queda > 10% | Exige rótulos reais (safra); **não se aplica ao protótipo** |
 | KS | — | abaixo de 0,20 | Idem |
-| Equidade | — | razão entre taxas de predição positiva < 0,80 entre grupos | Regra dos 80% é referência técnica externa (EEOC, EUA), **não exigência da LGPD**; aplicada à taxa de predição positiva (classe 1 = risco), não à aprovação |
+| Equidade | — | razão mínima/máxima entre grupos da taxa do **desfecho favorável** (não ser sinalizado como risco, isto é, 1 − taxa de predição positiva) abaixo de 0,80 | Regra dos 80% é referência técnica externa (EEOC, EUA), **não exigência da LGPD**. Aplicada à taxa de predição positiva (classe 1 = risco), a razão seria calculada sobre o desfecho **adverso** e daria resultado diferente; ver verificação abaixo |
+
+**Verificação dos gatilhos nos dados do projeto (2026-11-14, descritiva).** Aplicados aos
+resultados já existentes (`results-v1.0.2.json` e `validation_bias.json`; grupos com n ≥ 100):
+
+- **PSI:** o controle tem PSI máximo 0,004 (nenhum alerta em qualquer esquema). `LIMIT_BAL`
+  (0,7525) e `PAY_AMT1` (0,4647) ficam acima de 0,25 (**vermelho**) e acima do limiar do protótipo
+  (0,20). Como são intervenções sintéticas, o resultado é coerente com o desenho, não prova que
+  as faixas são adequadas;
+- **Equidade (razão mínima/máxima, desfecho favorável = não sinalizado):** `EDUCATION` 0,883,
+  `AGE` 0,935, `SEX` 0,970 e `MARRIAGE` 0,997, todos **acima de 0,80**. Pela taxa de sinalização
+  de risco (desfecho adverso), `EDUCATION` daria 0,703 e `AGE` 0,824, o que mostra que a escolha
+  do desfecho muda a conclusão: a definição deve ser fixada **antes** de usar o gatilho;
+- AUC, KS e a queda relativa **não podem ser verificados** sem rótulos de produção, que o projeto
+  não tem.
 
 #### Papéis e responsáveis (simulação acadêmica)
 
 Os papéis são da fintech hipotética. Por se tratar de projeto acadêmico, foram atribuídos aos
 integrantes do grupo, seguindo as frentes iniciais do [README](../README.md#equipe-e-frentes-de-trabalho),
 e o papel jurídico é **fictício**. A atribuição é uma **simulação para fins de documentação**:
-**não** constitui atribuição formal de responsabilidade individual, e **a revisão jurídica real
-continua pendente**; o Jurídico fictício não valida nada. Atribuição a confirmar pelo grupo.
+**não** constitui atribuição formal de responsabilidade individual. A revisão jurídica é
+**simulada** (premissa da entrega); o Jurídico fictício não valida nada. Em 2026-11-14 o grupo foi
+informado da distribuição de papéis e dos SLAs (declaração, sem registro formal).
 
 | Papel | Responsável (simulado) | Frente inicial |
 |---|---|---|
@@ -468,19 +507,26 @@ Responsáveis e escalonamento propostos em §3.3; a atribuição nominal está *
 | Viés entre grupos | Análise agregada por grupo (§3.2) | Descritiva; proxies não investigados |
 | Concept Drift não detectável | Limitação declarada | Sem rótulos em produção simulada |
 | Dados fora do contexto (Taiwan/2005) | Limite declarado | Sem validação em dados atuais |
-| Retenção indefinida em cache/remote | Procedimento descrito (§2.5); responsáveis simulados em §3.3 | Prazos pendentes de validação jurídica real |
+| Retenção indefinida em cache/remote | Procedimento descrito (§2.5); responsáveis simulados em §3.3 | Prazos propostos (5 anos e 24 meses) sem validação jurídica real (revisão simulada) |
 
-## 6. Pendências que dependem de decisão humana
+## 6. Limitações e pendências
 
-- revisão jurídica da base legal proposta (art. 7º, II, V e X); definição da instituição sob a
-  qual o grupo atua e se ela é "órgão de pesquisa" (art. 5º, XVIII) para o uso acadêmico; leitura
-  do art. 4º, IV; e aplicação dos fundamentos do prazo de 5 anos (CDC e Código Civil, não
-  conferidos em texto oficial). Os artigos da LGPD citados já foram conferidos contra
-  `docs/LGPD.txt` (§2.2) e o estudo técnico da ANPD foi lido (preliminar);
-- confirmação pelo grupo da atribuição simulada de responsáveis (§3.3); o papel jurídico é
-  fictício e **não substitui** a revisão jurídica real;
-- validação dos gatilhos numéricos do cenário real (§3.3) e das orientações da ANPD;
-- confirmação pelo grupo da data-base e da execução da exclusão proposta (90 dias após o fim da
-  avaliação, §2.5), com evidência; solicitação de eliminação às cópias de avaliadores;
-- confirmação do acesso de leitura dos avaliadores ao vídeo (o acesso ao DagsHub foi confirmado
-  pelo responsável do repositório, sem evidência registrada neste documento).
+**Limitações assumidas pela entrega simulada (não impedem a conclusão acadêmica):**
+
+- a revisão jurídica é simulada; base legal (art. 7º, II, V e X; IV para a camada acadêmica),
+  leitura do art. 4º, IV e fundamentos dos prazos de 5 anos e 24 meses (CDC e Código Civil, não
+  conferidos em texto oficial) **não foram validados por profissional**. Os artigos da LGPD
+  citados foram conferidos contra `docs/LGPD.txt` (§2.2) e o estudo técnico da ANPD foi lido
+  (preliminar);
+- as orientações da ANPD sobre decisões automatizadas e crédito constam de um **resumo fornecido
+  pelo grupo** (`docs/Diretrizes da ANPD.txt`), que o grupo informa ser resumo de fonte primária;
+  ele cita blogs e portais jurídicos e **não foi verificado diretamente na fonte**, por isso não é
+  usado para fundamentar afirmações deste documento;
+- o acesso dos avaliadores é declaração do grupo, sem captura de tela;
+- os gatilhos numéricos do cenário real (§3.3) são referência de mercado, não validados.
+
+**Pendências de execução:**
+
+- executar e **registrar evidência** da eliminação de objetos e caches após a conclusão da
+  avaliação (§2.5), e solicitar a eliminação às cópias de avaliadores;
+- confirmar o acesso de leitura dos avaliadores ao vídeo, quando publicado.

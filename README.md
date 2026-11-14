@@ -506,7 +506,8 @@ automatizadas (art. 20). O protótipo não implementa essas comunicações.
 **Acesso, retenção e descarte.** Credenciais ficam em `.env` e `.dvc/config.local`, ignorados
 pelo Git; dados e modelos vivem no DVC/DagsHub, nunca no Git. A retenção por classe de artefato,
 com gatilhos de revisão, está em [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md#25-retenção-e-descarte-proposta--responsáveis-e-prazos-a-confirmar);
-**prazos estão pendentes de validação jurídica**; os responsáveis são atribuídos de forma simulada
+**prazos (5 anos e 24 meses) são propostas acadêmicas**, sem validação jurídica real: a revisão é
+simulada por decisão do grupo. Os responsáveis são atribuídos de forma simulada
 aos integrantes do grupo (e a um Jurídico fictício). Apagar um ponteiro Git não apaga o objeto por hash no
 remote nem nos caches.
 

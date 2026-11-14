@@ -47,7 +47,7 @@ A fase 4 **consolida**; não reconstrói o que as fases anteriores já provaram.
 |---|---|
 | Inventário completo por artefato | **Feito** em `GOVERNANCE.md` §1.3, conferido contra `.gitignore`, `dvc.yaml` e `git ls-files` |
 | Base legal proposta e matriz de acesso | **Propostas** em `GOVERNANCE.md` §2.2 e §2.4; revisão jurídica e conferência dos artigos no texto oficial **pendentes** |
-| Retenção com responsável e prazo | Proposta em §2.5; responsáveis atribuídos de forma simulada (§3.3); prazos sem base legal conferida **pendentes** de validação jurídica real |
+| Retenção com responsável e prazo | Proposta em §2.5 (5 anos e 24 meses; término pelo critério dos arts. 15 e 16 da LGPD); responsáveis atribuídos de forma simulada (§3.3); revisão jurídica **simulada** por decisão do grupo |
 | Avaliação agregada de viés por grupo | **Executada** (`src/credit_monitoring/models/bias.py`, `reports/bias/validation_bias.json`) com os objetos oficiais recuperados por `dvc pull`; resultado descritivo |
 | Análise causal | **Documentada** em `GOVERNANCE.md` §4, ancorada em `reports/drift/results-v1.0.2.json` |
 | Seções de governança e causalidade no README | **Adicionadas**; falta validação por outro integrante |
