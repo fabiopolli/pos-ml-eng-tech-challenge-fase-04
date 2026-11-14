@@ -452,7 +452,8 @@ O acompanhamento operacional está em [`docs/CHECKLIST.md`](docs/CHECKLIST.md).
 | Campanha de otimização (plano 1.6) | Concluído | Estágio `tune` (só treino) + rodada única de validação com decisão registrada; laboratório Streamlit de comparação e teste; [`docs/evidence/1.6-otimizacao-modelos.md`](docs/evidence/1.6-otimizacao-modelos.md) |
 | Simulação e relatório de drift | M2 Data Drift concluído; `1.0.2` enviado e recuperado via DVC | [`docs/evidence/fase-2.md`](docs/evidence/fase-2.md); Concept Drift é limitação declarada, avaliação docente pós-entrega |
 | MLflow e Streamlit | Concluído | Quatro cenários oficiais registrados no MLflow e cinco verificações no Playwright. [Evidências da Etapa 3](docs/evidence/fase-3.md) |
-| Governança e vídeo | Em preparação | Documento-base e roteiro de entregas |
+| Governança, LGPD e causalidade | Documentado (4.1–4.4); base legal, prazos e acessos pendentes de decisão humana | [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md), análise de viés agregada e [evidências da fase 4](docs/evidence/fase-4.md) |
+| Vídeo STAR e reprodução final | Pendente | Gravação por outro integrante; reprodução em checkout/cache separado ainda não feita |
 
 ## Fluxo de colaboração
 
@@ -474,8 +475,88 @@ pequenas (~60 KB), derivadas da partição de treino e com IDs novos, existindo 
 revisor reproduza a demonstração do laboratório sem depender de artefatos DVC — a exceção está
 documentada em [`data/test/README.md`](data/test/README.md). Tokens e credenciais permanecem em
 configuração local não versionada. Antes de enviar dados ao serviço, confirmar a origem, os
-termos de uso e a autorização para armazenamento remoto. O plano de governança será consolidado
-em [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md) e resumido aqui antes da entrega.
+termos de uso e a autorização para armazenamento remoto. A governança completa está em
+[`docs/GOVERNANCE.md`](docs/GOVERNANCE.md) e é resumida nas duas seções seguintes.
+
+## Governança e LGPD
+
+> Resumo de [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md). Descreve o que foi observado e separa
+> **proposta** (fintech hipotética) de **pendente**. Não é parecer jurídico nem declara
+> conformidade com a LGPD, ausência de viés ou aptidão para conceder crédito.
+
+**Origem e finalidade.** Dataset público UCI 350 (Taiwan, 2005, CC BY 4.0, DOI
+`10.24432/C55S3H`), usado apenas para estudo acadêmico de monitoramento; o sistema não decide
+sobre pessoas. A licença permite reutilizar o dado e **não é base legal** para tratar dados de
+clientes reais. Ser público não elimina o risco de reidentificação.
+
+**Dados pessoais e minimização.** `ID` é identificador técnico, não identidade civil. `SEX`,
+`EDUCATION`, `MARRIAGE` e `AGE` são dados pessoais e ficam **fora do modelo**, usados só em
+análises agregadas; o modelo usa 19 features financeiras. O dataset não contém categorias
+sensíveis da LGPD (art. 5º, II). Excluir demografia não elimina proxies nem garante ausência de
+viés. Relatórios, capturas e vídeo contêm apenas agregados.
+
+**Base legal proposta (a validar juridicamente).** Para a fintech hipotética: proteção do
+crédito (art. 7º, X), execução de contrato (art. 7º, V) e obrigação legal/regulatória (art. 7º,
+II) quando aplicável, observando os princípios do art. 6º, em especial finalidade, necessidade,
+transparência e **não discriminação**. Contestação: revisão de decisões exclusivamente
+automatizadas (art. 20). O protótipo não implementa essas comunicações.
+
+**Acesso, retenção e descarte.** Credenciais ficam em `.env` e `.dvc/config.local`, ignorados
+pelo Git; dados e modelos vivem no DVC/DagsHub, nunca no Git. A retenção por classe de artefato,
+com gatilhos de revisão, está em [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md#25-retenção-e-descarte-proposta--responsáveis-e-prazos-a-confirmar);
+**prazos e responsáveis estão pendentes**. Apagar um ponteiro Git não apaga o objeto por hash no
+remote nem nos caches.
+
+**Modelo e viés agregado.** Random Forest (19 features, limiar 0,5, contrato `1.0.0`),
+selecionado por ROC-AUC na validação (0,774 contra 0,714 da Regressão Logística); reavaliação
+congelada no teste: ROC-AUC 0,777, recall 0,605. A análise de viés é **descritiva**, sobre a
+validação original (que já participou da seleção; o teste não foi consultado), com intervalo de
+Wilson 95% e supressão de grupos com menos de 30 linhas.
+
+| Grupo | n | TPR (recall) | FPR |
+|---|---:|---|---|
+| Total | 4.500 | 58,0% [54,9–61,0] | 16,7% [15,5–17,9] |
+| `SEX` = 1 / 2 | 1.797 / 2.703 | 60,4% / 56,3% | 17,6% / 16,1% |
+| `EDUCATION` = 1 / 2 / 3 | 1.626 / 2.111 / 711 | 59,1% / 57,4% / 59,9% | 13,9% / 17,5% / 21,2% |
+| `MARRIAGE` = 1 / 2 | 2.070 / 2.373 | 57,3% / 59,1% | 16,3% / 17,0% |
+| `AGE` ≤29 / 30–39 / 40–49 / ≥50 | 1.468 / 1.632 / 983 / 417 | 59,5% / 57,1% / 56,3% / 60,2% | 19,1% / 15,1% / 15,2% / 17,6% |
+
+O recall é semelhante entre grupos, com intervalos sobrepostos. A FPR é maior em `EDUCATION` = 3
+e `AGE` ≤29 (mais bons pagadores sinalizados como risco) e merece investigação antes de qualquer
+uso real; a diferença não prova causa nem discriminação. Tabela completa, intervalos, grupos
+suprimidos e limitações em [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md#32-análise-agregada-de-viés-realizado--descritiva);
+comando: `uv run python -m credit_monitoring.models.bias`.
+
+**Riscos, supervisão e resposta.** Alertas são sinais de investigação humana: não aprovam
+crédito, não retreinam o modelo e não provam perda de desempenho. A matriz de resposta por sinal
+(contrato, execução, drift, desempenho/viés) e os riscos com lacunas estão em
+[`docs/GOVERNANCE.md`](docs/GOVERNANCE.md#4-análise-causal-e-resposta-44). As probabilidades do
+Random Forest **não são calibradas**.
+
+## Análise causal
+
+O experimento da fase 2 é uma **intervenção sintética conhecida por construção**: o lote
+modificado multiplica `LIMIT_BAL` por 1,5 e `PAY_AMT1` por 0,5 (protocolo `1.0.2`). A causa da
+mudança de distribuição é essa transformação programada.
+
+| Observação | Valor |
+|---|---|
+| PSI `LIMIT_BAL` / `PAY_AMT1` (referência × modificado) | 0,7525 / 0,4647 (limiar 0,20) |
+| Controle (referência × original) | Nenhuma das 19 features excede 0,20 (maior PSI 0,004) |
+| Média do score previsto, original → modificado | 42,31% → 41,99% (−0,32 p.p.) |
+| Classe 1 prevista | 1.161 → 1.154 |
+| Rótulos em produção | Ausentes por construção |
+
+**Limites.** É Data Drift, não Concept Drift: sem rótulos em produção não se mede mudança em
+`P(y|X)` nem perda de desempenho. O efeito nos scores descreve a **saída** do modelo, não a
+qualidade. Inflação, mudança de limites ou novo perfil de clientes são **hipóteses de
+contexto**, não causas identificadas por este teste.
+
+**Explicações alternativas e investigação.** Em um alerta real, avaliar antes: erro de
+processamento ou de unidade, mudança de fonte ou schema, seleção amostral diferente, sensibilidade
+do PSI e mudança real da população. Cada uma pede evidência própria (logs da fonte, coortes
+comparáveis, outro método de drift, série temporal e rótulos posteriores). Impacto potencial não
+é perda medida; revisão ou suspensão do modelo exige avaliação humana com rótulos.
 
 ## Escopo deliberadamente excluído
 
@@ -492,6 +573,7 @@ planejada para armazenamento remoto versionado de dados e modelos; o treinamento
   quatro semanas.
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): fluxo, componentes e decisões de escopo.
 - [`docs/CHECKLIST.md`](docs/CHECKLIST.md): 28 entregas e suas evidências.
-- [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md): base para LGPD, viés, retenção e causalidade.
+- [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md): tratamento de dados, LGPD, retenção, viés e causalidade.
+- [`docs/evidence/README.md`](docs/evidence/README.md): índice das evidências das quatro fases.
 - [`docs/DAGSHUB.md`](docs/DAGSHUB.md): configuração e uso seguro do remote DVC no DagsHub.
 - [`CONTRIBUTING.md`](CONTRIBUTING.md): convenções de colaboração e qualidade.

@@ -53,10 +53,10 @@ evidência em [`docs/evidence/1.6-otimizacao-modelos.md`](evidence/1.6-otimizaca
 
 ## Semana 4 - Governança e apresentação
 
-- [ ] **4.1** Tratamento e origem dos dados documentados.
-- [ ] **4.2** Uso acadêmico versus cenário hipotético de crédito; base legal proposta, retenção/descarte local e remoto, incluindo cópias DVC.
-- [ ] **4.3** Governança, rastreabilidade e viés por grupos com denominadores/limitações, sem assumir que excluir demografia elimina viés.
-- [ ] **4.4** Hipóteses causais, limites do experimento e ações de investigação/mitigação.
-- [ ] **4.5** README consolidado com evidências reais.
-- [ ] **4.6** Vídeo STAR de até cinco minutos.
-- [ ] **4.7** Reprodução em checkout/cache separado, acesso dos avaliadores aos objetos/relatórios, histórico e matriz de cobertura/limitações; a docência avaliará o plano após a entrega.
+- [x] **4.1** Concluído - origem, finalidade, variáveis pessoais, minimização e inventário por artefato (com versionamento Git/DVC e cópias) em [`docs/GOVERNANCE.md`](GOVERNANCE.md) §1, conferido contra `.gitignore`, `dvc.yaml` e `git ls-files`. Ver [`docs/evidence/fase-4.md`](evidence/fase-4.md).
+- [ ] **4.2** Em revisão - uso acadêmico × cenário hipotético, base legal **proposta**, acesso, retenção e descarte (incluindo DVC/DagsHub e limites do armazenamento por hash) em [`docs/GOVERNANCE.md`](GOVERNANCE.md) §2. Pendente de decisão humana: revisão jurídica, prazos e responsáveis de retenção, acesso de leitura dos avaliadores; o texto da LGPD foi confirmado só em parte.
+- [ ] **4.3** Em revisão - ficha do modelo e análise agregada de viés por `SEX`, `EDUCATION`, `MARRIAGE` e `AGE` (`src/credit_monitoring/models/bias.py`, `tests/test_bias.py`, `reports/bias/validation_bias.json`), com denominadores, intervalos e limitações; teste não consultado. Gerada com o modelo local, que reproduz a matriz de confusão oficial da validação mas tem hash diferente do objeto DVC; fechar após `dvc pull` e nova execução. Ver [`docs/evidence/fase-4.md`](evidence/fase-4.md) §2.
+- [x] **4.4** Concluído - intervenção sintética conhecida × hipóteses de contexto, explicações alternativas, evidência adicional e matriz de resposta, ancoradas em `reports/drift/results-v1.0.2.json`; sem alegar causalidade identificada nem Concept Drift. [`docs/GOVERNANCE.md`](GOVERNANCE.md) §4.
+- [ ] **4.5** Em andamento - seções "Governança e LGPD" e "Análise causal" no README, com resultados de viés e limitações. Faltam o link do vídeo e a validação do README por outro integrante.
+- [ ] **4.6** Pendente - vídeo STAR de até cinco minutos, a ser gravado por outro integrante do grupo.
+- [ ] **4.7** Pendente - reprodução em checkout/cache separado, acesso dos avaliadores aos objetos/relatórios, histórico e matriz de cobertura/limitações; a docência avaliará o plano após a entrega. Rascunho da matriz por critério em [`docs/evidence/fase-4.md`](evidence/fase-4.md) §5.

@@ -1,0 +1,834 @@
+{
+  "analysis": "aggregate_bias_validation",
+  "contract_version": "1.0.0",
+  "groups": {
+    "AGE": {
+      "30-39": {
+        "confusion_matrix": {
+          "fn": 136,
+          "fp": 199,
+          "tn": 1116,
+          "tp": 181
+        },
+        "fnr": {
+          "ci95": [
+            0.375709,
+            0.484035
+          ],
+          "denominator": 317,
+          "status": "ok",
+          "value": 0.429022
+        },
+        "fpr": {
+          "ci95": [
+            0.132978,
+            0.171714
+          ],
+          "denominator": 1315,
+          "status": "ok",
+          "value": 0.151331
+        },
+        "n": 1632,
+        "negatives": 1315,
+        "positives": 317,
+        "predicted_positive_rate": {
+          "ci95": [
+            0.21298,
+            0.253961
+          ],
+          "denominator": 1632,
+          "status": "ok",
+          "value": 0.232843
+        },
+        "prevalence": {
+          "ci95": [
+            0.175774,
+            0.214143
+          ],
+          "denominator": 1632,
+          "status": "ok",
+          "value": 0.19424
+        },
+        "status": "ok",
+        "tpr": {
+          "ci95": [
+            0.515965,
+            0.624291
+          ],
+          "denominator": 317,
+          "status": "ok",
+          "value": 0.570978
+        }
+      },
+      "40-49": {
+        "confusion_matrix": {
+          "fn": 108,
+          "fp": 112,
+          "tn": 624,
+          "tp": 139
+        },
+        "fnr": {
+          "ci95": [
+            0.376814,
+            0.499602
+          ],
+          "denominator": 247,
+          "status": "ok",
+          "value": 0.437247
+        },
+        "fpr": {
+          "ci95": [
+            0.128035,
+            0.179925
+          ],
+          "denominator": 736,
+          "status": "ok",
+          "value": 0.152174
+        },
+        "n": 983,
+        "negatives": 736,
+        "positives": 247,
+        "predicted_positive_rate": {
+          "ci95": [
+            0.229071,
+            0.283516
+          ],
+          "denominator": 983,
+          "status": "ok",
+          "value": 0.255341
+        },
+        "prevalence": {
+          "ci95": [
+            0.225161,
+            0.279319
+          ],
+          "denominator": 983,
+          "status": "ok",
+          "value": 0.251272
+        },
+        "status": "ok",
+        "tpr": {
+          "ci95": [
+            0.500398,
+            0.623186
+          ],
+          "denominator": 247,
+          "status": "ok",
+          "value": 0.562753
+        }
+      },
+      "<=29": {
+        "confusion_matrix": {
+          "fn": 135,
+          "fp": 217,
+          "tn": 918,
+          "tp": 198
+        },
+        "fnr": {
+          "ci95": [
+            0.354042,
+            0.458927
+          ],
+          "denominator": 333,
+          "status": "ok",
+          "value": 0.405405
+        },
+        "fpr": {
+          "ci95": [
+            0.169369,
+            0.215094
+          ],
+          "denominator": 1135,
+          "status": "ok",
+          "value": 0.191189
+        },
+        "n": 1468,
+        "negatives": 1135,
+        "positives": 333,
+        "predicted_positive_rate": {
+          "ci95": [
+            0.260252,
+            0.306277
+          ],
+          "denominator": 1468,
+          "status": "ok",
+          "value": 0.282698
+        },
+        "prevalence": {
+          "ci95": [
+            0.206145,
+            0.248959
+          ],
+          "denominator": 1468,
+          "status": "ok",
+          "value": 0.226839
+        },
+        "status": "ok",
+        "tpr": {
+          "ci95": [
+            0.541073,
+            0.645958
+          ],
+          "denominator": 333,
+          "status": "ok",
+          "value": 0.594595
+        }
+      },
+      ">=50": {
+        "confusion_matrix": {
+          "fn": 39,
+          "fp": 56,
+          "tn": 263,
+          "tp": 59
+        },
+        "fnr": {
+          "ci95": [
+            0.306666,
+            0.49695
+          ],
+          "denominator": 98,
+          "status": "ok",
+          "value": 0.397959
+        },
+        "fpr": {
+          "ci95": [
+            0.137731,
+            0.221087
+          ],
+          "denominator": 319,
+          "status": "ok",
+          "value": 0.175549
+        },
+        "n": 417,
+        "negatives": 319,
+        "positives": 98,
+        "predicted_positive_rate": {
+          "ci95": [
+            0.235079,
+            0.320573
+          ],
+          "denominator": 417,
+          "status": "ok",
+          "value": 0.275779
+        },
+        "prevalence": {
+          "ci95": [
+            0.196849,
+            0.278013
+          ],
+          "denominator": 417,
+          "status": "ok",
+          "value": 0.235012
+        },
+        "status": "ok",
+        "tpr": {
+          "ci95": [
+            0.50305,
+            0.693334
+          ],
+          "denominator": 98,
+          "status": "ok",
+          "value": 0.602041
+        }
+      }
+    },
+    "EDUCATION": {
+      "0": {
+        "n": 2,
+        "status": "suppressed"
+      },
+      "1": {
+        "confusion_matrix": {
+          "fn": 114,
+          "fp": 187,
+          "tn": 1160,
+          "tp": 165
+        },
+        "fnr": {
+          "ci95": [
+            0.352542,
+            0.467145
+          ],
+          "denominator": 279,
+          "status": "ok",
+          "value": 0.408602
+        },
+        "fpr": {
+          "ci95": [
+            0.121387,
+            0.158321
+          ],
+          "denominator": 1347,
+          "status": "ok",
+          "value": 0.138827
+        },
+        "n": 1626,
+        "negatives": 1347,
+        "positives": 279,
+        "predicted_positive_rate": {
+          "ci95": [
+            0.197145,
+            0.237156
+          ],
+          "denominator": 1626,
+          "status": "ok",
+          "value": 0.216482
+        },
+        "prevalence": {
+          "ci95": [
+            0.154041,
+            0.190681
+          ],
+          "denominator": 1626,
+          "status": "ok",
+          "value": 0.171587
+        },
+        "status": "ok",
+        "tpr": {
+          "ci95": [
+            0.532855,
+            0.647458
+          ],
+          "denominator": 279,
+          "status": "ok",
+          "value": 0.591398
+        }
+      },
+      "2": {
+        "confusion_matrix": {
+          "fn": 227,
+          "fp": 276,
+          "tn": 1302,
+          "tp": 306
+        },
+        "fnr": {
+          "ci95": [
+            0.38459,
+            0.468253
+          ],
+          "denominator": 533,
+          "status": "ok",
+          "value": 0.425891
+        },
+        "fpr": {
+          "ci95": [
+            0.156957,
+            0.194432
+          ],
+          "denominator": 1578,
+          "status": "ok",
+          "value": 0.174905
+        },
+        "n": 2111,
+        "negatives": 1578,
+        "positives": 533,
+        "predicted_positive_rate": {
+          "ci95": [
+            0.257057,
+            0.295156
+          ],
+          "denominator": 2111,
+          "status": "ok",
+          "value": 0.275699
+        },
+        "prevalence": {
+          "ci95": [
+            0.234415,
+            0.271458
+          ],
+          "denominator": 2111,
+          "status": "ok",
+          "value": 0.252487
+        },
+        "status": "ok",
+        "tpr": {
+          "ci95": [
+            0.531747,
+            0.61541
+          ],
+          "denominator": 533,
+          "status": "ok",
+          "value": 0.574109
+        }
+      },
+      "3": {
+        "confusion_matrix": {
+          "fn": 71,
+          "fp": 113,
+          "tn": 421,
+          "tp": 106
+        },
+        "fnr": {
+          "ci95": [
+            0.331765,
+            0.474696
+          ],
+          "denominator": 177,
+          "status": "ok",
+          "value": 0.40113
+        },
+        "fpr": {
+          "ci95": [
+            0.17909,
+            0.248251
+          ],
+          "denominator": 534,
+          "status": "ok",
+          "value": 0.21161
+        },
+        "n": 711,
+        "negatives": 534,
+        "positives": 177,
+        "predicted_positive_rate": {
+          "ci95": [
+            0.275189,
+            0.342908
+          ],
+          "denominator": 711,
+          "status": "ok",
+          "value": 0.308017
+        },
+        "prevalence": {
+          "ci95": [
+            0.218568,
+            0.282021
+          ],
+          "denominator": 711,
+          "status": "ok",
+          "value": 0.248945
+        },
+        "status": "ok",
+        "tpr": {
+          "ci95": [
+            0.525304,
+            0.668235
+          ],
+          "denominator": 177,
+          "status": "ok",
+          "value": 0.59887
+        }
+      },
+      "4": {
+        "n": 15,
+        "status": "suppressed"
+      },
+      "5": {
+        "n": 29,
+        "status": "suppressed"
+      },
+      "6": {
+        "n": 6,
+        "status": "suppressed"
+      }
+    },
+    "MARRIAGE": {
+      "0": {
+        "n": 6,
+        "status": "suppressed"
+      },
+      "1": {
+        "confusion_matrix": {
+          "fn": 209,
+          "fp": 257,
+          "tn": 1323,
+          "tp": 281
+        },
+        "fnr": {
+          "ci95": [
+            0.383478,
+            0.470726
+          ],
+          "denominator": 490,
+          "status": "ok",
+          "value": 0.426531
+        },
+        "fpr": {
+          "ci95": [
+            0.145283,
+            0.18167
+          ],
+          "denominator": 1580,
+          "status": "ok",
+          "value": 0.162658
+        },
+        "n": 2070,
+        "negatives": 1580,
+        "positives": 490,
+        "predicted_positive_rate": {
+          "ci95": [
+            0.241467,
+            0.279229
+          ],
+          "denominator": 2070,
+          "status": "ok",
+          "value": 0.259903
+        },
+        "prevalence": {
+          "ci95": [
+            0.218902,
+            0.255504
+          ],
+          "denominator": 2070,
+          "status": "ok",
+          "value": 0.236715
+        },
+        "status": "ok",
+        "tpr": {
+          "ci95": [
+            0.529274,
+            0.616522
+          ],
+          "denominator": 490,
+          "status": "ok",
+          "value": 0.573469
+        }
+      },
+      "2": {
+        "confusion_matrix": {
+          "fn": 202,
+          "fp": 319,
+          "tn": 1560,
+          "tp": 292
+        },
+        "fnr": {
+          "ci95": [
+            0.366418,
+            0.452801
+          ],
+          "denominator": 494,
+          "status": "ok",
+          "value": 0.408907
+        },
+        "fpr": {
+          "ci95": [
+            0.153474,
+            0.187416
+          ],
+          "denominator": 1879,
+          "status": "ok",
+          "value": 0.169771
+        },
+        "n": 2373,
+        "negatives": 1879,
+        "positives": 494,
+        "predicted_positive_rate": {
+          "ci95": [
+            0.240289,
+            0.275454
+          ],
+          "denominator": 2373,
+          "status": "ok",
+          "value": 0.25748
+        },
+        "prevalence": {
+          "ci95": [
+            0.192318,
+            0.224976
+          ],
+          "denominator": 2373,
+          "status": "ok",
+          "value": 0.208175
+        },
+        "status": "ok",
+        "tpr": {
+          "ci95": [
+            0.547199,
+            0.633582
+          ],
+          "denominator": 494,
+          "status": "ok",
+          "value": 0.591093
+        }
+      },
+      "3": {
+        "confusion_matrix": {
+          "fn": 6,
+          "fp": 6,
+          "tn": 35,
+          "tp": 4
+        },
+        "fnr": {
+          "ci95": null,
+          "denominator": 10,
+          "status": "inconclusive",
+          "value": null
+        },
+        "fpr": {
+          "ci95": [
+            0.068842,
+            0.284435
+          ],
+          "denominator": 41,
+          "status": "ok",
+          "value": 0.146341
+        },
+        "n": 51,
+        "negatives": 41,
+        "positives": 10,
+        "predicted_positive_rate": {
+          "ci95": [
+            0.110153,
+            0.324581
+          ],
+          "denominator": 51,
+          "status": "ok",
+          "value": 0.196078
+        },
+        "prevalence": {
+          "ci95": [
+            0.110153,
+            0.324581
+          ],
+          "denominator": 51,
+          "status": "ok",
+          "value": 0.196078
+        },
+        "status": "partial",
+        "tpr": {
+          "ci95": null,
+          "denominator": 10,
+          "status": "inconclusive",
+          "value": null
+        }
+      }
+    },
+    "SEX": {
+      "1": {
+        "confusion_matrix": {
+          "fn": 159,
+          "fp": 245,
+          "tn": 1150,
+          "tp": 243
+        },
+        "fnr": {
+          "ci95": [
+            0.34893,
+            0.444093
+          ],
+          "denominator": 402,
+          "status": "ok",
+          "value": 0.395522
+        },
+        "fpr": {
+          "ci95": [
+            0.156558,
+            0.196478
+          ],
+          "denominator": 1395,
+          "status": "ok",
+          "value": 0.175627
+        },
+        "n": 1797,
+        "negatives": 1395,
+        "positives": 402,
+        "predicted_positive_rate": {
+          "ci95": [
+            0.251503,
+            0.292599
+          ],
+          "denominator": 1797,
+          "status": "ok",
+          "value": 0.271564
+        },
+        "prevalence": {
+          "ci95": [
+            0.20504,
+            0.243552
+          ],
+          "denominator": 1797,
+          "status": "ok",
+          "value": 0.223706
+        },
+        "status": "ok",
+        "tpr": {
+          "ci95": [
+            0.555907,
+            0.65107
+          ],
+          "denominator": 402,
+          "status": "ok",
+          "value": 0.604478
+        }
+      },
+      "2": {
+        "confusion_matrix": {
+          "fn": 259,
+          "fp": 339,
+          "tn": 1771,
+          "tp": 334
+        },
+        "fnr": {
+          "ci95": [
+            0.397376,
+            0.476963
+          ],
+          "denominator": 593,
+          "status": "ok",
+          "value": 0.436762
+        },
+        "fpr": {
+          "ci95": [
+            0.145614,
+            0.176947
+          ],
+          "denominator": 2110,
+          "status": "ok",
+          "value": 0.160664
+        },
+        "n": 2703,
+        "negatives": 2110,
+        "positives": 593,
+        "predicted_positive_rate": {
+          "ci95": [
+            0.233045,
+            0.265633
+          ],
+          "denominator": 2703,
+          "status": "ok",
+          "value": 0.248983
+        },
+        "prevalence": {
+          "ci95": [
+            0.204189,
+            0.235379
+          ],
+          "denominator": 2703,
+          "status": "ok",
+          "value": 0.219386
+        },
+        "status": "ok",
+        "tpr": {
+          "ci95": [
+            0.523037,
+            0.602624
+          ],
+          "denominator": 593,
+          "status": "ok",
+          "value": 0.563238
+        }
+      }
+    }
+  },
+  "model_file_sha256": "fb20f6f96d8024aab8f3f55768157a0b7577583a45574d434eec60a50cc511ec",
+  "overall": {
+    "confusion_matrix": {
+      "fn": 418,
+      "fp": 584,
+      "tn": 2921,
+      "tp": 577
+    },
+    "fnr": {
+      "ci95": [
+        0.389797,
+        0.451019
+      ],
+      "denominator": 995,
+      "status": "ok",
+      "value": 0.420101
+    },
+    "fpr": {
+      "ci95": [
+        0.154649,
+        0.179319
+      ],
+      "denominator": 3505,
+      "status": "ok",
+      "value": 0.166619
+    },
+    "n": 4500,
+    "negatives": 3505,
+    "positives": 995,
+    "predicted_positive_rate": {
+      "ci95": [
+        0.245427,
+        0.270986
+      ],
+      "denominator": 4500,
+      "status": "ok",
+      "value": 0.258
+    },
+    "prevalence": {
+      "ci95": [
+        0.209227,
+        0.233471
+      ],
+      "denominator": 4500,
+      "status": "ok",
+      "value": 0.221111
+    },
+    "status": "ok",
+    "tpr": {
+      "ci95": [
+        0.548981,
+        0.610203
+      ],
+      "denominator": 995,
+      "status": "ok",
+      "value": 0.579899
+    }
+  },
+  "protocol": {
+    "age_bands": [
+      "<=29",
+      "30-39",
+      "40-49",
+      ">=50"
+    ],
+    "governance_features": [
+      "SEX",
+      "EDUCATION",
+      "MARRIAGE",
+      "AGE"
+    ],
+    "interval": "wilson_95",
+    "limitations": [
+      "Descritivo: a validacao ja participou da selecao do modelo e pode ser otimista.",
+      "Excluir demografia das entradas nao elimina proxies nem prova ausencia de vies.",
+      "Intervalo largo ou grupo suprimido significa inconclusivo, nao ausencia de vies.",
+      "Codigos fora da documentacao do dataset sao mantidos sem atribuir significado.",
+      "Analise nao causal: diferencas entre grupos nao indicam a causa."
+    ],
+    "min_class_size": 30,
+    "min_group_size": 30,
+    "model_inputs": [
+      "LIMIT_BAL",
+      "PAY_0",
+      "PAY_2",
+      "PAY_3",
+      "PAY_4",
+      "PAY_5",
+      "PAY_6",
+      "BILL_AMT1",
+      "BILL_AMT2",
+      "BILL_AMT3",
+      "BILL_AMT4",
+      "BILL_AMT5",
+      "BILL_AMT6",
+      "PAY_AMT1",
+      "PAY_AMT2",
+      "PAY_AMT3",
+      "PAY_AMT4",
+      "PAY_AMT5",
+      "PAY_AMT6"
+    ],
+    "partition": "validation",
+    "partition_rows": 4500,
+    "positive_class": "1 = default next month (risk of default); not a credit approval",
+    "test_split_used": false,
+    "threshold": 0.5
+  },
+  "reconciliation": {
+    "confusion_matrix": {
+      "fn": 418,
+      "fp": 584,
+      "tn": 2921,
+      "tp": 577
+    },
+    "source": "reports/metrics.json",
+    "validation_confusion_matrix_matches": true
+  },
+  "schema_version": "1.0.0",
+  "selected_model": "random_forest",
+  "validation_file_sha256": "08607ed7b3b8e6e78ee07fb73356bc81197afe2588429fc31869f588164f3547",
+  "validation_sha256_lf_normalized": "e910967511f31406edbc3c9fe0528571d079c45da10116dba4e53e379d285106"
+}

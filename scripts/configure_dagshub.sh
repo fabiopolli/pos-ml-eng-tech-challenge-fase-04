@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Configura o remote DagsHub do DVC a partir do arquivo .env local.
+# Configura os remotes DagsHub (Git `dagshub` e DVC `dagshub`) a partir do
+# arquivo .env local. O Git `origin` (GitHub) nao e alterado.
 #
 # O .env NUNCA é versionado (.gitignore) e os segredos ficam em
 # .dvc/config.local, também ignorado. Este script apenas traduz as variáveis
@@ -95,6 +96,14 @@ if [[ "$DAGSHUB_OWNER" == *"/"* || "$DAGSHUB_REPO" == *"/"* ]]; then
   exit 1
 fi
 
+# Remote Git do DagsHub (espelho do GitHub), ao lado do origin. Nao envia nada.
+DAGSHUB_GIT_URL="https://dagshub.com/${DAGSHUB_OWNER}/${DAGSHUB_REPO}.git"
+if git remote get-url dagshub >/dev/null 2>&1; then
+  git remote set-url dagshub "$DAGSHUB_GIT_URL"
+else
+  git remote add dagshub "$DAGSHUB_GIT_URL"
+fi
+
 if uv run dvc remote list | grep -q '^dagshub'; then
   uv run dvc remote modify dagshub url s3://dvc
 else
@@ -111,6 +120,7 @@ uv run dvc remote modify dagshub --local secret_access_key "${DAGSHUB_TOKEN}"
 
 unset DAGSHUB_TOKEN
 
-echo "Remote dagshub configurado para ${DAGSHUB_OWNER}/${DAGSHUB_REPO}."
+echo "Remotes dagshub (Git e DVC) configurados para ${DAGSHUB_OWNER}/${DAGSHUB_REPO}."
+git remote -v
 uv run dvc remote list
 echo "Confira o acesso antes de sincronizar: uv run dvc status -c -r dagshub"

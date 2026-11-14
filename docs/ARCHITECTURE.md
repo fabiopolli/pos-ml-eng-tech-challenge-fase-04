@@ -32,6 +32,11 @@ data/default of credit card clients.xls (objeto DVC) -> acquire -> eda -> prepar
 | `score_production` | lotes de produção + modelo congelado + contrato | `data/production/v1.0.2/predictions/`, `reports/drift/prediction_summary-v1.0.2.json` |
 | `detect_drift` | referência + lotes + predições + auditoria/modelagem + template HTML | `reports/drift/results-v1.0.2.json`, `reports/drift/phase-2-drift-v1.0.2-ptbr-v6.html` |
 
+A análise agregada de viés (fase 4, `python -m credit_monitoring.models.bias`) **não é um
+estágio do DAG**: lê `validation.csv` e o modelo congelado, nunca o teste, e grava
+`reports/bias/validation_bias.json` (agregado, versionado no Git). Ver
+[`GOVERNANCE.md`](GOVERNANCE.md) §3.2.
+
 Fronteiras que o DAG impõe:
 
 - `acquire` reconstrói o CSV bruto a partir do workbook original (objeto DVC, fora do Git) e

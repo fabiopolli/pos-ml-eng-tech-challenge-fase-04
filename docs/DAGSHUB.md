@@ -52,8 +52,31 @@ dessa alteração versionada, cada integrante instala o mesmo ambiente com `uv s
    scripts/configure_dagshub.sh
    ```
 
-   O script é equivalente ao procedimento manual descrito abaixo e falha com mensagem explícita
-   quando alguma variável está vazia.
+   O script também cria/atualiza o remote Git `dagshub`
+   (`https://dagshub.com/<owner>/<repo>.git`) ao lado do `origin` (GitHub), sem alterar o
+   `origin` e sem enviar nada. É equivalente ao procedimento manual descrito abaixo e falha com
+   mensagem explícita quando alguma variável está vazia.
+
+### Remotes Git: GitHub e DagsHub
+
+| Remote Git | Papel | URL |
+| --- | --- | --- |
+| `origin` | Remoto canônico de código e documentação | `https://github.com/fabiopolli/pos-ml-eng-tech-challenge-fase-04.git` |
+| `dagshub` | Espelho no DagsHub, que também hospeda o DVC Storage | `https://dagshub.com/<owner>/<repo>.git` |
+
+Configuração manual (remotes Git ficam em `.git/config`, não são versionados):
+
+```bash
+git remote add dagshub https://dagshub.com/<owner>/<repo>.git   # ou: git remote set-url ...
+git remote -v
+```
+
+Publicação explícita em cada remoto, sempre depois do `dvc push` e somente quando autorizado:
+
+```bash
+git push origin <branch>
+git push dagshub <branch>
+```
 
 ### Procedimento manual equivalente
 
