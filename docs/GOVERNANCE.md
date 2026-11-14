@@ -242,13 +242,12 @@ comparações múltiplas; códigos fora da documentação preservados sem interp
 pequenos suprimidos; **não** valida equidade nem causalidade. Uma revisão motivada por viés deve
 abrir **nova versão de modelo e protocolo**, sem ajustar o limiar consultando o teste reservado.
 
-**Ressalva de rastreabilidade:** o relatório foi gerado com o modelo e as partições regenerados
-localmente no Windows. As partições, após normalizar quebras de linha CRLF→LF, têm hashes MD5
-idênticos aos do `dvc.lock`, e o SHA-256 da validação normalizada (`e910967511f3…`) coincide
-com o registrado em `reports/metrics.json`. O modelo local (`fb20f6f9…`) tem hash de bytes
-**diferente** do modelo oficial no DVC (`a5a4a740…`), mas reproduz exatamente a matriz de
-confusão de validação oficial (TN 2.921, FP 584, FN 418, TP 577; ROC-AUC 0,774103). Para
-fechar a rastreabilidade com o objeto oficial, **reexecutar o comando após `dvc pull`**.
+**Rastreabilidade:** o relatório foi (re)gerado em 2026-11-14 com os objetos **oficiais**
+recuperados do DagsHub por `dvc pull`: modelo `a5a4a740902f…` (igual ao de
+`reports/test_metrics.json`) e validação `e910967511f3…` (igual ao de `reports/metrics.json`);
+ambos coincidem com o `dvc.lock`. O relatório reproduz a matriz de confusão de validação
+registrada (TN 2.921, FP 584, FN 418, TP 577; ROC-AUC 0,774103). Uma execução anterior, feita com
+artefatos regenerados localmente no Windows, produziu **exatamente os mesmos resultados**.
 
 ### 3.3 Responsabilidade e versões (Proposta)
 
@@ -324,5 +323,4 @@ Responsáveis e escalonamento: **Pendente** de confirmação.
 - revisão jurídica da base legal proposta e conferência do texto atualizado da LGPD/ANPD;
 - prazos e responsáveis de retenção/descarte; responsável por revisar alertas;
 - confirmação do acesso de leitura dos avaliadores aos objetos DVC e ao vídeo;
-- reexecução da análise de viés com o modelo oficial recuperado do DVC;
 - gatilhos numéricos de suspensão/revisão do modelo.

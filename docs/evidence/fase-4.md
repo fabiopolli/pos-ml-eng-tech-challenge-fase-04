@@ -39,20 +39,19 @@ Controles implementados e testados em `tests/test_bias.py`:
 - a execução **recusa** gerar o relatório se modelo e partição não reproduzirem a matriz de
   confusão de validação de `reports/metrics.json`.
 
-### 2.1 Integridade dos insumos usados nesta execução
+### 2.1 Integridade dos insumos
+
+Execução final (2026-11-14), com os objetos oficiais recuperados por `dvc pull -r dagshub`:
 
 | Verificação | Resultado |
 |---|---|
-| `data/raw/default_of_credit_card_clients.csv` SHA-256 | `1fc7fe04…79358`, igual a `expected_csv_sha256` |
-| Partições após normalizar CRLF→LF (MD5) | treino `dd57d28d…`, validação `b3b78304…`, teste `43d9bfda…` — **iguais ao `dvc.lock`** |
-| SHA-256 da validação normalizada | `e910967511f3…`, igual ao registrado em `reports/metrics.json` |
-| Matriz de confusão da validação com o modelo local | TN 2.921, FP 584, FN 418, TP 577; ROC-AUC 0,774103 — **igual** ao registrado |
-| Hash do modelo local | `fb20f6f96d80…` — **diferente** do oficial `a5a4a740…` |
+| Modelo (`models/credit_model.joblib`) | MD5 `95e041c6…` (igual ao `dvc.lock`); SHA-256 `a5a4a740902f…`, **igual** ao de `reports/test_metrics.json` |
+| Validação (`data/processed/validation.csv`) | MD5 `b3b78304…` (igual ao `dvc.lock`); SHA-256 `e910967511f3…`, **igual** ao de `reports/metrics.json` |
+| Matriz de confusão da validação | TN 2.921, FP 584, FN 418, TP 577 — **igual** ao registrado em `reports/metrics.json` |
+| Resultados da análise | **Idênticos** aos de uma execução anterior com artefatos regenerados localmente no Windows (que tinha hash de modelo diferente e arquivos com CRLF) |
 
-Os arquivos locais de `data/processed/` têm quebras de linha CRLF (gerados no Windows) e por
-isso o hash bruto difere do `dvc.lock`; o conteúdo é o mesmo. O modelo local foi treinado em
-23/10 no Windows: reproduz a validação oficial, mas **não é o objeto DVC oficial**.
-**Ação pendente:** após `dvc pull`, reexecutar o comando e conferir `model_file_sha256`.
+A execução anterior serviu de pré-verificação: o modelo local reproduzia a validação oficial, mas
+não era o objeto DVC. Com o `dvc pull`, `model_file_sha256` do relatório passou a ser o oficial.
 
 ## 3. Verificações executadas
 
@@ -72,16 +71,16 @@ importar `train` justamente para funcionar no Windows.
 
 ## 4. Observações para a reprodução final (4.7)
 
-- **DVC neste checkout:** `uv run dvc status` falha com
-  `config file error: extra keys not allowed @ data['remote']['dagshub']['auth']`. O
-  `.dvc/config.local` desta máquina tem as chaves `auth` e `user`, que o DVC 3.67.1 rejeita para
-  um remote S3; as credenciais devem ficar em `access_key_id`/`secret_access_key`, conforme
-  [`DAGSHUB.md`](../DAGSHUB.md) (`scripts/configure_dagshub.sh`). Sem corrigir isso, não é
-  possível fazer `dvc pull` aqui. Não foi alterada nenhuma configuração local.
-- O workbook `.xls` não está materializado neste checkout; o estágio `acquire` só roda após
-  `dvc pull`.
-- Não foi feita reprodução em checkout e cache separados, nem conferência do acesso dos
-  avaliadores.
+- **DVC neste checkout:** a configuração local foi corrigida (credenciais em
+  `access_key_id`/`secret_access_key` de `.dvc/config.local`, conforme
+  [`DAGSHUB.md`](../DAGSHUB.md)) e o `dvc pull -r dagshub` recuperou os objetos oficiais, com
+  hashes conferidos (§2.1). Isso não é a prova de recuperação em **checkout e cache separados**,
+  que continua pendente (4.7): o cache local deste diretório já existia.
+- `uv run dvc status` ainda lista dependências e saídas como modificadas (código em `src/`,
+  `configs/optimization.yaml`, JSON/HTML de `reports/drift/`). Não foi investigado; pode ser
+  efeito de quebras de linha CRLF no checkout Windows ou de alterações posteriores ao `dvc.lock`.
+  Deve ser esclarecido antes da reprodução final.
+- Não foi feita conferência do acesso dos avaliadores.
 
 ## 5. Matriz de cobertura (rascunho, por critério oficial)
 
@@ -99,7 +98,7 @@ Não substitui a conferência das 28 entregas, que continua pendente (4.7).
 
 - decisão humana: base legal, prazos e responsáveis de retenção, gatilhos de suspensão,
   responsável por alertas (`GOVERNANCE.md` §6);
-- `dvc pull` com credenciais corrigidas e reexecução da análise de viés com o modelo oficial;
+- `dvc pull` com credenciais corrigidas — **feito**; falta apenas a prova em checkout/cache separado (4.7);
 - acesso de leitura dos avaliadores (DagsHub e vídeo);
 - link do vídeo no README (4.5/4.6);
 - reprodução em checkout/cache separado e conferência das 28 entregas (4.7).
