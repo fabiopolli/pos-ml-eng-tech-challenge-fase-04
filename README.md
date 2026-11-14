@@ -525,8 +525,9 @@ Wilson 95% e supressão de grupos com menos de 30 linhas.
 | `AGE` ≤29 / 30–39 / 40–49 / ≥50 | 1.468 / 1.632 / 983 / 417 | 59,5% / 57,1% / 56,3% / 60,2% | 19,1% / 15,1% / 15,2% / 17,6% |
 
 O recall é semelhante entre grupos, com intervalos sobrepostos. A FPR é maior em `EDUCATION` = 3
-e `AGE` ≤29 (mais bons pagadores sinalizados como risco) e merece investigação antes de qualquer
-uso real; a diferença não prova causa nem discriminação. Tabela completa, intervalos, grupos
+(intervalo sem sobreposição com `EDUCATION` = 1) e em `AGE` ≤29 (evidência mais fraca, com
+sobreposição marginal), isto é, mais bons pagadores sinalizados como risco; merece investigação antes de qualquer
+uso real. A diferença não prova causa nem discriminação. Tabela completa, intervalos, grupos
 suprimidos e limitações em [`docs/GOVERNANCE.md`](docs/GOVERNANCE.md#32-análise-agregada-de-viés-realizado--descritiva);
 comando: `uv run python -m credit_monitoring.models.bias`.
 

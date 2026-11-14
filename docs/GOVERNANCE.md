@@ -334,9 +334,12 @@ sinalizados como risco; entre colchetes, IC 95%):
   **não há evidência de diferença** de recall entre os grupos, o que é diferente de afirmar
   igualdade;
 - a FPR varia mais: `EDUCATION` = 3 (21,2%) e `AGE` ≤ 29 (19,1%) têm FPR acima do total
-  (16,7%), enquanto `EDUCATION` = 1 (13,9%) fica abaixo. Para `EDUCATION` = 3 e = 1 os
-  intervalos não se sobrepõem. Isso indica **mais bons pagadores sinalizados como risco** nesses
-  grupos, e merece investigação antes de qualquer uso real;
+  (16,7%), enquanto `EDUCATION` = 1 (13,9%) fica abaixo. A evidência é **mais forte para
+  `EDUCATION`**: os intervalos de `EDUCATION` = 3 [17,9–24,8] e `EDUCATION` = 1 [12,1–15,8] não se
+  sobrepõem. Para `AGE` ≤ 29 [16,9–21,5] a evidência é **mais fraca**: o intervalo se sobrepõe
+  marginalmente aos de 30–39 [13,3–17,2] e 40–49 [12,8–18,0]. Isso indica **mais bons pagadores
+  sinalizados como risco** nesses grupos, e merece investigação antes de qualquer uso real. A
+  comparação de intervalos é um critério informal, sem teste formal de diferença;
 - `EDUCATION` = 3 também tem a maior taxa de predição positiva (30,8%) com prevalência real
   (24,9%) semelhante à de `EDUCATION` = 2 (25,2%), o que é compatível com a FPR maior;
 - a diferença observada **não prova causa nem discriminação**: pode refletir proxies
